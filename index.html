@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Uhr">
+  <meta name="theme-color" content="#000000">
+  <title>Uhr</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed:wght@700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+```
+html, body {
+  width:100%; height:100%;
+  background:#000; color:#fff;
+  overflow:hidden;
+  font-family:'Share Tech Mono', monospace;
+  user-select:none;
+}
+
+/* ══ SCREENS ══ */
+.screen {
+  width:100vw; height:100vh;
+  display:none; flex-direction:column;
+  align-items:center; justify-content:center;
+  position:relative;
+}
+.screen.active { display:flex; }
+
+/* ══ SWITCH BUTTON ══ */
+.switch-btn {
+  position:fixed; bottom:20px; right:20px;
+  background:rgba(255,128,0,0.15);
+  border:1px solid rgba(255,128,0,0.5);
+  color:#ff8000;
+  font-family:'Share Tech Mono', monospace;
+  font-size:12px; letter-spacing:2px;
+  padding:10px 16px; border-radius:20px;
+  cursor:pointer; z-index:999;
+  text-transform:uppercase;
+}
+
+/* ══ VOLLBILD ══ */
+#fsBtn {
+  position:fixed; bottom:20px; left:20px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.15);
+  color:rgba(255,255,255,0.4);
+  font-size:18px; width:40px; height:40px;
+  border-radius:10px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  z-index:999;
+}
+
+/* ══════════════════════════════
+   UHR
+══════════════════════════════ */
+.time-row {
+  display:flex; align-items:flex-end;
+}
+.time-main {
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700; letter-spacing:-2px; line-height:1; color:#fff;
+}
+.time-sec {
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700; color:rgba(255,255,255,0.42); line-height:1;
+}
+.date-block {
+  display:flex; gap:12px; align-items:baseline; margin-top:10px;
+}
+.weekday {
+  font-family:'Share Tech Mono',monospace;
+  color:rgba(255,255,255,0.36); letter-spacing:5px; text-transform:uppercase;
+}
+.date-txt {
+  font-family:'Share Tech Mono',monospace;
+  color:rgba(255,255,255,0.48); letter-spacing:2px;
+}
+.progress-bar-wrap {
+  width:92%; margin-top:18px;
+  display:flex; align-items:center; gap:6px;
+}
+.bar-marker {
+  width:2px; height:22px;
+  background:rgba(255,255,255,0.35); border-radius:1px; flex-shrink:0;
+}
+.progress-bar-container {
+  flex:1; height:12px;
+  background:rgba(255,255,255,0.07); border-radius:6px;
+  position:relative; overflow:hidden;
+}
+.progress-bar {
+  position:absolute; top:0; left:0; height:100%; width:0%;
+  background:#ff8000;
+  box-shadow:0 0 16px #ff8000, 0 0 32px rgba(255,128,0,0.4);
+  border-radius:6px;
+}
+.colon { animation:blink 1s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.1} }
+
+@media (orientation:portrait) {
+  .time-main { font-size:clamp(80px,24vw,220px); }
+  .time-sec  { font-size:clamp(36px,11vw,95px); padding-bottom:clamp(8px,2.5vw,22px); padding-left:8px; }
+  .weekday,.date-txt { font-size:clamp(12px,3.2vw,22px); }
+}
+@media (orientation:landscape) {
+  .time-main { font-size:clamp(80px,30vh,280px); }
+  .time-sec  { font-size:clamp(36px,13vh,120px); padding-bottom:clamp(8px,3.2vh,32px); padding-left:12px; }
+  .weekday,.date-txt { font-size:clamp(12px,3vh,28px); }
+}
+
+/* ══════════════════════════════
+   COUNTDOWN
+══════════════════════════════ */
+#countdown-screen { gap:0; }
+
+/* Ring-Container */
+.ring-wrap {
+  position:relative;
+  display:flex; align-items:center; justify-content:center;
+}
+.ring-wrap svg { transform:rotate(-90deg); }
+
+/* Hintergrundkreis (dunkel) */
+.ring-bg { fill:none; stroke:rgba(255,128,0,0.12); }
+/* Fortschrittskreis */
+.ring-fg {
+  fill:none; stroke:#ff8000; stroke-linecap:round;
+  filter:drop-shadow(0 0 8px #ff8000);
+  transition: stroke-dashoffset 0.25s linear;
+}
+
+/* Digitale Anzeige in der Mitte */
+.cd-center {
+  position:absolute;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+}
+.cd-digits {
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700; color:#fff; line-height:1;
+  letter-spacing:-1px;
+}
+.cd-label {
+  font-family:'Share Tech Mono',monospace;
+  color:rgba(255,255,255,0.35); letter-spacing:4px;
+  text-transform:uppercase; margin-top:4px;
+}
+
+/* Einstellung (Minuten wählen) */
+.cd-setup {
+  display:flex; flex-direction:column;
+  align-items:center; gap:16px; margin-top:20px;
+}
+.cd-setup.hidden { display:none; }
+
+.minutes-picker {
+  display:flex; align-items:center; gap:20px;
+}
+.pick-btn {
+  background:rgba(255,128,0,0.15);
+  border:1px solid rgba(255,128,0,0.4);
+  color:#ff8000;
+  font-family:'DIN Condensed',sans-serif;
+  font-size:32px; font-weight:700;
+  width:52px; height:52px; border-radius:14px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.pick-val {
+  font-family:'DIN Condensed',sans-serif;
+  font-size:clamp(36px,8vw,60px); font-weight:700;
+  color:#fff; min-width:80px; text-align:center;
+}
+.pick-unit {
+  font-family:'Share Tech Mono',monospace;
+  font-size:13px; color:rgba(255,255,255,0.4);
+  letter-spacing:3px; text-transform:uppercase;
+}
+
+/* Start / Reset Buttons */
+.cd-controls {
+  display:flex; gap:14px; margin-top:4px;
+}
+.cd-btn {
+  font-family:'Share Tech Mono',monospace;
+  font-size:12px; letter-spacing:3px; text-transform:uppercase;
+  padding:11px 24px; border-radius:20px; cursor:pointer; border:none;
+}
+.cd-btn.start {
+  background:#ff8000; color:#000;
+  box-shadow:0 0 18px rgba(255,128,0,0.5);
+}
+.cd-btn.start:disabled { opacity:0.3; cursor:default; }
+.cd-btn.reset {
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.2); color:#fff;
+}
+
+/* Fertig-Nachricht */
+.cd-done {
+  font-family:'Share Tech Mono',monospace;
+  font-size:clamp(14px,3vw,22px);
+  color:#ff8000; letter-spacing:5px;
+  text-transform:uppercase; margin-top:10px;
+  animation:pulse 1s ease-in-out infinite alternate;
+}
+.cd-done.hidden { display:none; }
+@keyframes pulse { from{opacity:0.4} to{opacity:1} }
+
+/* Ring-Größe per Orientierung */
+@media (orientation:portrait) {
+  .ring-wrap { width:72vw; height:72vw; }
+  .ring-wrap svg { width:100%; height:100%; }
+  .cd-digits { font-size:clamp(42px,14vw,100px); }
+  .cd-label  { font-size:clamp(10px,2.5vw,16px); }
+}
+@media (orientation:landscape) {
+  .ring-wrap { width:55vh; height:55vh; }
+  .ring-wrap svg { width:100%; height:100%; }
+  .cd-digits { font-size:clamp(38px,13vh,90px); }
+  .cd-label  { font-size:clamp(10px,2.2vh,15px); }
+}
+```
+
+  </style>
+</head>
+<body>
+
+  <!-- ══ UHR ══ -->
+
+  <div class="screen active" id="clock-screen">
+    <div class="time-row">
+      <div class="time-main" id="timeMain">00<span class="colon">:</span>00</div>
+      <div class="time-sec"  id="timeSec">00</div>
+    </div>
+    <div class="date-block">
+      <span class="weekday"  id="weekday">Montag</span>
+      <span class="date-txt" id="dateTxt">01. Jan 2025</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="bar-marker"></div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="bar-marker"></div>
+    </div>
+  </div>
+
+  <!-- ══ COUNTDOWN ══ -->
+
+  <div class="screen" id="countdown-screen">
+
+```
+<div class="ring-wrap" id="ringWrap">
+  <svg viewBox="0 0 200 200" id="ringSvg">
+    <circle class="ring-bg" cx="100" cy="100" r="88" stroke-width="10"/>
+    <circle class="ring-fg" cx="100" cy="100" r="88" stroke-width="10"
+            id="ringFg"
+            stroke-dasharray="552.9"
+            stroke-dashoffset="0"/>
+  </svg>
+  <div class="cd-center">
+    <div class="cd-digits" id="cdDigits">00:00</div>
+    <div class="cd-label">countdown</div>
+  </div>
+</div>
+
+<div class="cd-setup" id="cdSetup">
+  <div class="minutes-picker">
+    <button class="pick-btn" id="minMinus">−</button>
+    <div>
+      <div class="pick-val" id="pickVal">5</div>
+      <div class="pick-unit">Minuten</div>
+    </div>
+    <button class="pick-btn" id="minPlus">+</button>
+  </div>
+  <div class="cd-controls">
+    <button class="cd-btn start" id="cdStart">Start</button>
+    <button class="cd-btn reset" id="cdReset">Reset</button>
+  </div>
+</div>
+
+<div class="cd-done hidden" id="cdDone">⏱ Zeit abgelaufen!</div>
+```
+
+  </div>
+
+  <!-- ══ GEMEINSAME BUTTONS ══ -->
+
+<button class="switch-btn" id="switchBtn">⏱ Countdown</button>
+<button id="fsBtn">⛶</button>
+
+  <script>
+    // ── Hilfsfunktionen ──
+    const $  = id => document.getElementById(id);
+    const pad = n  => String(n).padStart(2,'0');
+
+    const WEEKDAYS = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+    const MONTHS   = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+
+    // ── UHR ──
+    function tickClock() {
+      const now      = new Date();
+      const progress = ((now.getSeconds()*1000 + now.getMilliseconds()) / 60000) * 100;
+      $('timeMain').innerHTML = `${pad(now.getHours())}<span class="colon">:</span>${pad(now.getMinutes())}`;
+      $('timeSec').textContent = pad(now.getSeconds());
+      $('weekday').textContent = WEEKDAYS[now.getDay()];
+      $('dateTxt').textContent = `${pad(now.getDate())}. ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+      $('progressBar').style.width = progress + '%';
+    }
+
+    // ── COUNTDOWN ──
+    const CIRCUMFERENCE = 2 * Math.PI * 88; // 552.9
+    let cdMinutes  = 5;
+    let cdTotal    = 0;   // Gesamtsekunden
+    let cdRemain   = 0;   // verbleibende Sekunden
+    let cdInterval = null;
+    let cdRunning  = false;
+
+    function updatePickDisplay() {
+      $('pickVal').textContent = cdMinutes;
+    }
+
+    function updateRing(fraction) {
+      // fraction 1 = voll, 0 = leer
+      const offset = CIRCUMFERENCE * (1 - fraction);
+      $('ringFg').style.strokeDashoffset = offset;
+    }
+
+    function updateCdDisplay() {
+      const m = Math.floor(cdRemain / 60);
+      const s = cdRemain % 60;
+      $('cdDigits').textContent = `${pad(m)}:${pad(s)}`;
+      updateRing(cdTotal > 0 ? cdRemain / cdTotal : 1);
+    }
+
+    function cdTick() {
+      if (cdRemain <= 0) {
+        clearInterval(cdInterval);
+        cdRunning = false;
+        cdRemain  = 0;
+        updateCdDisplay();
+        $('cdDone').classList.remove('hidden');
+        $('cdStart').textContent = 'Start';
+        return;
+      }
+      cdRemain--;
+      updateCdDisplay();
+    }
+
+    $('minMinus').onclick = () => { if (!cdRunning && cdMinutes > 1) { cdMinutes--; updatePickDisplay(); } };
+    $('minPlus').onclick  = () => { if (!cdRunning && cdMinutes < 99) { cdMinutes++; updatePickDisplay(); } };
+
+    $('cdStart').onclick = () => {
+      if (cdRunning) {
+        // Pause
+        clearInterval(cdInterval);
+        cdRunning = false;
+        $('cdStart').textContent = 'Weiter';
+      } else {
+        if (cdRemain === 0) {
+          // Frischer Start
+          cdTotal  = cdMinutes * 60;
+          cdRemain = cdTotal;
+          $('cdDone').classList.add('hidden');
+        }
+        cdRunning = true;
+        $('cdStart').textContent = 'Pause';
+        updateCdDisplay();
+        cdInterval = setInterval(cdTick, 1000);
+      }
+    };
+
+    $('cdReset').onclick = () => {
+      clearInterval(cdInterval);
+      cdRunning = false;
+      cdRemain  = 0;
+      cdTotal   = 0;
+      $('cdStart').textContent = 'Start';
+      $('cdDigits').textContent = '00:00';
+      $('cdDone').classList.add('hidden');
+      updateRing(1);
+    };
+
+    // Init Ring
+    updateRing(1);
+    updatePickDisplay();
+
+    // ── SCREEN SWITCH ──
+    let onClock = true;
+    $('switchBtn').onclick = () => {
+      onClock = !onClock;
+      $('clock-screen').classList.toggle('active', onClock);
+      $('countdown-screen').classList.toggle('active', !onClock);
+      $('switchBtn').textContent = onClock ? '⏱ Countdown' : '🕐 Uhr';
+    };
+
+    // ── VOLLBILD ──
+    $('fsBtn').onclick = () => {
+      const el = document.documentElement;
+      if (!document.fullscreenElement) {
+        (el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen).call(el);
+        $('fsBtn').textContent = '✕';
+      } else {
+        (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+        $('fsBtn').textContent = '⛶';
+      }
+    };
+
+    // ── HAUPTLOOP ──
+    function loop() {
+      if (onClock) tickClock();
+      requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
+
+</body>
+</html>
