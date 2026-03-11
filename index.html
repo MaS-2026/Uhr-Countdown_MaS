@@ -77,18 +77,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 }
 .dot.active { background:#ff8000; -webkit-transform:scale(1.35); transform:scale(1.35); }
 
-/* ── FULLSCREEN BTN ── */
-#fsBtn {
-  position:absolute; bottom:9px; left:14px;
-  width:30px; height:30px;
-  background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12);
-  color:rgba(255,255,255,.3); font-size:15px; border-radius:7px;
-  cursor:pointer; z-index:99;
-  display:-webkit-flex; display:flex;
-  -webkit-align-items:center; align-items:center;
-  -webkit-justify-content:center; justify-content:center;
-  font-family:sans-serif;
-}
+
 
 /* ── CLOCK ── */
 #uhr-screen.active { -webkit-flex-direction:column; flex-direction:column; }
@@ -354,7 +343,6 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   <div id="dots" class="btn-ui">
     <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
   </div>
-  <button id="fsBtn" class="btn-ui">⛶</button>
 
 </div><!-- #app -->
 
@@ -432,15 +420,16 @@ var wkH = createDrum('wkHScroll','wkHOuter','wkHhl', 24, 7);
 var wkM = createDrum('wkMScroll','wkMOuter','wkMhl', 60, 30);
 
 /* ═══════════════════════════════════
-   RESIZE  (reads #app dimensions, not window)
+   RESIZE  — orientationchange needs a delay on iOS Safari
+   because the new viewport size isn't available immediately
 ═══════════════════════════════════ */
-function resize() {
+function doResize() {
   var app = $('app');
   var W = app.offsetWidth, H = app.offsetHeight, P = H >= W;
   var cW = P ? W : W-185, cH = P ? H-46 : H-16;
 
-  /* Clock */
-  var uFs = Math.max(40, Math.min(Math.floor(cW/3.05), Math.floor(cH*(P?0.72:0.82))));
+  /* Clock — tighter factor so HH:MM never clips */
+  var uFs = Math.max(40, Math.min(Math.floor(cW/3.55), Math.floor(cH*(P?0.55:0.72))));
   $('timeMain').style.fontSize     = uFs+'px';
   $('timeSec').style.fontSize      = Math.round(uFs*0.43)+'px';
   $('timeSec').style.paddingBottom = Math.round(uFs*0.08)+'px';
@@ -479,7 +468,15 @@ function resize() {
     wkH.setVal(wkH.getVal(),false); wkM.setVal(wkM.getVal(),false);
   }, 60);
 }
-window.addEventListener('resize', resize, false);
+
+function resize() { doResize(); }
+
+// iOS Safari fires orientationchange BEFORE the viewport updates.
+// We must wait ~300ms for the new dimensions to settle.
+window.addEventListener('resize', function(){ doResize(); }, false);
+window.addEventListener('orientationchange', function(){
+  setTimeout(function(){ doResize(); }, 300);
+}, false);
 
 /* ═══════════════════════════════════
    AUTO-HIDE
@@ -690,17 +687,6 @@ $('alarmOverlay').addEventListener('touchstart', function(e){ e.preventDefault()
 /* ═══════════════════════════════════
    FULLSCREEN
 ═══════════════════════════════════ */
-$('fsBtn').addEventListener('click', function(){
-  try {
-    var el=document.documentElement;
-    var req=el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen;
-    var ex=document.exitFullscreen||document.webkitExitFullscreen;
-    var isF=document.fullscreenElement||document.webkitFullscreenElement;
-    if(!isF&&req){req.call(el);$('fsBtn').textContent='✕';}
-    else if(isF&&ex){ex.call(document);$('fsBtn').textContent='⛶';}
-  }catch(e){}
-}, false);
-
 /* ═══════════════════════════════════
    INIT
 ═══════════════════════════════════ */
