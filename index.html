@@ -66,37 +66,31 @@
     gap:3vmin;
   }
 }
-/* Landscape: CSS Grid with equal side columns
-   grid-template-columns: 1fr [ring:auto] 1fr
-   → ring always in geometric center of screen,
-     regardless of button panel width.           */
+/* Landscape: ring stays in flex flow → Flexbox centers it.
+   Buttons float absolutely over the right side.
+   This way: ring = geometrically centered, buttons = never
+   affect centering, no grid, no broken Safari positioning. */
 @media (orientation:landscape) {
-  .screen.active {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    -webkit-align-items: center;
-            align-items: center;
+  #countdown-screen.active,
+  #wecker-screen.active {
+    -webkit-flex-direction: row;
+            flex-direction: row;
   }
-  /* ring sits in auto middle column = centered */
-  .screen.active .ring-wrap {
-    grid-column: 2;
-    justify-self: center;
+  /* Ring in flow — flexbox centers it perfectly */
+  #countdown-screen .ring-wrap,
+  #wecker-screen    .ring-wrap {
+    position: relative;
+    -webkit-flex-shrink: 0;
+            flex-shrink: 0;
   }
-  /* buttons sit in right 1fr, left-aligned with breathing room */
-  .screen.active .side-panel {
-    grid-column: 3;
-    -webkit-align-self: center;
-            align-self: center;
-    justify-self: start;
-    padding-left: 4vmin;
-  }
-  /* clock screen: override back to plain flex-column */
-  #uhr-screen.active {
-    display: -webkit-flex;
-    display: flex;
-    -webkit-flex-direction: column;
-            flex-direction: column;
-    gap: 3vmin;
+  /* Buttons float over right side, out of flow */
+  #countdown-screen .side-panel,
+  #wecker-screen    .side-panel {
+    position: absolute;
+    right: 4vmin;
+    top:   50%;
+    -webkit-transform: translateY(-50%);
+            transform: translateY(-50%);
   }
 }
 
