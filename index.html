@@ -3,7 +3,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Uhr">
@@ -12,172 +12,218 @@
   <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed:wght@700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     :root { color-scheme: dark only; }
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    html {
-      width:100%; height:100%;
-      height: -webkit-fill-available;
-      overflow:hidden;
-    }
-    body {
-      width:100%; height:100%;
-      min-height: -webkit-fill-available;
-      overflow:hidden;
-      background:#000 !important; color:#fff !important;
-      font-family:'Share Tech Mono',monospace;
-      user-select:none; -webkit-user-select:none;
-    }
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
 ```
-/* SCREENS */
-.screen { position:fixed; top:0; left:0; right:0; bottom:0; display:none; align-items:center; justify-content:center; background:#000 !important;
-  width:100%; height:100%; height: -webkit-fill-available; }
-.screen.active { display:flex; }
-@media (orientation:portrait)  { .screen { flex-direction:column; } }
-@media (orientation:landscape) { .screen { flex-direction:row; } }
+html, body {
+  width:100%; height:100%;
+  overflow:hidden;
+  background:#000;
+  -webkit-user-select:none; user-select:none;
+}
 
-/* AUTO-HIDE */
-.btn-ui { transition:opacity 0.8s; }
+/* ── SINGLE FIXED APP CONTAINER ──
+   This is the ONLY fixed element. All screens live inside it.
+   This is the Safari-safe pattern.                          */
+#app {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+/* ── SCREENS: absolute inside #app ── */
+.screen {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: none;                  /* hidden by default */
+  background: #000;
+  -webkit-box-align: center; -webkit-align-items: center; align-items: center;
+  -webkit-box-pack: center; -webkit-justify-content: center; justify-content: center;
+}
+.screen.active {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+}
+@media (orientation:portrait) {
+  .screen.active {
+    -webkit-box-orient: vertical; -webkit-flex-direction: column; flex-direction: column;
+  }
+}
+@media (orientation:landscape) {
+  .screen.active {
+    -webkit-box-orient: horizontal; -webkit-flex-direction: row; flex-direction: row;
+  }
+}
+
+/* ── AUTO-HIDE ── */
+.btn-ui { -webkit-transition:opacity .8s; transition:opacity .8s; }
 body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 
-/* DOTS */
-#dots { position:fixed; bottom:13px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:999; pointer-events:none; }
-.dot  { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.2); transition:all .3s; }
-.dot.active { background:#ff8000; transform:scale(1.35); }
+/* ── DOTS ── */
+#dots {
+  position: absolute; bottom:13px; left:50%;
+  -webkit-transform:translateX(-50%); transform:translateX(-50%);
+  display:-webkit-flex; display:flex;
+  gap:8px; z-index:99; pointer-events:none;
+}
+.dot {
+  width:6px; height:6px; border-radius:50%;
+  background:rgba(255,255,255,.2);
+  -webkit-transition:all .3s; transition:all .3s;
+}
+.dot.active { background:#ff8000; -webkit-transform:scale(1.35); transform:scale(1.35); }
 
-/* FS */
-#fsBtn { position:fixed; bottom:9px; left:14px; width:30px; height:30px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); color:rgba(255,255,255,.3); font-size:15px; border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:999; }
+/* ── FULLSCREEN BTN ── */
+#fsBtn {
+  position:absolute; bottom:9px; left:14px;
+  width:30px; height:30px;
+  background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12);
+  color:rgba(255,255,255,.3); font-size:15px; border-radius:7px;
+  cursor:pointer; z-index:99;
+  display:-webkit-flex; display:flex;
+  -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
+  font-family:sans-serif;
+}
 
-/* UHR */
-#uhr-screen { flex-direction:column; }
-.uhr-content { display:flex; flex-direction:column; align-items:center; }
-.time-row { display:flex; align-items:flex-end; }
+/* ── CLOCK ── */
+#uhr-screen.active { -webkit-flex-direction:column; flex-direction:column; }
+.uhr-content {
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-align-items:center; align-items:center;
+}
+.time-row { display:-webkit-flex; display:flex; -webkit-align-items:flex-end; align-items:flex-end; }
 .time-main { font-family:'DIN Condensed','Arial Narrow',sans-serif; font-weight:700; letter-spacing:-2px; line-height:1; color:#fff; white-space:nowrap; }
 .time-sec  { font-family:'DIN Condensed','Arial Narrow',sans-serif; font-weight:700; color:rgba(255,255,255,.42); line-height:1; white-space:nowrap; }
-.date-block { display:flex; gap:10px; align-items:baseline; margin-top:6px; }
-.weekday  { color:rgba(255,255,255,.36); letter-spacing:5px; text-transform:uppercase; }
-.date-txt { color:rgba(255,255,255,.48); letter-spacing:2px; }
-.progress-bar-wrap { margin-top:12px; display:flex; align-items:center; gap:6px; }
-.bar-marker { width:2px; height:18px; background:rgba(255,255,255,.32); border-radius:1px; flex-shrink:0; }
+.date-block { display:-webkit-flex; display:flex; gap:10px; -webkit-align-items:baseline; align-items:baseline; margin-top:6px; }
+.weekday  { color:rgba(255,255,255,.36); letter-spacing:5px; text-transform:uppercase; font-family:'Share Tech Mono',monospace; }
+.date-txt { color:rgba(255,255,255,.48); letter-spacing:2px; font-family:'Share Tech Mono',monospace; }
+.progress-bar-wrap { margin-top:12px; display:-webkit-flex; display:flex; -webkit-align-items:center; align-items:center; gap:6px; }
+.bar-marker { width:2px; height:18px; background:rgba(255,255,255,.32); border-radius:1px; -webkit-flex-shrink:0; flex-shrink:0; }
 .bar-track  { height:12px; background:rgba(255,255,255,.07); border-radius:6px; position:relative; overflow:hidden; }
-.bar-fill   { position:absolute; top:0; left:0; right:0; bottom:0; width:0%; background:#ff8000; box-shadow:0 0 16px #ff8000; border-radius:6px; }
-.colon { animation:blink 1s step-end infinite; }
-@keyframes blink { 0%,100%{opacity:1}50%{opacity:.1} }
+.bar-fill   { position:absolute; top:0; left:0; bottom:0; width:0%; background:#ff8000; box-shadow:0 0 16px #ff8000; border-radius:6px; }
+.colon { -webkit-animation:blink 1s step-end infinite; animation:blink 1s step-end infinite; }
+@-webkit-keyframes blink { 0%,100%{opacity:1} 50%{opacity:.1} }
+@keyframes blink         { 0%,100%{opacity:1} 50%{opacity:.1} }
 
-/* RING */
-.ring-wrap { position:relative; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
-.ring-wrap svg { width:100%; height:100%; transform:rotate(-90deg); }
+/* ── RING ── */
+.ring-wrap {
+  position:relative; -webkit-flex-shrink:0; flex-shrink:0;
+  display:-webkit-flex; display:flex;
+  -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
+}
+.ring-wrap svg { width:100%; height:100%; -webkit-transform:rotate(-90deg); transform:rotate(-90deg); }
 .ring-bg { fill:none; stroke:rgba(255,128,0,.12); }
-.ring-fg { fill:none; stroke:#ff8000; stroke-linecap:round; filter:drop-shadow(0 0 10px #ff8000); transition:stroke-dashoffset .3s linear; }
-.ring-center { position:absolute; top:0; left:0; right:0; bottom:0; display:-webkit-flex; display:flex; -webkit-flex-direction:column; flex-direction:column; -webkit-align-items:center; align-items:center; -webkit-justify-content:center; justify-content:center; }
+.ring-fg { fill:none; stroke:#ff8000; stroke-linecap:round; -webkit-filter:drop-shadow(0 0 10px #ff8000); filter:drop-shadow(0 0 10px #ff8000); -webkit-transition:stroke-dashoffset .3s linear; transition:stroke-dashoffset .3s linear; }
+.ring-center {
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
+}
 .ring-digits { font-family:'DIN Condensed','Arial Narrow',sans-serif; font-weight:700; color:#fff; line-height:1; letter-spacing:-1px; white-space:nowrap; }
-.ring-label  { color:rgba(255,255,255,.28); letter-spacing:4px; text-transform:uppercase; margin-top:4px; }
 .ring-sec    { font-family:'DIN Condensed','Arial Narrow',sans-serif; font-weight:700; color:rgba(255,255,255,.55); letter-spacing:2px; margin-top:2px; }
+.ring-label  { color:rgba(255,255,255,.28); letter-spacing:4px; text-transform:uppercase; margin-top:4px; font-family:'Share Tech Mono',monospace; }
 .ring-sub    { font-family:'DIN Condensed',sans-serif; font-weight:700; color:rgba(255,128,0,.78); letter-spacing:3px; margin-top:6px; cursor:pointer; }
-.ring-sublbl { color:rgba(255,255,255,.22); letter-spacing:3px; text-transform:uppercase; margin-top:6px; cursor:pointer; }
+.ring-sublbl { color:rgba(255,255,255,.22); letter-spacing:3px; text-transform:uppercase; margin-top:6px; cursor:pointer; font-family:'Share Tech Mono',monospace; }
 
-/* PANEL */
-.side-panel { display:flex; flex-direction:column; align-items:center; flex-shrink:0; }
+/* ── SIDE PANEL ── */
+.side-panel { display:-webkit-flex; display:flex; -webkit-flex-direction:column; flex-direction:column; -webkit-align-items:center; align-items:center; -webkit-flex-shrink:0; flex-shrink:0; }
 @media (orientation:portrait)  { .side-panel { gap:10px; margin-top:14px; } }
-@media (orientation:landscape) { .side-panel { position:fixed; right:14px; top:50%; transform:translateY(-55%); gap:8px; z-index:10; } }
+@media (orientation:landscape) { .side-panel { position:absolute; right:14px; top:50%; -webkit-transform:translateY(-55%); transform:translateY(-55%); gap:8px; z-index:10; } }
 
 .act-btn { font-family:'Share Tech Mono',monospace; letter-spacing:2px; text-transform:uppercase; border-radius:16px; cursor:pointer; border:none; font-size:clamp(9px,1.6vmin,12px); padding:clamp(6px,1.2vmin,9px) clamp(11px,2.4vmin,18px); }
 .act-go    { background:#ff8000; color:#000; box-shadow:0 0 14px rgba(255,128,0,.5); }
 .act-reset { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.2); color:#fff; }
 .act-set   { background:rgba(255,128,0,.14); border:1px solid rgba(255,128,0,.5); color:#ff8000; }
 .act-set.armed { background:#ff8000; color:#000; }
-.btn-row { display:flex; gap:8px; align-items:center; }
-.info-msg { color:#ff8000; letter-spacing:2px; text-transform:uppercase; text-align:center; font-size:clamp(8px,1.8vmin,12px); animation:pulse 1s ease-in-out infinite alternate; }
+.btn-row { display:-webkit-flex; display:flex; gap:8px; -webkit-align-items:center; align-items:center; }
+.info-msg { color:#ff8000; letter-spacing:2px; text-transform:uppercase; text-align:center; font-size:clamp(8px,1.8vmin,12px); font-family:'Share Tech Mono',monospace; -webkit-animation:pulse 1s ease-in-out infinite alternate; animation:pulse 1s ease-in-out infinite alternate; }
 .info-msg.hidden { display:none; }
-@keyframes pulse { from{opacity:.2}to{opacity:1} }
+@-webkit-keyframes pulse { from{opacity:.2} to{opacity:1} }
+@keyframes pulse         { from{opacity:.2} to{opacity:1} }
 
-/* ══════════════════════════════════════════
-   PICKER MODAL
-══════════════════════════════════════════ */
-.picker-modal { position:fixed; top:0; left:0; right:0; bottom:0; z-index:8888; display:-webkit-flex; display:flex; -webkit-align-items:center; align-items:center; -webkit-justify-content:center; justify-content:center; background:rgba(0,0,0,.88); }
-.picker-modal.hidden { display:none; }
-.picker-box   { display:flex; flex-direction:column; align-items:center; gap:22px; background:rgb(13,13,13); border:1px solid rgba(255,128,0,.28); border-radius:22px; padding:28px 34px; }
-.picker-title { color:rgba(255,255,255,.28); letter-spacing:4px; text-transform:uppercase; font-size:10px; }
-.drums-row    { display:flex; align-items:center; gap:12px; }
-.drum-wrap    { display:flex; flex-direction:column; align-items:center; gap:6px; }
-.drum-lbl     { color:rgba(255,255,255,.22); letter-spacing:3px; text-transform:uppercase; font-size:9px; }
-.drum-sep     { font-family:'DIN Condensed',sans-serif; font-weight:700; color:rgba(255,128,0,.6); align-self:center; margin-bottom:18px; }
-
-/* ────────────────────────────────────────
-   DRUM (CSS scroll-snap, center-aligned)
-   ────────────────────────────────────────
-   Container height = 3 × IH
-   1 spacer (IH) top + items + 1 spacer (IH) bottom
-   Items: scroll-snap-align:center  → no scroll-snap-stop
-          so the scroll coasts naturally (flywheel feel)
-
-   Math proof:
-     item at DOM-index i (0=top-spacer, 1=first-value …):
-       offsetTop = i × IH
-     snap: item-center aligns with container-center (1.5×IH)
-       → scrollTop = offsetTop + IH/2 − 1.5×IH = (i−1)×IH
-     for rep r, value v:  i = 1 + r×count + v
-       → scrollTop = (r×count + v) × IH          ← very clean!
-     reading back:
-       idx = round(scrollTop / IH)
-       val = idx % count                           ← correct ✓
-*/
-.drum-outer {
-  position: relative;
-  overflow: hidden;
-  border-radius: 10px;
+/* ── PICKER MODAL (inside #app, so also absolute) ── */
+.picker-modal {
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  z-index:200;
+  display:-webkit-flex; display:flex;
+  -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
+  background:rgba(0,0,0,.88);
 }
-/* Highlight bar (real DOM element, not pseudo) */
-.drum-hl {
-  position:absolute; left:0; right:0; z-index:4; pointer-events:none;
-  border-top:1px solid rgba(255,128,0,.7);
-  border-bottom:1px solid rgba(255,128,0,.7);
-  background:rgba(255,128,0,.09);
+.picker-modal.hidden { display:none !important; }
+.picker-box {
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-align-items:center; align-items:center;
+  gap:22px;
+  background:rgb(13,13,13); border:1px solid rgba(255,128,0,.28);
+  border-radius:22px; padding:28px 34px;
 }
-/* Fade top & bottom */
-.drum-fade {
-  position:absolute; top:0; left:0; right:0; bottom:0; z-index:3; pointer-events:none;
-  background:linear-gradient(to bottom,
-    rgb(13,13,13) 0%, rgba(13,13,13,0) 30%,
-    rgba(13,13,13,0) 70%, rgb(13,13,13) 100%);
+.picker-title { color:rgba(255,255,255,.28); letter-spacing:4px; text-transform:uppercase; font-size:10px; font-family:'Share Tech Mono',monospace; }
+.drums-row { display:-webkit-flex; display:flex; -webkit-align-items:center; align-items:center; gap:12px; }
+.drum-wrap { display:-webkit-flex; display:flex; -webkit-flex-direction:column; flex-direction:column; -webkit-align-items:center; align-items:center; gap:6px; }
+.drum-lbl  { color:rgba(255,255,255,.22); letter-spacing:3px; text-transform:uppercase; font-size:9px; font-family:'Share Tech Mono',monospace; }
+.drum-sep  { font-family:'DIN Condensed',sans-serif; font-weight:700; color:rgba(255,128,0,.6); -webkit-align-self:center; align-self:center; margin-bottom:18px; }
+
+/* ── DRUM ── */
+.drum-outer { position:relative; overflow:hidden; border-radius:10px; }
+.drum-hl    { position:absolute; left:0; right:0; z-index:4; pointer-events:none; border-top:1px solid rgba(255,128,0,.7); border-bottom:1px solid rgba(255,128,0,.7); background:rgba(255,128,0,.09); }
+.drum-fade  { position:absolute; top:0; left:0; right:0; bottom:0; z-index:3; pointer-events:none;
+  background:-webkit-linear-gradient(top, rgb(13,13,13) 0%, rgba(13,13,13,0) 30%, rgba(13,13,13,0) 70%, rgb(13,13,13) 100%);
+  background:linear-gradient(to bottom,   rgb(13,13,13) 0%, rgba(13,13,13,0) 30%, rgba(13,13,13,0) 70%, rgb(13,13,13) 100%);
 }
 .drum-scroller {
-  display: block;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  scroll-snap-type: y mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  display:block; overflow-y:scroll; overflow-x:hidden;
+  -webkit-scroll-snap-type:y mandatory; scroll-snap-type:y mandatory;
+  -webkit-overflow-scrolling:touch; scrollbar-width:none;
 }
 .drum-scroller::-webkit-scrollbar { display:none; }
 .drum-item {
-  display: flex; align-items: center; justify-content: center;
+  display:-webkit-flex; display:flex;
+  -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
   font-family:'DIN Condensed',sans-serif; font-weight:700;
-  color: rgba(255,255,255,.22);
-  flex-shrink: 0;
-  scroll-snap-align: center;
-  /* NO scroll-snap-stop → allows flywheel momentum */
+  color:rgba(255,255,255,.22);
+  -webkit-flex-shrink:0; flex-shrink:0;
+  -webkit-scroll-snap-align:center; scroll-snap-align:center;
 }
-.drum-spacer {
-  flex-shrink: 0;
-  scroll-snap-align: none; /* spacers are NOT snap targets */
-}
+.drum-spacer { -webkit-flex-shrink:0; flex-shrink:0; -webkit-scroll-snap-align:none; scroll-snap-align:none; }
 
-/* Picker buttons */
 .picker-ok     { background:#ff8000; color:#000; border:none; border-radius:14px; font-family:'Share Tech Mono',monospace; letter-spacing:2px; text-transform:uppercase; cursor:pointer; padding:10px 26px; font-size:11px; }
 .picker-cancel { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15); color:rgba(255,255,255,.4); border-radius:14px; font-family:'Share Tech Mono',monospace; letter-spacing:2px; text-transform:uppercase; cursor:pointer; padding:10px 18px; font-size:11px; }
 
-/* ALARM */
-#alarmOverlay { position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999; display:-webkit-flex; display:flex; -webkit-flex-direction:column; flex-direction:column; -webkit-align-items:center; align-items:center; -webkit-justify-content:center; justify-content:center; gap:16px; cursor:pointer; touch-action:manipulation; animation:ablink .6s ease-in-out infinite; }
+/* ── ALARM ── */
+#alarmOverlay {
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  z-index:300;
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
+  gap:16px; cursor:pointer; touch-action:manipulation;
+  -webkit-animation:ablink .6s ease-in-out infinite; animation:ablink .6s ease-in-out infinite;
+}
 #alarmOverlay.hidden { display:none !important; }
-@keyframes ablink { 0%,100%{background:rgba(0,0,0,.97)}50%{background:rgba(200,40,0,.26)} }
+@-webkit-keyframes ablink { 0%,100%{background:rgba(0,0,0,.97)} 50%{background:rgba(200,40,0,.26)} }
+@keyframes ablink         { 0%,100%{background:rgba(0,0,0,.97)} 50%{background:rgba(200,40,0,.26)} }
 .a-title { font-family:'DIN Condensed',sans-serif; font-weight:700; color:#ff8000; letter-spacing:5px; text-transform:uppercase; font-size:clamp(28px,9vmin,72px); }
 .a-time  { font-family:'DIN Condensed',sans-serif; font-weight:700; color:#fff; line-height:1; font-size:clamp(60px,18vmin,130px); }
-.a-hint  { color:rgba(255,255,255,.3); letter-spacing:3px; text-transform:uppercase; font-size:clamp(10px,2vmin,14px); }
+.a-hint  { color:rgba(255,255,255,.3); letter-spacing:3px; text-transform:uppercase; font-size:clamp(10px,2vmin,14px); font-family:'Share Tech Mono',monospace; }
 ```
 
   </style>
 </head>
 <body>
+<div id="app">
 
   <!-- UHR -->
 
@@ -205,14 +251,13 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
     <div class="ring-wrap" id="cdRingWrap">
       <svg viewBox="0 0 200 200">
         <circle class="ring-bg" cx="100" cy="100" r="88" stroke-width="10"/>
-        <circle class="ring-fg" cx="100" cy="100" r="88" stroke-width="10"
-                id="cdRingFg" stroke-dasharray="552.9" stroke-dashoffset="0"/>
+        <circle class="ring-fg" cx="100" cy="100" r="88" stroke-width="10" id="cdRingFg" stroke-dasharray="552.9" stroke-dashoffset="0"/>
       </svg>
       <div class="ring-center">
         <div class="ring-digits" id="cdDigits">00:00</div>
-        <div class="ring-sec" id="cdSec">00</div>
+        <div class="ring-sec"    id="cdSec">00</div>
         <div class="ring-label">countdown</div>
-        <div class="ring-sub hidden" id="cdSub" style="cursor:pointer"></div>
+        <div class="ring-sub hidden" id="cdSub"></div>
       </div>
     </div>
     <div class="side-panel btn-ui">
@@ -230,8 +275,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
     <div class="ring-wrap" id="wkRingWrap">
       <svg viewBox="0 0 200 200">
         <circle class="ring-bg" cx="100" cy="100" r="88" stroke-width="10"/>
-        <circle class="ring-fg" cx="100" cy="100" r="88" stroke-width="10"
-                id="wkRingFg" stroke-dasharray="552.9" stroke-dashoffset="0"/>
+        <circle class="ring-fg" cx="100" cy="100" r="88" stroke-width="10" id="wkRingFg" stroke-dasharray="552.9" stroke-dashoffset="0"/>
       </svg>
       <div class="ring-center">
         <div class="ring-digits" id="wkDigits">--:--</div>
@@ -267,7 +311,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
         </div>
         <div class="drum-sep" id="cdSep2">m</div>
       </div>
-      <div style="display:flex;gap:10px">
+      <div style="display:-webkit-flex;display:flex;gap:10px">
         <button class="picker-ok"     id="cdOk">Start</button>
         <button class="picker-cancel" id="cdCancel">Abbrechen</button>
       </div>
@@ -290,14 +334,14 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
           <div class="drum-lbl">Minute</div>
         </div>
       </div>
-      <div style="display:flex;gap:10px">
+      <div style="display:-webkit-flex;display:flex;gap:10px">
         <button class="picker-ok"     id="wkOk">OK</button>
         <button class="picker-cancel" id="wkCancel">Abbrechen</button>
       </div>
     </div>
   </div>
 
-  <!-- ALARM OVERLAY -->
+  <!-- ALARM -->
 
   <div id="alarmOverlay" class="hidden">
     <div class="a-title">Aufwachen!</div>
@@ -307,320 +351,284 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 
   <!-- DOTS + FS -->
 
-  <div id="dots" class="btn-ui"><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
+  <div id="dots" class="btn-ui">
+    <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+  </div>
   <button id="fsBtn" class="btn-ui">⛶</button>
+
+</div><!-- #app -->
 
 <script>
 (function(){
 'use strict';
-const $ = id => document.getElementById(id);
-const pad = n => String(n).padStart(2,'0');
-const CIRC = 2 * Math.PI * 88;
-const DAYS = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
-const MONS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+var $ = function(id){ return document.getElementById(id); };
+var pad = function(n){ return String(n).padStart(2,'0'); };
+var CIRC = 2 * Math.PI * 88;
+var DAYS = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+var MONS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 
-/* ══════════════════════════════════════════════════
+/* ═══════════════════════════════════
    DRUM ENGINE
-   ══════════════════════════════════════════════════
-   Layout inside drum-scroller:
-     [spacer height=IH, no-snap]
-     [item_0 … item_{count-1}]  × REPS
-     [spacer height=IH, no-snap]
-
-   scroll-snap-align: center  (NOT start)
-   NO scroll-snap-stop  →  natural flywheel momentum
-
-   Snap math (container height = 3×IH, snap center = 1.5×IH):
-     item at DOM-index i has offsetTop = i × IH
-     snapped scrollTop = offsetTop − IH = (i−1) × IH
-     for rep r, value v:  i = 1 + r×count + v
-       → snapTop(r,v) = (r×count + v) × IH   ← clean formula
-
-   Reading back:
-     rawIdx = round(scrollTop / IH)
-     val    = rawIdx % count                  ← always correct
-══════════════════════════════════════════════════ */
-
-let IH = 48; // item height in px; updated on resize
-const REPS = 41;
-const MID  = 20; // middle repetition index (floor(41/2))
+═══════════════════════════════════ */
+var IH = 48, REPS = 41, MID = 20;
 
 function createDrum(scrollId, outerId, hlId, count, initVal) {
-  const sc = $(scrollId), ou = $(outerId), hl = $(hlId);
+  var sc = $(scrollId), ou = $(outerId), hl = $(hlId);
 
-  /* Build DOM */
-  function build() {
-    sc.innerHTML = '';
-    const makeSpan = cls => { const d=document.createElement('div'); d.className=cls; sc.appendChild(d); };
-    makeSpan('drum-spacer');
-    for (let r=0; r<REPS; r++)
-      for (let v=0; v<count; v++) {
-        const el = document.createElement('div');
-        el.className = 'drum-item';
-        el.textContent = pad(v);
-        sc.appendChild(el);
-      }
-    makeSpan('drum-spacer');
+  sc.innerHTML = '';
+  var ts = document.createElement('div'); ts.className = 'drum-spacer'; sc.appendChild(ts);
+  for (var r = 0; r < REPS; r++) {
+    for (var v = 0; v < count; v++) {
+      var el = document.createElement('div');
+      el.className = 'drum-item';
+      el.textContent = pad(v);
+      sc.appendChild(el);
+    }
   }
+  var bs = document.createElement('div'); bs.className = 'drum-spacer'; sc.appendChild(bs);
 
-  /* Apply sizes after IH changes */
   function applySize() {
-    const w = Math.round(IH * 2.15);
-    ou.style.cssText = `width:${w}px; height:${IH*3}px;`;
-    sc.style.cssText = `width:${w}px; height:${IH*3}px;`;
-    sc.querySelectorAll('.drum-item,.drum-spacer').forEach(el => {
-      el.style.height   = IH+'px';
-      el.style.width    = w+'px';
-      el.style.fontSize = Math.round(IH*0.70)+'px';
-    });
-    hl.style.cssText = `top:${IH}px; height:${IH}px;`;
+    var w = Math.round(IH * 2.15);
+    ou.style.width = w+'px'; ou.style.height = (IH*3)+'px';
+    sc.style.width = w+'px'; sc.style.height = (IH*3)+'px';
+    var els = sc.querySelectorAll('.drum-item,.drum-spacer');
+    for (var i = 0; i < els.length; i++) {
+      els[i].style.height = IH+'px';
+      els[i].style.width  = w+'px';
+      els[i].style.fontSize = Math.round(IH*0.70)+'px';
+    }
+    hl.style.top = IH+'px'; hl.style.height = IH+'px';
   }
 
-  /* Target scrollTop for value v in repetition r */
-  function snapTop(v, r) { return (r * count + v) * IH; }
-
-  /* Read current snapped value */
-  function getVal() {
-    const rawIdx = Math.round(sc.scrollTop / IH);
-    return ((rawIdx % count) + count) % count;
-  }
-
-  /* Jump to value (instant or smooth) */
+  function snapTop(v, rep) { return (rep * count + v) * IH; }
+  function getVal() { return ((Math.round(sc.scrollTop/IH) % count) + count) % count; }
   function setVal(v, smooth) {
-    const sv = ((v % count) + count) % count;
-    const top = snapTop(sv, MID);
-    if (smooth) sc.scrollTo({ top, behavior:'smooth' });
-    else        sc.scrollTop = top;
+    var sv = ((v%count)+count)%count;
+    var t  = snapTop(sv, MID);
+    if (smooth) { try { sc.scrollTo({top:t, behavior:'smooth'}); } catch(e){ sc.scrollTop=t; } }
+    else { sc.scrollTop = t; }
   }
 
-  /* After scroll settles, silently re-centre to MID rep.
-     We wait 400 ms of silence before acting so we never
-     interrupt active scrolling or momentum. */
-  let normTimer = null;
-  sc.addEventListener('scroll', () => {
-    clearTimeout(normTimer);
-    normTimer = setTimeout(() => {
-      const v   = getVal();
-      const cur = sc.scrollTop;
-      const tgt = snapTop(v, MID);
-      if (Math.abs(cur - tgt) > IH * 0.5) {
-        // silent jump — user won't notice as scroll is already stopped
-        sc.scrollTop = tgt;
-      }
+  var normTmr = null;
+  sc.addEventListener('scroll', function() {
+    clearTimeout(normTmr);
+    normTmr = setTimeout(function() {
+      var v = getVal();
+      if (Math.abs(sc.scrollTop - snapTop(v,MID)) > IH*0.5) sc.scrollTop = snapTop(v,MID);
     }, 400);
-  }, { passive:true });
+  }, false);
 
-  build();
   applySize();
-  // Two rAF rounds: first lets layout complete, second sets scroll
-  requestAnimationFrame(() => requestAnimationFrame(() => { sc.scrollTop = snapTop(initVal, MID); }));
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ sc.scrollTop = snapTop(initVal, MID); });
+  });
 
-  return { getVal, setVal, applySize };
+  return { getVal:getVal, setVal:setVal, applySize:applySize };
 }
 
-/* Create the four drums:
-   Countdown hours 0–99,  minutes 0–59
-   Wecker    hours 0–23,  minutes 0–59  */
-const cdH = createDrum('cdHScroll','cdHOuter','cdHhl',  25, 0); // 0–24 h
-const cdM = createDrum('cdMScroll','cdMOuter','cdMhl',  60, 5);
-const wkH = createDrum('wkHScroll','wkHOuter','wkHhl',  24, 7);
-const wkM = createDrum('wkMScroll','wkMOuter','wkMhl',  60, 30);
+var cdH = createDrum('cdHScroll','cdHOuter','cdHhl', 25, 0);
+var cdM = createDrum('cdMScroll','cdMOuter','cdMhl', 60, 5);
+var wkH = createDrum('wkHScroll','wkHOuter','wkHhl', 24, 7);
+var wkM = createDrum('wkMScroll','wkMOuter','wkMhl', 60, 30);
 
-/* ══ RESIZE ══ */
+/* ═══════════════════════════════════
+   RESIZE  (reads #app dimensions, not window)
+═══════════════════════════════════ */
 function resize() {
-  const vv = window.visualViewport;
-  const W = vv ? vv.width  : window.innerWidth;
-  const H = vv ? vv.height : window.innerHeight;
-  const P = H >= W;
-  const cW = P ? W : W-185, cH = P ? H-46 : H-16;
+  var app = $('app');
+  var W = app.offsetWidth, H = app.offsetHeight, P = H >= W;
+  var cW = P ? W : W-185, cH = P ? H-46 : H-16;
 
   /* Clock */
-  let uFs = Math.min(Math.floor(cW/3.05), Math.floor(cH*(P?0.72:0.82)));
-  uFs = Math.max(uFs, 40);
+  var uFs = Math.max(40, Math.min(Math.floor(cW/3.05), Math.floor(cH*(P?0.72:0.82))));
   $('timeMain').style.fontSize     = uFs+'px';
   $('timeSec').style.fontSize      = Math.round(uFs*0.43)+'px';
   $('timeSec').style.paddingBottom = Math.round(uFs*0.08)+'px';
   $('timeSec').style.paddingLeft   = Math.round(uFs*0.05)+'px';
-  const dFs = Math.max(11, Math.round(uFs*0.11));
-  $('dateBlock').querySelectorAll('span').forEach(s=>s.style.fontSize=dFs+'px');
-  const bW = P ? W*0.92 : cW*0.88;
+  var dFs = Math.max(11, Math.round(uFs*0.11));
+  var sp = $('dateBlock').querySelectorAll('span');
+  for (var i=0;i<sp.length;i++) sp[i].style.fontSize = dFs+'px';
+  var bW = P ? W*0.92 : cW*0.88;
   $('progressWrap').style.width = bW+'px';
-  $('barTrack').style.width     = Math.max(60,bW-28)+'px';
+  $('barTrack').style.width = Math.max(60,bW-28)+'px';
 
   /* Rings */
-  const rSz = Math.max(80, Math.floor(Math.min(P?W*0.88:cW*0.96, P?H*0.54:cH*0.93)));
-  const rFs = Math.round(rSz*0.29);
-  ['cdRingWrap','wkRingWrap'].forEach(id=>{$(id).style.width=rSz+'px';$(id).style.height=rSz+'px';});
-  ['cdDigits','wkDigits'].forEach(id=>$(id).style.fontSize=rFs+'px');
-  document.querySelectorAll('.ring-label').forEach(el=>el.style.fontSize=Math.max(9,Math.round(rFs*.13))+'px');
-  ['cdSub','wkSub'].forEach(id=>$(id).style.fontSize=Math.max(12,Math.round(rFs*.20))+'px');
-  $('cdSec').style.fontSize=Math.max(13,Math.round(rFs*.27))+'px';
-  $('wkSec').style.fontSize=Math.max(13,Math.round(rFs*.27))+'px';
-  $('wkLbl').style.fontSize=Math.max(9,Math.round(rFs*.11))+'px';
+  var rSz = Math.max(80, Math.floor(Math.min(P?W*0.88:cW*0.96, P?H*0.54:cH*0.93)));
+  var rFs = Math.round(rSz*0.29);
+  var rw = ['cdRingWrap','wkRingWrap'];
+  for (var j=0;j<rw.length;j++) { $(rw[j]).style.width=rSz+'px'; $(rw[j]).style.height=rSz+'px'; }
+  $('cdDigits').style.fontSize = rFs+'px';
+  $('wkDigits').style.fontSize = rFs+'px';
+  var lbl = document.querySelectorAll('.ring-label');
+  for (var k=0;k<lbl.length;k++) lbl[k].style.fontSize = Math.max(9,Math.round(rFs*.13))+'px';
+  var subFs = Math.max(12, Math.round(rFs*.20));
+  $('cdSub').style.fontSize = subFs+'px';
+  $('wkSub').style.fontSize = subFs+'px';
+  var secFs = Math.max(13, Math.round(rFs*.27));
+  $('cdSec').style.fontSize = secFs+'px';
+  $('wkSec').style.fontSize = secFs+'px';
+  $('wkLbl').style.fontSize = Math.max(9,Math.round(rFs*.11))+'px';
 
   /* Drums */
   IH = Math.max(40, Math.min(64, Math.round(H*0.08)));
-  [cdH,cdM,wkH,wkM].forEach(d=>d.applySize());
-  const sepFs = Math.round(IH*0.70);
-  [$('cdSep1'),$('cdSep2'),$('wkSep')].forEach(el=>{ if(el) el.style.fontSize=sepFs+'px'; });
-  // Re-snap all drums after resize
-  setTimeout(()=>{ cdH.setVal(cdH.getVal(),false); cdM.setVal(cdM.getVal(),false);
-                   wkH.setVal(wkH.getVal(),false); wkM.setVal(wkM.getVal(),false); }, 60);
+  cdH.applySize(); cdM.applySize(); wkH.applySize(); wkM.applySize();
+  var sepFs = Math.round(IH*0.70);
+  [$('cdSep1'),$('cdSep2'),$('wkSep')].forEach(function(e){ if(e) e.style.fontSize=sepFs+'px'; });
+  setTimeout(function(){
+    cdH.setVal(cdH.getVal(),false); cdM.setVal(cdM.getVal(),false);
+    wkH.setVal(wkH.getVal(),false); wkM.setVal(wkM.getVal(),false);
+  }, 60);
 }
-window.addEventListener('resize', resize);
-if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
+window.addEventListener('resize', resize, false);
 
-/* ══ AUTO-HIDE ══ */
-let hideTimer;
+/* ═══════════════════════════════════
+   AUTO-HIDE
+═══════════════════════════════════ */
+var hideTimer;
 function showUI() {
   clearTimeout(hideTimer);
   document.body.classList.remove('ui-hidden');
-  hideTimer = setTimeout(()=>document.body.classList.add('ui-hidden'), 4000);
+  hideTimer = setTimeout(function(){ document.body.classList.add('ui-hidden'); }, 4000);
 }
-document.addEventListener('mousemove', showUI, {passive:true});
-document.addEventListener('click', showUI);
+document.addEventListener('mousemove', showUI, false);
+document.addEventListener('click', showUI, false);
 showUI();
 
-/* ══ SWIPE NAV ══ */
-let curScreen=0, sx=0, sy=0, inDrum=false;
-document.addEventListener('touchstart', e=>{
-  sx=e.touches[0].clientX; sy=e.touches[0].clientY;
-  inDrum = !!e.target.closest('.drum-scroller,.picker-box');
+/* ═══════════════════════════════════
+   SWIPE NAV
+═══════════════════════════════════ */
+var curScreen = 0, sx = 0, sy = 0, inDrum = false;
+var app = $('app');
+app.addEventListener('touchstart', function(e) {
+  sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+  inDrum = !!(e.target.closest && e.target.closest('.drum-scroller,.picker-box'));
   showUI();
-},{passive:true});
-document.addEventListener('touchend', e=>{
-  if(inDrum) return;
-  if(!$('cdModal').classList.contains('hidden')||!$('wkModal').classList.contains('hidden')) return;
-  const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
-  if(Math.abs(dx)>Math.abs(dy)*1.5&&Math.abs(dx)>50) goTo(dx<0?curScreen+1:curScreen-1);
-},{passive:true});
+}, false);
+app.addEventListener('touchend', function(e) {
+  if (inDrum) return;
+  if (!$('cdModal').classList.contains('hidden') || !$('wkModal').classList.contains('hidden')) return;
+  var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+  if (Math.abs(dx) > Math.abs(dy)*1.5 && Math.abs(dx) > 50) goTo(dx < 0 ? curScreen+1 : curScreen-1);
+}, false);
 
 function goTo(i) {
   i = ((i%3)+3)%3;
-  ['uhr-screen','countdown-screen','wecker-screen'].forEach((id,j)=>$(id).classList.toggle('active',j===i));
-  document.querySelectorAll('.dot').forEach((d,j)=>d.classList.toggle('active',j===i));
-  curScreen=i; resize(); showUI();
+  var ids = ['uhr-screen','countdown-screen','wecker-screen'];
+  for (var k=0;k<3;k++) {
+    if (k===i) $(ids[k]).classList.add('active');
+    else       $(ids[k]).classList.remove('active');
+  }
+  var dots = document.querySelectorAll('.dot');
+  for (var d=0;d<dots.length;d++) {
+    if (d===i) dots[d].classList.add('active');
+    else       dots[d].classList.remove('active');
+  }
+  curScreen = i; resize(); showUI();
 }
 
-/* ══ RING ══ */
-const setRing = (id,f) => $(id).style.strokeDashoffset = CIRC*(1-Math.max(0,Math.min(1,f)));
+/* ═══════════════════════════════════
+   RING
+═══════════════════════════════════ */
+function setRing(id,f){ $(id).style.strokeDashoffset = CIRC*(1-Math.max(0,Math.min(1,f))); }
 setRing('cdRingFg',1); setRing('wkRingFg',1);
 
-/* ══ CLOCK ══ */
+/* ═══════════════════════════════════
+   CLOCK
+═══════════════════════════════════ */
 function tickClock() {
-  const now=new Date();
-  const p=((now.getSeconds()*1000+now.getMilliseconds())/60000)*100;
-  $('timeMain').innerHTML=`${pad(now.getHours())}<span class="colon">:</span>${pad(now.getMinutes())}`;
-  $('timeSec').textContent=pad(now.getSeconds());
-  $('weekday').textContent=DAYS[now.getDay()];
-  $('dateTxt').textContent=`${pad(now.getDate())}. ${MONS[now.getMonth()]} ${now.getFullYear()}`;
-  $('barFill').style.width=p+'%';
+  var now = new Date();
+  var p = ((now.getSeconds()*1000+now.getMilliseconds())/60000)*100;
+  $('timeMain').innerHTML = pad(now.getHours())+'<span class="colon">:</span>'+pad(now.getMinutes());
+  $('timeSec').textContent = pad(now.getSeconds());
+  $('weekday').textContent = DAYS[now.getDay()];
+  $('dateTxt').textContent = pad(now.getDate())+'. '+MONS[now.getMonth()]+' '+now.getFullYear();
+  $('barFill').style.width = p+'%';
 }
 
-/* ══ COUNTDOWN ══ */
-let cdTotal=0, cdRemain=0, cdIv=null, cdState='idle'; // idle | running | paused
+/* ═══════════════════════════════════
+   COUNTDOWN
+═══════════════════════════════════ */
+var cdTotal=0, cdRemain=0, cdIv=null, cdState='idle';
 
 function cdDisplay() {
-  const h=Math.floor(cdRemain/3600), m=Math.floor((cdRemain%3600)/60), s=cdRemain%60;
-  $('cdDigits').textContent=`${pad(h)}:${pad(m)}`;
-  $('cdSec').textContent=pad(s);
-  // Show end-clock-time
-  if(cdRemain>0){
-    const end=new Date(Date.now()+cdRemain*1000);
-    $('cdSub').textContent=`→ ${pad(end.getHours())}:${pad(end.getMinutes())}`;
+  var h=Math.floor(cdRemain/3600), m=Math.floor((cdRemain%3600)/60), s=cdRemain%60;
+  $('cdDigits').textContent = pad(h)+':'+pad(m);
+  $('cdSec').textContent = pad(s);
+  if (cdRemain > 0) {
+    var end = new Date(Date.now()+cdRemain*1000);
+    $('cdSub').textContent = '→ '+pad(end.getHours())+':'+pad(end.getMinutes());
     $('cdSub').classList.remove('hidden');
   }
   setRing('cdRingFg', cdTotal>0 ? cdRemain/cdTotal : 1);
 }
 
 function cdTick() {
-  if(cdRemain<=0) {
-    clearInterval(cdIv);cdIv=null;cdState='idle';cdRemain=0;
-    cdDisplay();
-    $('cdDone').classList.remove('hidden');
-    $('cdGoBtn').textContent='Stellen';
-    $('cdSub').classList.add('hidden');
-    return;
+  if (cdRemain<=0) {
+    clearInterval(cdIv); cdIv=null; cdState='idle'; cdRemain=0;
+    cdDisplay(); $('cdDone').classList.remove('hidden');
+    $('cdGoBtn').textContent='Stellen'; $('cdSub').classList.add('hidden'); return;
   }
   cdRemain--; cdDisplay();
 }
 
 function openCdModal() {
-  showUI();
-  $('cdModal').classList.remove('hidden');
-  // Modal was hidden → scrollTop couldn't be set. Re-snap now so both directions are free.
-  requestAnimationFrame(()=>{
-    cdH.setVal(cdH.getVal(), false);
-    cdM.setVal(cdM.getVal(), false);
-  });
+  showUI(); $('cdModal').classList.remove('hidden');
+  requestAnimationFrame(function(){ cdH.setVal(cdH.getVal(),false); cdM.setVal(cdM.getVal(),false); });
 }
-$('cdGoBtn').addEventListener('click',()=>{
-  showUI();
-  if(cdState==='running') {
-    clearInterval(cdIv);cdIv=null;cdState='paused';$('cdGoBtn').textContent='Weiter';
-  } else if(cdState==='paused') {
-    cdState='running';$('cdGoBtn').textContent='Pause';cdIv=setInterval(cdTick,1000);
-  } else {
-    openCdModal();
-  }
-});
-$('cdSub').addEventListener('click', openCdModal);
 
-$('cdOk').addEventListener('click',()=>{
-  // Read values — drums have settled by now
-  const h=cdH.getVal(), m=cdM.getVal();
+$('cdGoBtn').addEventListener('click', function(){
+  showUI();
+  if (cdState==='running') { clearInterval(cdIv);cdIv=null;cdState='paused';$('cdGoBtn').textContent='Weiter'; }
+  else if (cdState==='paused') { cdState='running';$('cdGoBtn').textContent='Pause';cdIv=setInterval(cdTick,1000); }
+  else { openCdModal(); }
+}, false);
+$('cdSub').addEventListener('click', openCdModal, false);
+$('cdOk').addEventListener('click', function(){
+  var h=cdH.getVal(), m=cdM.getVal();
   $('cdModal').classList.add('hidden');
-  if(h===0&&m===0) return;
-  clearInterval(cdIv);cdIv=null;
-  cdTotal = h*3600 + m*60;
-  cdRemain = cdTotal;
-  cdState = 'running';
-  $('cdDone').classList.add('hidden');
-  $('cdGoBtn').textContent='Pause';
-  cdDisplay();
-  cdIv=setInterval(cdTick,1000);
-  showUI();
-});
-$('cdCancel').addEventListener('click',()=>{ $('cdModal').classList.add('hidden'); showUI(); });
-$('cdModal').addEventListener('click', e=>{ if(e.target===$('cdModal')){ $('cdModal').classList.add('hidden');showUI(); } });
-$('cdResetBtn').addEventListener('click',()=>{
+  if (h===0&&m===0) return;
+  clearInterval(cdIv); cdIv=null;
+  cdTotal=h*3600+m*60; cdRemain=cdTotal; cdState='running';
+  $('cdDone').classList.add('hidden'); $('cdGoBtn').textContent='Pause';
+  cdDisplay(); cdIv=setInterval(cdTick,1000); showUI();
+}, false);
+$('cdCancel').addEventListener('click', function(){ $('cdModal').classList.add('hidden'); showUI(); }, false);
+$('cdModal').addEventListener('click', function(e){ if(e.target===$('cdModal')){ $('cdModal').classList.add('hidden'); showUI(); } }, false);
+$('cdResetBtn').addEventListener('click', function(){
   clearInterval(cdIv);cdIv=null;cdState='idle';cdTotal=0;cdRemain=0;
-  $('cdGoBtn').textContent='Stellen';$('cdDigits').textContent='00:00';$('cdSec').textContent='00';
-  $('cdDone').classList.add('hidden');$('cdSub').classList.add('hidden');
-  setRing('cdRingFg',1);showUI();
-});
+  $('cdGoBtn').textContent='Stellen'; $('cdDigits').textContent='00:00'; $('cdSec').textContent='00';
+  $('cdDone').classList.add('hidden'); $('cdSub').classList.add('hidden');
+  setRing('cdRingFg',1); showUI();
+}, false);
 
-/* ══ WECKER ══ */
-let wkActive=false, wkH_val=7, wkM_val=30, wkTotalSec=0;
-let wkIv=null, wkRinging=false, wkACtx=null, wkSndIv=null;
+/* ═══════════════════════════════════
+   WECKER
+═══════════════════════════════════ */
+var wkActive=false, wkHval=7, wkMval=30, wkTotalSec=0;
+var wkIv=null, wkRinging=false, wkACtx=null, wkSndIv=null;
 
-/* Seconds until next occurrence of HH:MM:00 */
 function secUntilAlarm(h,m) {
-  const now   = new Date();
-  const alarm = new Date(now);
-  alarm.setHours(h, m, 0, 0);
-  if (alarm <= now) alarm.setDate(alarm.getDate()+1); // tomorrow
-  return Math.max(0, Math.round((alarm - now) / 1000));
+  var now=new Date(), alarm=new Date(now);
+  alarm.setHours(h,m,0,0);
+  if (alarm<=now) alarm.setDate(alarm.getDate()+1);
+  return Math.max(0, Math.round((alarm-now)/1000));
 }
-
 function wkDisplay() {
-  if(!wkActive){ $('wkDigits').textContent='--:--'; $('wkSec').textContent='--'; setRing('wkRingFg',1); return; }
-  const rem = secUntilAlarm(wkH_val, wkM_val);
-  const h=Math.floor(rem/3600), m=Math.floor((rem%3600)/60), s=rem%60;
-  $('wkDigits').textContent=`${pad(h)}:${pad(m)}`;
-  $('wkSec').textContent=pad(s);
+  if (!wkActive) { $('wkDigits').textContent='--:--'; $('wkSec').textContent='--'; setRing('wkRingFg',1); return; }
+  var rem=secUntilAlarm(wkHval,wkMval);
+  $('wkDigits').textContent = pad(Math.floor(rem/3600))+':'+pad(Math.floor((rem%3600)/60));
+  $('wkSec').textContent = pad(rem%60);
   setRing('wkRingFg', wkTotalSec>0 ? rem/wkTotalSec : 1);
 }
-
 function wkBeep() {
   try {
-    if(!wkACtx) wkACtx=new(window.AudioContext||window.webkitAudioContext)();
-    if(wkACtx.state==='suspended') wkACtx.resume();
-    [880,1046,1318].forEach((freq,i)=>{
-      const o=wkACtx.createOscillator(), g=wkACtx.createGain();
+    if (!wkACtx) wkACtx=new(window.AudioContext||window.webkitAudioContext)();
+    if (wkACtx.state==='suspended') wkACtx.resume();
+    [880,1046,1318].forEach(function(freq,i){
+      var o=wkACtx.createOscillator(), g=wkACtx.createGain();
       o.connect(g); g.connect(wkACtx.destination);
       o.frequency.value=freq; o.type='sine';
-      const t=wkACtx.currentTime+i*0.14;
+      var t=wkACtx.currentTime+i*0.14;
       g.gain.setValueAtTime(0,t);
       g.gain.linearRampToValueAtTime(0.65,t+0.04);
       g.gain.exponentialRampToValueAtTime(0.001,t+0.40);
@@ -628,97 +636,78 @@ function wkBeep() {
     });
   } catch(e){}
 }
-
 function triggerAlarm() {
-  if(wkRinging) return;
-  wkRinging=true;
-  $('alarmTime').textContent=`${pad(wkH_val)}:${pad(wkM_val)}`;
+  if (wkRinging) return; wkRinging=true;
+  $('alarmTime').textContent = pad(wkHval)+':'+pad(wkMval);
   $('alarmOverlay').classList.remove('hidden');
-  wkBeep();
-  wkSndIv=setInterval(wkBeep,900);
-  try{ if(navigator.vibrate) navigator.vibrate([500,200,500,200,500,200,500]); }catch(e){}
+  wkBeep(); wkSndIv=setInterval(wkBeep,900);
+  try{ if(navigator.vibrate) navigator.vibrate([500,200,500,200,500]); }catch(e){}
 }
-
 function stopAlarm() {
-  clearInterval(wkSndIv);wkSndIv=null;
+  clearInterval(wkSndIv); wkSndIv=null;
   try{ if(wkACtx){wkACtx.close();wkACtx=null;} }catch(e){}
   try{ if(navigator.vibrate) navigator.vibrate(0); }catch(e){}
   $('alarmOverlay').classList.add('hidden');
   wkRinging=false; wkActive=false;
-  clearInterval(wkIv);wkIv=null;
+  clearInterval(wkIv); wkIv=null;
   $('wkSetBtn').textContent='Stellen'; $('wkSetBtn').classList.remove('armed');
-  $('wkSub').textContent='--:--';
-  $('wkDigits').textContent='--:--'; $('wkSec').textContent='--';
+  $('wkSub').textContent='--:--'; $('wkDigits').textContent='--:--'; $('wkSec').textContent='--';
   setRing('wkRingFg',1); showUI();
 }
-
 function wkTick() {
-  if(!wkActive||wkRinging) return;
+  if (!wkActive||wkRinging) return;
   wkDisplay();
-  const now=new Date();
-  if(now.getHours()===wkH_val && now.getMinutes()===wkM_val && now.getSeconds()===0) triggerAlarm();
+  var now=new Date();
+  if (now.getHours()===wkHval&&now.getMinutes()===wkMval&&now.getSeconds()===0) triggerAlarm();
 }
-
 function openWkModal() {
-  showUI();
-  $('wkModal').classList.remove('hidden');
-  requestAnimationFrame(()=>{
-    wkH.setVal(wkH.getVal(), false);
-    wkM.setVal(wkM.getVal(), false);
-  });
+  showUI(); $('wkModal').classList.remove('hidden');
+  requestAnimationFrame(function(){ wkH.setVal(wkH.getVal(),false); wkM.setVal(wkM.getVal(),false); });
 }
-$('wkLbl').addEventListener('click', openWkModal);
-$('wkSub').addEventListener('click', openWkModal);
-$('wkSetBtn').addEventListener('click',()=>{
-  showUI();
-  if(wkActive){ stopAlarm(); return; }
-  openWkModal();
-});
-
-$('wkOk').addEventListener('click',()=>{
-  // Small delay — ensures any still-moving scroll has snapped
-  setTimeout(()=>{
-    const h=wkH.getVal(), m=wkM.getVal();
+$('wkLbl').addEventListener('click', openWkModal, false);
+$('wkSub').addEventListener('click', openWkModal, false);
+$('wkSetBtn').addEventListener('click', function(){ showUI(); if(wkActive){stopAlarm();return;} openWkModal(); }, false);
+$('wkOk').addEventListener('click', function(){
+  setTimeout(function(){
+    var h=wkH.getVal(), m=wkM.getVal();
     $('wkModal').classList.add('hidden');
-    const rem = secUntilAlarm(h, m);
-    if(rem < 30) {
-      $('wkInfo').textContent='Mind. 1 Min. in der Zukunft!';
-      $('wkInfo').classList.remove('hidden'); return;
-    }
-    if(wkActive){ clearInterval(wkIv);wkIv=null;wkActive=false; }
-    wkH_val=h; wkM_val=m; wkTotalSec=rem;
-    wkActive=true;
+    var rem=secUntilAlarm(h,m);
+    if (rem<30) { $('wkInfo').textContent='Mind. 1 Min. in der Zukunft!'; $('wkInfo').classList.remove('hidden'); return; }
+    if (wkActive) { clearInterval(wkIv);wkIv=null;wkActive=false; }
+    wkHval=h; wkMval=m; wkTotalSec=rem; wkActive=true;
     $('wkSetBtn').textContent='Aktiv ✓'; $('wkSetBtn').classList.add('armed');
-    $('wkSub').textContent=`${pad(h)}:${pad(m)}`;
+    $('wkSub').textContent=pad(h)+':'+pad(m);
     $('wkInfo').classList.add('hidden');
-    wkDisplay();
-    clearInterval(wkIv);
-    wkIv=setInterval(wkTick,1000);
-    showUI();
-  }, 150); // 150 ms: enough for scroll-snap to fully settle
-});
-$('wkCancel').addEventListener('click',()=>{ $('wkModal').classList.add('hidden'); showUI(); });
-$('wkModal').addEventListener('click', e=>{ if(e.target===$('wkModal')){ $('wkModal').classList.add('hidden');showUI(); } });
-$('wkResetBtn').addEventListener('click',()=>{ stopAlarm(); $('wkInfo').classList.add('hidden'); });
-$('alarmOverlay').addEventListener('click', stopAlarm);
-$('alarmOverlay').addEventListener('touchstart', e=>{ e.preventDefault(); stopAlarm(); },{passive:false});
+    wkDisplay(); clearInterval(wkIv); wkIv=setInterval(wkTick,1000); showUI();
+  }, 150);
+}, false);
+$('wkCancel').addEventListener('click', function(){ $('wkModal').classList.add('hidden'); showUI(); }, false);
+$('wkModal').addEventListener('click', function(e){ if(e.target===$('wkModal')){ $('wkModal').classList.add('hidden'); showUI(); } }, false);
+$('wkResetBtn').addEventListener('click', function(){ stopAlarm(); $('wkInfo').classList.add('hidden'); }, false);
+$('alarmOverlay').addEventListener('click', stopAlarm, false);
+$('alarmOverlay').addEventListener('touchstart', function(e){ e.preventDefault(); stopAlarm(); }, false);
 
-/* ══ FULLSCREEN ══ */
-$('fsBtn').addEventListener('click',()=>{
-  try{
-    const el=document.documentElement;
-    const req=el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen;
-    const exit=document.exitFullscreen||document.webkitExitFullscreen;
-    const isF=document.fullscreenElement||document.webkitFullscreenElement;
+/* ═══════════════════════════════════
+   FULLSCREEN
+═══════════════════════════════════ */
+$('fsBtn').addEventListener('click', function(){
+  try {
+    var el=document.documentElement;
+    var req=el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen;
+    var ex=document.exitFullscreen||document.webkitExitFullscreen;
+    var isF=document.fullscreenElement||document.webkitFullscreenElement;
     if(!isF&&req){req.call(el);$('fsBtn').textContent='✕';}
-    else if(isF&&exit){exit.call(document);$('fsBtn').textContent='⛶';}
+    else if(isF&&ex){ex.call(document);$('fsBtn').textContent='⛶';}
   }catch(e){}
-});
+}, false);
 
-/* ══ INIT & MAIN LOOP ══ */
+/* ═══════════════════════════════════
+   INIT
+═══════════════════════════════════ */
 resize();
 function loop(){ tickClock(); requestAnimationFrame(loop); }
 loop();
+
 })();
 </script>
 
