@@ -4,14 +4,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <!-- iOS PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Uhr">
+  <!-- Android: färbt Chrome-Toolbar + Statusleiste schwarz -->
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#000000">
+  <!-- Inline Web App Manifest für Android "Zum Startbildschirm" -->
+  <link rel="manifest" href='data:application/manifest+json,{"name":"Uhr","short_name":"Uhr","display":"standalone","background_color":"#000000","theme_color":"#000000","orientation":"any","start_url":".","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'50\' fill=\'%23000\'/%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'42\' fill=\'none\' stroke=\'%23ff8000\' stroke-width=\'6\'/%3E%3C/svg%3E","sizes":"any","type":"image/svg+xml"}]}'>
   <title>Uhr</title>
   <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed:wght@700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     :root { color-scheme: dark only; }
+    :root { background:#000; }
     *, *::before, *::after {
       margin:0; padding:0; box-sizing:border-box;
       -webkit-tap-highlight-color:transparent;
