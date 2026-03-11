@@ -106,22 +106,18 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 
 /* FULLSCREEN BTN — only shown on Android via JS */
 #fsBtn {
-  display: none; /* hidden until JS decides to show */
+  display: none; /* shown only on non-iOS via JS */
   position: absolute;
-  bottom: 10px; left: 12px;
-  width: 34px; height: 34px;
-  background: rgba(255,128,0,.15);
-  border: 1px solid rgba(255,128,0,.4);
-  color: rgba(255,128,0,.8);
-  font-size: 18px; border-radius: 8px;
-  cursor: pointer; z-index: 99;
+  bottom: 14px; left: 14px;
+  width: 44px; height: 44px;
+  background: rgba(255,128,0,.18);
+  border: 1px solid rgba(255,128,0,.5);
+  color: #ff8000;
+  font-size: 22px; border-radius: 10px;
+  cursor: pointer; z-index: 999;
   -webkit-align-items: center; align-items: center;
   -webkit-justify-content: center; justify-content: center;
   font-family: sans-serif;
-}
-#fsBtn.visible {
-  display: -webkit-flex;
-  display: flex;
 }
 
 /* DOTS */
@@ -590,7 +586,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 
   <!-- FULLSCREEN (Android only) -->
 
-<button id="fsBtn" class="btn-ui" title="Vollbild">⛶</button>
+<button id="fsBtn" title="Vollbild">⛶</button>
 
   <!-- DOTS -->
 
@@ -912,9 +908,10 @@ $('alarmOverlay').addEventListener('touchstart',function(e){e.preventDefault();s
   var isAndroid = /android/i.test(navigator.userAgent);
   var btn = $('fsBtn');
 
-  // Show button on Android (and desktop where it also works)
+  // Show button everywhere except iOS Safari (where it doesn't work)
   if (!isIOS && btn) {
-    btn.classList.add('visible');
+    btn.style.display = '-webkit-flex';
+    btn.style.display = 'flex';
     var inFS = false;
     btn.addEventListener('click', function(){
       try {
