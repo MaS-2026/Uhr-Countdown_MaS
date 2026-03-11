@@ -104,6 +104,26 @@
 .btn-ui { -webkit-transition:opacity .8s; transition:opacity .8s; }
 body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 
+/* FULLSCREEN BTN — only shown on Android via JS */
+#fsBtn {
+  display: none; /* hidden until JS decides to show */
+  position: absolute;
+  bottom: 10px; left: 12px;
+  width: 34px; height: 34px;
+  background: rgba(255,128,0,.15);
+  border: 1px solid rgba(255,128,0,.4);
+  color: rgba(255,128,0,.8);
+  font-size: 18px; border-radius: 8px;
+  cursor: pointer; z-index: 99;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  font-family: sans-serif;
+}
+#fsBtn.visible {
+  display: -webkit-flex;
+  display: flex;
+}
+
 /* DOTS */
 #dots {
   position:absolute; bottom:2vmin; left:50%;
@@ -568,6 +588,10 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
     <div class="a-hint">Tippen zum Stoppen</div>
   </div>
 
+  <!-- FULLSCREEN (Android only) -->
+
+<button id="fsBtn" class="btn-ui" title="Vollbild">⛶</button>
+
   <!-- DOTS -->
 
   <div id="dots" class="btn-ui">
@@ -876,6 +900,45 @@ $('wkModal').addEventListener('click',function(e){
 $('wkResetBtn').addEventListener('click',function(){stopAlarm();$('wkInfo').classList.add('hidden');},false);
 $('alarmOverlay').addEventListener('click',stopAlarm,false);
 $('alarmOverlay').addEventListener('touchstart',function(e){e.preventDefault();stopAlarm();},false);
+
+/* ══════════════════════════════════════════
+   FULLSCREEN — Android only
+   iOS Safari doesn't support requestFullscreen in browser.
+   Android Chrome does. We detect and show the button only
+   where it actually works.
+══════════════════════════════════════════ */
+(function(){
+  var isIOS = /iP(hone|ad|od)/i.test(navigator.userAgent);
+  var isAndroid = /android/i.test(navigator.userAgent);
+  var btn = $('fsBtn');
+
+  // Show button on Android (and desktop where it also works)
+  if (!isIOS && btn) {
+    btn.classList.add('visible');
+    var inFS = false;
+    btn.addEventListener('click', function(){
+      try {
+        var el = document.documentElement;
+        if (!inFS) {
+          var req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
+          if (req) { req.call(el); }
+        } else {
+          var ex = document.exitFullscreen || document.webkitExitFullscreen;
+          if (ex) { ex.call(document); }
+        }
+      } catch(e) {}
+      showUI();
+    }, false);
+
+    // Track fullscreen state to toggle icon
+    function onFSChange() {
+      inFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      btn.textContent = inFS ? '✕' : '⛶';
+    }
+    document.addEventListener('fullscreenchange', onFSChange, false);
+    document.addEventListener('webkitfullscreenchange', onFSChange, false);
+  }
+})();
 
 /* ══════════════════════════════════════════
    INIT
