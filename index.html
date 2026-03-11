@@ -9,374 +9,706 @@
   <meta name="apple-mobile-web-app-title" content="Uhr">
   <meta name="theme-color" content="#000000">
   <title>Uhr</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed:wght@700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     :root { color-scheme: dark only; }
-    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html, body {
+      width:100%; height:100%; overflow:hidden;
+      background:#000 !important; color:#fff !important;
+      font-family:'Share Tech Mono',monospace;
+      user-select:none; -webkit-user-select:none;
+    }
 
 ```
-html, body {
-  width:100%; height:100%;
-  background:#000 !important; color:#fff !important;
-  overflow:hidden; font-family:'Share Tech Mono',monospace;
-  user-select:none; -webkit-user-select:none;
-}
-
-.screen {
-  width:100vw; height:100vh; display:none;
-  flex-direction:column; align-items:center; justify-content:center;
-  position:relative; background:#000 !important;
-}
+/* SCREENS */
+.screen { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:#000 !important; }
 .screen.active { display:flex; }
+@media (orientation:portrait)  { .screen { flex-direction:column; } }
+@media (orientation:landscape) { .screen { flex-direction:row; } }
 
-/* ══ FIXED BUTTONS ══ */
-.switch-btn {
-  position:fixed; bottom:14px; right:14px;
-  background:rgba(255,128,0,0.15); border:1px solid rgba(255,128,0,0.5);
-  color:#ff8000; font-family:'Share Tech Mono',monospace;
-  font-size:10px; letter-spacing:2px; padding:7px 12px; border-radius:16px;
-  cursor:pointer; z-index:999; text-transform:uppercase;
-}
-#fsBtn {
-  position:fixed; bottom:14px; left:14px;
-  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15);
-  color:rgba(255,255,255,0.4); font-size:16px; width:34px; height:34px;
-  border-radius:8px; cursor:pointer; display:flex; align-items:center;
-  justify-content:center; z-index:999;
-}
+/* AUTO-HIDE */
+.btn-ui { transition:opacity 0.8s; }
+body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 
-/* ══ UHR ══ */
-#clock-screen { flex-direction:column; padding:12px; }
+/* DOTS */
+#dots { position:fixed; bottom:13px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:999; pointer-events:none; }
+.dot  { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.2); transition:all .3s; }
+.dot.active { background:#ff8000; transform:scale(1.35); }
 
-.time-row { display:flex; align-items:flex-end; flex-shrink:0; }
+/* FS */
+#fsBtn { position:fixed; bottom:9px; left:14px; width:30px; height:30px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); color:rgba(255,255,255,.3); font-size:15px; border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:999; }
 
-.time-main {
-  font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; letter-spacing:-2px; line-height:1; color:#fff;
-  white-space:nowrap;
-}
-.time-sec {
-  font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; color:rgba(255,255,255,0.42); line-height:1;
-  white-space:nowrap;
-}
-
-.date-block {
-  display:flex; gap:12px; align-items:baseline;
-  margin-top:6px; flex-shrink:0;
-}
-.weekday  { font-family:'Share Tech Mono',monospace; color:rgba(255,255,255,0.36); letter-spacing:5px; text-transform:uppercase; }
-.date-txt { font-family:'Share Tech Mono',monospace; color:rgba(255,255,255,0.48); letter-spacing:2px; }
-
-.progress-bar-wrap {
-  width:94%; margin-top:12px; display:flex; align-items:center;
-  gap:6px; flex-shrink:0;
-}
-.bar-marker { width:2px; height:18px; background:rgba(255,255,255,0.35); border-radius:1px; flex-shrink:0; }
-.progress-bar-container { flex:1; height:12px; background:rgba(255,255,255,0.07); border-radius:6px; position:relative; overflow:hidden; }
-.progress-bar {
-  position:absolute; top:0; left:0; height:100%; width:0%;
-  background:#ff8000; box-shadow:0 0 16px #ff8000,0 0 32px rgba(255,128,0,0.4); border-radius:6px;
-}
-
+/* UHR */
+#uhr-screen { flex-direction:column; }
+.uhr-content { display:flex; flex-direction:column; align-items:center; }
+.time-row { display:flex; align-items:flex-end; }
+.time-main { font-family:'DIN Condensed','Arial Narrow',sans-serif; font-weight:700; letter-spacing:-2px; line-height:1; color:#fff; white-space:nowrap; }
+.time-sec  { font-family:'DIN Condensed','Arial Narrow',sans-serif; font-weight:700; color:rgba(255,255,255,.42); line-height:1; white-space:nowrap; }
+.date-block { display:flex; gap:10px; align-items:baseline; margin-top:6px; }
+.weekday  { color:rgba(255,255,255,.36); letter-spacing:5px; text-transform:uppercase; }
+.date-txt { color:rgba(255,255,255,.48); letter-spacing:2px; }
+.progress-bar-wrap { margin-top:12px; display:flex; align-items:center; gap:6px; }
+.bar-marker { width:2px; height:18px; background:rgba(255,255,255,.32); border-radius:1px; flex-shrink:0; }
+.bar-track  { height:12px; background:rgba(255,255,255,.07); border-radius:6px; position:relative; overflow:hidden; }
+.bar-fill   { position:absolute; inset:0; width:0%; background:#ff8000; box-shadow:0 0 16px #ff8000; border-radius:6px; }
 .colon { animation:blink 1s step-end infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.1} }
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:.1} }
 
-/* ══ COUNTDOWN – GEMEINSAM ══ */
-.ring-wrap {
-  position:relative; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-}
+/* RING */
+.ring-wrap { position:relative; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .ring-wrap svg { width:100%; height:100%; transform:rotate(-90deg); }
-.ring-bg { fill:none; stroke:rgba(255,128,0,0.12); }
-.ring-fg {
-  fill:none; stroke:#ff8000; stroke-linecap:round;
-  filter:drop-shadow(0 0 10px #ff8000);
-  transition:stroke-dashoffset 0.25s linear;
-}
-.cd-center {
-  position:absolute; inset:0;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-}
-.cd-digits {
-  font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; color:#fff; line-height:1; letter-spacing:-1px;
-  white-space:nowrap;
-}
-.cd-label {
-  font-family:'Share Tech Mono',monospace; color:rgba(255,255,255,0.35);
-  letter-spacing:4px; text-transform:uppercase; margin-top:4px;
-}
+.ring-bg { fill:none; stroke:rgba(255,128,0,.12); }
+.ring-fg { fill:none; stroke:#ff8000; stroke-linecap:round; filter:drop-shadow(0 0 10px #ff8000); transition:stroke-dashoffset .3s linear; }
+.ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.ring-digits { font-family:'DIN Condensed','Arial Narrow',sans-serif; font-weight:700; color:#fff; line-height:1; letter-spacing:-1px; white-space:nowrap; }
+.ring-label  { color:rgba(255,255,255,.28); letter-spacing:4px; text-transform:uppercase; margin-top:4px; }
+.ring-sec    { font-family:'DIN Condensed','Arial Narrow',sans-serif; font-weight:700; color:rgba(255,255,255,.55); letter-spacing:2px; margin-top:2px; }
+.ring-sub    { font-family:'DIN Condensed',sans-serif; font-weight:700; color:rgba(255,128,0,.78); letter-spacing:3px; margin-top:6px; cursor:pointer; }
+.ring-sublbl { color:rgba(255,255,255,.22); letter-spacing:3px; text-transform:uppercase; margin-top:6px; cursor:pointer; }
 
-/* ══ COUNTDOWN – PORTRAIT ══ */
-@media (orientation:portrait) {
-  #countdown-screen { flex-direction:column; align-items:center; justify-content:center; }
-  .cd-controls {
-    display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:14px;
-  }
-  .btn-row { display:flex; flex-direction:row; align-items:center; gap:10px; }
-}
+/* PANEL */
+.side-panel { display:flex; flex-direction:column; align-items:center; flex-shrink:0; }
+@media (orientation:portrait)  { .side-panel { gap:10px; margin-top:14px; } }
+@media (orientation:landscape) { .side-panel { position:fixed; right:14px; top:50%; transform:translateY(-55%); gap:8px; z-index:10; } }
 
-/* ══ COUNTDOWN – LANDSCAPE ══ */
-@media (orientation:landscape) {
-  #countdown-screen { flex-direction:row; align-items:center; justify-content:center; }
-  .cd-controls {
-    position:fixed; right:14px; top:50%; transform:translateY(-55%);
-    display:flex; flex-direction:column; align-items:center; gap:8px; z-index:10;
-  }
-  .btn-row { display:flex; flex-direction:row; align-items:center; gap:6px; }
-}
+.act-btn { font-family:'Share Tech Mono',monospace; letter-spacing:2px; text-transform:uppercase; border-radius:16px; cursor:pointer; border:none; font-size:clamp(9px,1.6vmin,12px); padding:clamp(6px,1.2vmin,9px) clamp(11px,2.4vmin,18px); }
+.act-go    { background:#ff8000; color:#000; box-shadow:0 0 14px rgba(255,128,0,.5); }
+.act-reset { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.2); color:#fff; }
+.act-set   { background:rgba(255,128,0,.14); border:1px solid rgba(255,128,0,.5); color:#ff8000; }
+.act-set.armed { background:#ff8000; color:#000; }
+.btn-row { display:flex; gap:8px; align-items:center; }
+.info-msg { color:#ff8000; letter-spacing:2px; text-transform:uppercase; text-align:center; font-size:clamp(8px,1.8vmin,12px); animation:pulse 1s ease-in-out infinite alternate; }
+.info-msg.hidden { display:none; }
+@keyframes pulse { from{opacity:.2}to{opacity:1} }
 
-/* Controls */
-.pick-display { display:flex; flex-direction:column; align-items:center; justify-content:center; }
-.pick-val {
-  font-family:'DIN Condensed',sans-serif; font-weight:700; color:#fff;
-  text-align:center; line-height:1; font-size:clamp(24px,6vmin,56px); min-width:44px;
+/* ══════════════════════════════════════════
+   PICKER MODAL
+══════════════════════════════════════════ */
+.picker-modal { position:fixed; inset:0; z-index:8888; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.88); }
+.picker-modal.hidden { display:none; }
+.picker-box   { display:flex; flex-direction:column; align-items:center; gap:22px; background:rgb(13,13,13); border:1px solid rgba(255,128,0,.28); border-radius:22px; padding:28px 34px; }
+.picker-title { color:rgba(255,255,255,.28); letter-spacing:4px; text-transform:uppercase; font-size:10px; }
+.drums-row    { display:flex; align-items:center; gap:12px; }
+.drum-wrap    { display:flex; flex-direction:column; align-items:center; gap:6px; }
+.drum-lbl     { color:rgba(255,255,255,.22); letter-spacing:3px; text-transform:uppercase; font-size:9px; }
+.drum-sep     { font-family:'DIN Condensed',sans-serif; font-weight:700; color:rgba(255,128,0,.6); align-self:center; margin-bottom:18px; }
+
+/* ────────────────────────────────────────
+   DRUM (CSS scroll-snap, center-aligned)
+   ────────────────────────────────────────
+   Container height = 3 × IH
+   1 spacer (IH) top + items + 1 spacer (IH) bottom
+   Items: scroll-snap-align:center  → no scroll-snap-stop
+          so the scroll coasts naturally (flywheel feel)
+
+   Math proof:
+     item at DOM-index i (0=top-spacer, 1=first-value …):
+       offsetTop = i × IH
+     snap: item-center aligns with container-center (1.5×IH)
+       → scrollTop = offsetTop + IH/2 − 1.5×IH = (i−1)×IH
+     for rep r, value v:  i = 1 + r×count + v
+       → scrollTop = (r×count + v) × IH          ← very clean!
+     reading back:
+       idx = round(scrollTop / IH)
+       val = idx % count                           ← correct ✓
+*/
+.drum-outer {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
 }
-.pick-unit-lbl {
-  font-family:'Share Tech Mono',monospace; color:rgba(255,255,255,0.4);
-  letter-spacing:3px; text-transform:uppercase; font-size:10px; margin-top:2px;
+/* Highlight bar (real DOM element, not pseudo) */
+.drum-hl {
+  position:absolute; left:0; right:0; z-index:4; pointer-events:none;
+  border-top:1px solid rgba(255,128,0,.7);
+  border-bottom:1px solid rgba(255,128,0,.7);
+  background:rgba(255,128,0,.09);
 }
-.pick-btn {
-  background:rgba(255,128,0,0.15); border:1px solid rgba(255,128,0,0.4); color:#ff8000;
+/* Fade top & bottom */
+.drum-fade {
+  position:absolute; inset:0; z-index:3; pointer-events:none;
+  background:linear-gradient(to bottom,
+    rgb(13,13,13) 0%, rgba(13,13,13,0) 30%,
+    rgba(13,13,13,0) 70%, rgb(13,13,13) 100%);
+}
+.drum-scroller {
+  display: block;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.drum-scroller::-webkit-scrollbar { display:none; }
+.drum-item {
+  display: flex; align-items: center; justify-content: center;
   font-family:'DIN Condensed',sans-serif; font-weight:700;
-  border-radius:9px; cursor:pointer;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  line-height:1; gap:1px;
-  width:clamp(38px,6vmin,52px); height:clamp(34px,5.5vmin,48px);
+  color: rgba(255,255,255,.22);
+  flex-shrink: 0;
+  scroll-snap-align: center;
+  /* NO scroll-snap-stop → allows flywheel momentum */
 }
-.btn-num  { font-size:clamp(14px,3vmin,20px); }
-.btn-unit { font-size:clamp(7px,1.2vmin,9px); opacity:0.75; letter-spacing:1px; }
+.drum-spacer {
+  flex-shrink: 0;
+  scroll-snap-align: none; /* spacers are NOT snap targets */
+}
 
-.cd-btn {
-  font-family:'Share Tech Mono',monospace; letter-spacing:2px; text-transform:uppercase;
-  border-radius:16px; cursor:pointer; border:none;
-  font-size:clamp(9px,1.6vmin,12px); padding:clamp(6px,1.2vmin,10px) clamp(12px,2.5vmin,20px);
-}
-.cd-btn.start { background:#ff8000; color:#000; box-shadow:0 0 14px rgba(255,128,0,0.5); }
-.cd-btn.reset { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.2); color:#fff; }
+/* Picker buttons */
+.picker-ok     { background:#ff8000; color:#000; border:none; border-radius:14px; font-family:'Share Tech Mono',monospace; letter-spacing:2px; text-transform:uppercase; cursor:pointer; padding:10px 26px; font-size:11px; }
+.picker-cancel { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15); color:rgba(255,255,255,.4); border-radius:14px; font-family:'Share Tech Mono',monospace; letter-spacing:2px; text-transform:uppercase; cursor:pointer; padding:10px 18px; font-size:11px; }
 
-.cd-done {
-  font-family:'Share Tech Mono',monospace; color:#ff8000;
-  letter-spacing:3px; text-transform:uppercase; text-align:center;
-  font-size:clamp(9px,2vmin,16px);
-  animation:pulse 1s ease-in-out infinite alternate;
-}
-.cd-done.hidden { display:none; }
-@keyframes pulse { from{opacity:0.3} to{opacity:1} }
+/* ALARM */
+#alarmOverlay { position:fixed; inset:0; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; cursor:pointer; touch-action:manipulation; animation:ablink .6s ease-in-out infinite; }
+#alarmOverlay.hidden { display:none !important; }
+@keyframes ablink { 0%,100%{background:rgba(0,0,0,.97)}50%{background:rgba(200,40,0,.26)} }
+.a-title { font-family:'DIN Condensed',sans-serif; font-weight:700; color:#ff8000; letter-spacing:5px; text-transform:uppercase; font-size:clamp(28px,9vmin,72px); }
+.a-time  { font-family:'DIN Condensed',sans-serif; font-weight:700; color:#fff; line-height:1; font-size:clamp(60px,18vmin,130px); }
+.a-hint  { color:rgba(255,255,255,.3); letter-spacing:3px; text-transform:uppercase; font-size:clamp(10px,2vmin,14px); }
 ```
 
   </style>
 </head>
 <body>
 
-  <!-- ══ UHR ══ -->
+  <!-- UHR -->
 
-  <div class="screen active" id="clock-screen">
-    <div class="time-row" id="timeRow">
-      <div class="time-main" id="timeMain">00<span class="colon">:</span>00</div>
-      <div class="time-sec"  id="timeSec">00</div>
-    </div>
-    <div class="date-block" id="dateBlock">
-      <span class="weekday"  id="weekday">Montag</span>
-      <span class="date-txt" id="dateTxt">01. Jan 2025</span>
-    </div>
-    <div class="progress-bar-wrap">
-      <div class="bar-marker"></div>
-      <div class="progress-bar-container">
-        <div class="progress-bar" id="progressBar"></div>
+  <div class="screen active" id="uhr-screen">
+    <div class="uhr-content">
+      <div class="time-row">
+        <div class="time-main" id="timeMain">00<span class="colon">:</span>00</div>
+        <div class="time-sec"  id="timeSec">00</div>
       </div>
-      <div class="bar-marker"></div>
+      <div class="date-block" id="dateBlock">
+        <span class="weekday" id="weekday">Montag</span>
+        <span class="date-txt" id="dateTxt">01. Jan 2025</span>
+      </div>
+      <div class="progress-bar-wrap" id="progressWrap">
+        <div class="bar-marker"></div>
+        <div class="bar-track" id="barTrack"><div class="bar-fill" id="barFill"></div></div>
+        <div class="bar-marker"></div>
+      </div>
     </div>
   </div>
 
-  <!-- ══ COUNTDOWN ══ -->
+  <!-- COUNTDOWN -->
 
   <div class="screen" id="countdown-screen">
-    <div class="ring-wrap" id="ringWrap">
+    <div class="ring-wrap" id="cdRingWrap">
       <svg viewBox="0 0 200 200">
         <circle class="ring-bg" cx="100" cy="100" r="88" stroke-width="10"/>
         <circle class="ring-fg" cx="100" cy="100" r="88" stroke-width="10"
-                id="ringFg" stroke-dasharray="552.9" stroke-dashoffset="0"/>
+                id="cdRingFg" stroke-dasharray="552.9" stroke-dashoffset="0"/>
       </svg>
-      <div class="cd-center">
-        <div class="cd-digits" id="cdDigits">00:00</div>
-        <div class="cd-label" id="cdLabel">countdown</div>
+      <div class="ring-center">
+        <div class="ring-digits" id="cdDigits">00:00</div>
+        <div class="ring-sec" id="cdSec">00</div>
+        <div class="ring-label">countdown</div>
+        <div class="ring-sub hidden" id="cdSub" style="cursor:pointer"></div>
       </div>
     </div>
-
-```
-<div class="cd-controls">
-  <div class="btn-row">
-    <button class="pick-btn" id="min5Minus">
-      <span class="btn-num">−</span><span class="btn-unit">5 MIN</span>
-    </button>
-    <div class="pick-display">
-      <div class="pick-val" id="pickVal">5</div>
-      <div class="pick-unit-lbl">min</div>
+    <div class="side-panel btn-ui">
+      <div class="btn-row">
+        <button class="act-btn act-go"    id="cdGoBtn">Stellen</button>
+        <button class="act-btn act-reset" id="cdResetBtn">Reset</button>
+      </div>
+      <div class="info-msg hidden" id="cdDone">Zeit abgelaufen!</div>
     </div>
-    <button class="pick-btn" id="min5Plus">
-      <span class="btn-num">+</span><span class="btn-unit">5 MIN</span>
-    </button>
-  </div>
-  <div class="btn-row">
-    <button class="pick-btn" id="minMinus">
-      <span class="btn-num">−</span><span class="btn-unit">1 MIN</span>
-    </button>
-    <button class="pick-btn" id="minPlus">
-      <span class="btn-num">+</span><span class="btn-unit">1 MIN</span>
-    </button>
-  </div>
-  <div class="btn-row">
-    <button class="cd-btn start" id="cdStart">Start</button>
-    <button class="cd-btn reset" id="cdReset">Reset</button>
-  </div>
-  <div class="cd-done hidden" id="cdDone">⏱ Zeit abgelaufen!</div>
-</div>
-```
-
   </div>
 
-<button class="switch-btn" id="switchBtn">⏱ Countdown</button>
-<button id="fsBtn">⛶</button>
+  <!-- WECKER -->
 
-  <script>
-    const $ = id => document.getElementById(id);
-    const pad = n => String(n).padStart(2,'0');
-    const WEEKDAYS = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
-    const MONTHS   = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  <div class="screen" id="wecker-screen">
+    <div class="ring-wrap" id="wkRingWrap">
+      <svg viewBox="0 0 200 200">
+        <circle class="ring-bg" cx="100" cy="100" r="88" stroke-width="10"/>
+        <circle class="ring-fg" cx="100" cy="100" r="88" stroke-width="10"
+                id="wkRingFg" stroke-dasharray="552.9" stroke-dashoffset="0"/>
+      </svg>
+      <div class="ring-center">
+        <div class="ring-digits" id="wkDigits">--:--</div>
+        <div class="ring-sec"    id="wkSec">--</div>
+        <div class="ring-label">wecker</div>
+        <div class="ring-sublbl" id="wkLbl">weckzeit</div>
+        <div class="ring-sub"    id="wkSub">--:--</div>
+      </div>
+    </div>
+    <div class="side-panel btn-ui">
+      <div class="btn-row">
+        <button class="act-btn act-set"   id="wkSetBtn">Stellen</button>
+        <button class="act-btn act-reset" id="wkResetBtn">Reset</button>
+      </div>
+      <div class="info-msg hidden" id="wkInfo">–</div>
+    </div>
+  </div>
 
-    /* ── Dynamische Größenanpassung ── */
-    function resize() {
-      const W = window.innerWidth;
-      const H = window.innerHeight;
-      const portrait = H > W;
+  <!-- COUNTDOWN PICKER -->
 
-      // ── UHR: Schriftgröße dynamisch berechnen ──
-      // Verfügbare Höhe: minus Datum (~5%), Balken (~5%), padding
-      const availH = H * 0.78;
-      const availW = W * 0.96;
+  <div class="picker-modal hidden" id="cdModal">
+    <div class="picker-box">
+      <div class="picker-title">Countdown einstellen</div>
+      <div class="drums-row">
+        <div class="drum-wrap">
+          <div class="drum-outer" id="cdHOuter"><div class="drum-hl" id="cdHhl"></div><div class="drum-fade"></div><div class="drum-scroller" id="cdHScroll"></div></div>
+          <div class="drum-lbl">Stunden</div>
+        </div>
+        <div class="drum-sep" id="cdSep1">h</div>
+        <div class="drum-wrap">
+          <div class="drum-outer" id="cdMOuter"><div class="drum-hl" id="cdMhl"></div><div class="drum-fade"></div><div class="drum-scroller" id="cdMScroll"></div></div>
+          <div class="drum-lbl">Minuten</div>
+        </div>
+        <div class="drum-sep" id="cdSep2">m</div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="picker-ok"     id="cdOk">Start</button>
+        <button class="picker-cancel" id="cdCancel">Abbrechen</button>
+      </div>
+    </div>
+  </div>
 
-      // DIN Condensed: ca. 0.52 Breite pro Zeichen bei HH:MM (5 Zeichen)
-      // Sekunden daneben: ca. 2 Zeichen bei 43% der Hauptgröße
-      // Gesamtbreite ≈ fontSize * (5*0.52 + 2*0.52*0.43) = fontSize * 3.05
-      let fs;
-      if (portrait) {
-        // Breite ist limitierend
-        fs = Math.floor(availW / 3.05);
-        // Höhe prüfen
-        fs = Math.min(fs, Math.floor(availH * 0.82));
-      } else {
-        // Höhe ist limitierend
-        fs = Math.floor(availH * 0.88);
-        // Breite prüfen
-        fs = Math.min(fs, Math.floor(availW / 3.05));
+  <!-- WECKER PICKER -->
+
+  <div class="picker-modal hidden" id="wkModal">
+    <div class="picker-box">
+      <div class="picker-title">Weckzeit einstellen</div>
+      <div class="drums-row">
+        <div class="drum-wrap">
+          <div class="drum-outer" id="wkHOuter"><div class="drum-hl" id="wkHhl"></div><div class="drum-fade"></div><div class="drum-scroller" id="wkHScroll"></div></div>
+          <div class="drum-lbl">Stunde</div>
+        </div>
+        <div class="drum-sep" id="wkSep">:</div>
+        <div class="drum-wrap">
+          <div class="drum-outer" id="wkMOuter"><div class="drum-hl" id="wkMhl"></div><div class="drum-fade"></div><div class="drum-scroller" id="wkMScroll"></div></div>
+          <div class="drum-lbl">Minute</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="picker-ok"     id="wkOk">OK</button>
+        <button class="picker-cancel" id="wkCancel">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALARM OVERLAY -->
+
+  <div id="alarmOverlay" class="hidden">
+    <div class="a-title">Aufwachen!</div>
+    <div class="a-time" id="alarmTime"></div>
+    <div class="a-hint">Tippen zum Stoppen</div>
+  </div>
+
+  <!-- DOTS + FS -->
+
+  <div id="dots" class="btn-ui"><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
+  <button id="fsBtn" class="btn-ui">⛶</button>
+
+<script>
+(function(){
+'use strict';
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2,'0');
+const CIRC = 2 * Math.PI * 88;
+const DAYS = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+const MONS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+
+/* ══════════════════════════════════════════════════
+   DRUM ENGINE
+   ══════════════════════════════════════════════════
+   Layout inside drum-scroller:
+     [spacer height=IH, no-snap]
+     [item_0 … item_{count-1}]  × REPS
+     [spacer height=IH, no-snap]
+
+   scroll-snap-align: center  (NOT start)
+   NO scroll-snap-stop  →  natural flywheel momentum
+
+   Snap math (container height = 3×IH, snap center = 1.5×IH):
+     item at DOM-index i has offsetTop = i × IH
+     snapped scrollTop = offsetTop − IH = (i−1) × IH
+     for rep r, value v:  i = 1 + r×count + v
+       → snapTop(r,v) = (r×count + v) × IH   ← clean formula
+
+   Reading back:
+     rawIdx = round(scrollTop / IH)
+     val    = rawIdx % count                  ← always correct
+══════════════════════════════════════════════════ */
+
+let IH = 48; // item height in px; updated on resize
+const REPS = 41;
+const MID  = 20; // middle repetition index (floor(41/2))
+
+function createDrum(scrollId, outerId, hlId, count, initVal) {
+  const sc = $(scrollId), ou = $(outerId), hl = $(hlId);
+
+  /* Build DOM */
+  function build() {
+    sc.innerHTML = '';
+    const makeSpan = cls => { const d=document.createElement('div'); d.className=cls; sc.appendChild(d); };
+    makeSpan('drum-spacer');
+    for (let r=0; r<REPS; r++)
+      for (let v=0; v<count; v++) {
+        const el = document.createElement('div');
+        el.className = 'drum-item';
+        el.textContent = pad(v);
+        sc.appendChild(el);
       }
-      fs = Math.max(fs, 40); // Minimum
+    makeSpan('drum-spacer');
+  }
 
-      $('timeMain').style.fontSize = fs + 'px';
-      $('timeSec').style.fontSize  = Math.round(fs * 0.43) + 'px';
-      $('timeSec').style.paddingBottom = Math.round(fs * 0.08) + 'px';
-      $('timeSec').style.paddingLeft   = Math.round(fs * 0.05) + 'px';
+  /* Apply sizes after IH changes */
+  function applySize() {
+    const w = Math.round(IH * 2.15);
+    ou.style.cssText = `width:${w}px; height:${IH*3}px;`;
+    sc.style.cssText = `width:${w}px; height:${IH*3}px;`;
+    sc.querySelectorAll('.drum-item,.drum-spacer').forEach(el => {
+      el.style.height   = IH+'px';
+      el.style.width    = w+'px';
+      el.style.fontSize = Math.round(IH*0.70)+'px';
+    });
+    hl.style.cssText = `top:${IH}px; height:${IH}px;`;
+  }
 
-      // Datum & Wochentag: ~4% der Hauptgröße, min 11px
-      const dateFs = Math.max(11, Math.round(fs * 0.11));
-      $('dateBlock').style.fontSize = dateFs + 'px';
-      $('dateBlock').querySelectorAll('span').forEach(s => s.style.fontSize = dateFs + 'px');
+  /* Target scrollTop for value v in repetition r */
+  function snapTop(v, r) { return (r * count + v) * IH; }
 
-      // ── COUNTDOWN RING ──
-      const ctrlW = portrait ? 0 : 140; // Breite der fixierten Controls rechts
-      const ringAvailW = (W - ctrlW) * 0.94;
-      const ringAvailH = portrait ? H * 0.58 : H * 0.92;
-      const ringSize = Math.floor(Math.min(ringAvailW, ringAvailH));
+  /* Read current snapped value */
+  function getVal() {
+    const rawIdx = Math.round(sc.scrollTop / IH);
+    return ((rawIdx % count) + count) % count;
+  }
 
-      $('ringWrap').style.width  = ringSize + 'px';
-      $('ringWrap').style.height = ringSize + 'px';
+  /* Jump to value (instant or smooth) */
+  function setVal(v, smooth) {
+    const sv = ((v % count) + count) % count;
+    const top = snapTop(sv, MID);
+    if (smooth) sc.scrollTo({ top, behavior:'smooth' });
+    else        sc.scrollTop = top;
+  }
 
-      // Ziffern im Ring: ~28% der Ringgröße
-      const cdFs = Math.round(ringSize * 0.28);
-      $('cdDigits').style.fontSize = cdFs + 'px';
-      $('cdLabel').style.fontSize  = Math.round(cdFs * 0.14) + 'px';
-    }
-
-    window.addEventListener('resize', resize);
-    resize(); // Initial
-
-    /* ── Uhr ── */
-    function tickClock() {
-      const now = new Date();
-      const p = ((now.getSeconds()*1000+now.getMilliseconds())/60000)*100;
-      $('timeMain').innerHTML = `${pad(now.getHours())}<span class="colon">:</span>${pad(now.getMinutes())}`;
-      $('timeSec').textContent = pad(now.getSeconds());
-      $('weekday').textContent = WEEKDAYS[now.getDay()];
-      $('dateTxt').textContent = `${pad(now.getDate())}. ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
-      $('progressBar').style.width = p + '%';
-    }
-
-    /* ── Countdown ── */
-    const CIRC = 2 * Math.PI * 88;
-    let cdMin=5, cdTotal=0, cdRemain=0, cdIv=null, cdRun=false;
-    const updPick = () => $('pickVal').textContent = cdMin;
-    const updRing = f => $('ringFg').style.strokeDashoffset = CIRC*(1-f);
-    function updCd() {
-      $('cdDigits').textContent = `${pad(Math.floor(cdRemain/60))}:${pad(cdRemain%60)}`;
-      updRing(cdTotal > 0 ? cdRemain/cdTotal : 1);
-    }
-    function cdTick() {
-      if (cdRemain <= 0) {
-        clearInterval(cdIv); cdRun=false; cdRemain=0;
-        updCd(); $('cdDone').classList.remove('hidden');
-        $('cdStart').textContent = 'Start'; return;
+  /* After scroll settles, silently re-centre to MID rep.
+     We wait 400 ms of silence before acting so we never
+     interrupt active scrolling or momentum. */
+  let normTimer = null;
+  sc.addEventListener('scroll', () => {
+    clearTimeout(normTimer);
+    normTimer = setTimeout(() => {
+      const v   = getVal();
+      const cur = sc.scrollTop;
+      const tgt = snapTop(v, MID);
+      if (Math.abs(cur - tgt) > IH * 0.5) {
+        // silent jump — user won't notice as scroll is already stopped
+        sc.scrollTop = tgt;
       }
-      cdRemain--; updCd();
+    }, 400);
+  }, { passive:true });
+
+  build();
+  applySize();
+  // Two rAF rounds: first lets layout complete, second sets scroll
+  requestAnimationFrame(() => requestAnimationFrame(() => { sc.scrollTop = snapTop(initVal, MID); }));
+
+  return { getVal, setVal, applySize };
+}
+
+/* Create the four drums:
+   Countdown hours 0–99,  minutes 0–59
+   Wecker    hours 0–23,  minutes 0–59  */
+const cdH = createDrum('cdHScroll','cdHOuter','cdHhl',  25, 0); // 0–24 h
+const cdM = createDrum('cdMScroll','cdMOuter','cdMhl',  60, 5);
+const wkH = createDrum('wkHScroll','wkHOuter','wkHhl',  24, 7);
+const wkM = createDrum('wkMScroll','wkMOuter','wkMhl',  60, 30);
+
+/* ══ RESIZE ══ */
+function resize() {
+  const W=window.innerWidth, H=window.innerHeight, P=H>=W;
+  const cW = P ? W : W-185, cH = P ? H-46 : H-16;
+
+  /* Clock */
+  let uFs = Math.min(Math.floor(cW/3.05), Math.floor(cH*(P?0.72:0.82)));
+  uFs = Math.max(uFs, 40);
+  $('timeMain').style.fontSize     = uFs+'px';
+  $('timeSec').style.fontSize      = Math.round(uFs*0.43)+'px';
+  $('timeSec').style.paddingBottom = Math.round(uFs*0.08)+'px';
+  $('timeSec').style.paddingLeft   = Math.round(uFs*0.05)+'px';
+  const dFs = Math.max(11, Math.round(uFs*0.11));
+  $('dateBlock').querySelectorAll('span').forEach(s=>s.style.fontSize=dFs+'px');
+  const bW = P ? W*0.92 : cW*0.88;
+  $('progressWrap').style.width = bW+'px';
+  $('barTrack').style.width     = Math.max(60,bW-28)+'px';
+
+  /* Rings */
+  const rSz = Math.max(80, Math.floor(Math.min(P?W*0.88:cW*0.96, P?H*0.54:cH*0.93)));
+  const rFs = Math.round(rSz*0.29);
+  ['cdRingWrap','wkRingWrap'].forEach(id=>{$(id).style.width=rSz+'px';$(id).style.height=rSz+'px';});
+  ['cdDigits','wkDigits'].forEach(id=>$(id).style.fontSize=rFs+'px');
+  document.querySelectorAll('.ring-label').forEach(el=>el.style.fontSize=Math.max(9,Math.round(rFs*.13))+'px');
+  ['cdSub','wkSub'].forEach(id=>$(id).style.fontSize=Math.max(12,Math.round(rFs*.20))+'px');
+  $('cdSec').style.fontSize=Math.max(13,Math.round(rFs*.27))+'px';
+  $('wkSec').style.fontSize=Math.max(13,Math.round(rFs*.27))+'px';
+  $('wkLbl').style.fontSize=Math.max(9,Math.round(rFs*.11))+'px';
+
+  /* Drums */
+  IH = Math.max(40, Math.min(64, Math.round(H*0.08)));
+  [cdH,cdM,wkH,wkM].forEach(d=>d.applySize());
+  const sepFs = Math.round(IH*0.70);
+  [$('cdSep1'),$('cdSep2'),$('wkSep')].forEach(el=>{ if(el) el.style.fontSize=sepFs+'px'; });
+  // Re-snap all drums after resize
+  setTimeout(()=>{ cdH.setVal(cdH.getVal(),false); cdM.setVal(cdM.getVal(),false);
+                   wkH.setVal(wkH.getVal(),false); wkM.setVal(wkM.getVal(),false); }, 60);
+}
+window.addEventListener('resize', resize);
+
+/* ══ AUTO-HIDE ══ */
+let hideTimer;
+function showUI() {
+  clearTimeout(hideTimer);
+  document.body.classList.remove('ui-hidden');
+  hideTimer = setTimeout(()=>document.body.classList.add('ui-hidden'), 4000);
+}
+document.addEventListener('mousemove', showUI, {passive:true});
+document.addEventListener('click', showUI);
+showUI();
+
+/* ══ SWIPE NAV ══ */
+let curScreen=0, sx=0, sy=0, inDrum=false;
+document.addEventListener('touchstart', e=>{
+  sx=e.touches[0].clientX; sy=e.touches[0].clientY;
+  inDrum = !!e.target.closest('.drum-scroller,.picker-box');
+  showUI();
+},{passive:true});
+document.addEventListener('touchend', e=>{
+  if(inDrum) return;
+  if(!$('cdModal').classList.contains('hidden')||!$('wkModal').classList.contains('hidden')) return;
+  const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+  if(Math.abs(dx)>Math.abs(dy)*1.5&&Math.abs(dx)>50) goTo(dx<0?curScreen+1:curScreen-1);
+},{passive:true});
+
+function goTo(i) {
+  i = ((i%3)+3)%3;
+  ['uhr-screen','countdown-screen','wecker-screen'].forEach((id,j)=>$(id).classList.toggle('active',j===i));
+  document.querySelectorAll('.dot').forEach((d,j)=>d.classList.toggle('active',j===i));
+  curScreen=i; resize(); showUI();
+}
+
+/* ══ RING ══ */
+const setRing = (id,f) => $(id).style.strokeDashoffset = CIRC*(1-Math.max(0,Math.min(1,f)));
+setRing('cdRingFg',1); setRing('wkRingFg',1);
+
+/* ══ CLOCK ══ */
+function tickClock() {
+  const now=new Date();
+  const p=((now.getSeconds()*1000+now.getMilliseconds())/60000)*100;
+  $('timeMain').innerHTML=`${pad(now.getHours())}<span class="colon">:</span>${pad(now.getMinutes())}`;
+  $('timeSec').textContent=pad(now.getSeconds());
+  $('weekday').textContent=DAYS[now.getDay()];
+  $('dateTxt').textContent=`${pad(now.getDate())}. ${MONS[now.getMonth()]} ${now.getFullYear()}`;
+  $('barFill').style.width=p+'%';
+}
+
+/* ══ COUNTDOWN ══ */
+let cdTotal=0, cdRemain=0, cdIv=null, cdState='idle'; // idle | running | paused
+
+function cdDisplay() {
+  const h=Math.floor(cdRemain/3600), m=Math.floor((cdRemain%3600)/60), s=cdRemain%60;
+  $('cdDigits').textContent=`${pad(h)}:${pad(m)}`;
+  $('cdSec').textContent=pad(s);
+  // Show end-clock-time
+  if(cdRemain>0){
+    const end=new Date(Date.now()+cdRemain*1000);
+    $('cdSub').textContent=`→ ${pad(end.getHours())}:${pad(end.getMinutes())}`;
+    $('cdSub').classList.remove('hidden');
+  }
+  setRing('cdRingFg', cdTotal>0 ? cdRemain/cdTotal : 1);
+}
+
+function cdTick() {
+  if(cdRemain<=0) {
+    clearInterval(cdIv);cdIv=null;cdState='idle';cdRemain=0;
+    cdDisplay();
+    $('cdDone').classList.remove('hidden');
+    $('cdGoBtn').textContent='Stellen';
+    $('cdSub').classList.add('hidden');
+    return;
+  }
+  cdRemain--; cdDisplay();
+}
+
+function openCdModal() {
+  showUI();
+  $('cdModal').classList.remove('hidden');
+  // Modal was hidden → scrollTop couldn't be set. Re-snap now so both directions are free.
+  requestAnimationFrame(()=>{
+    cdH.setVal(cdH.getVal(), false);
+    cdM.setVal(cdM.getVal(), false);
+  });
+}
+$('cdGoBtn').addEventListener('click',()=>{
+  showUI();
+  if(cdState==='running') {
+    clearInterval(cdIv);cdIv=null;cdState='paused';$('cdGoBtn').textContent='Weiter';
+  } else if(cdState==='paused') {
+    cdState='running';$('cdGoBtn').textContent='Pause';cdIv=setInterval(cdTick,1000);
+  } else {
+    openCdModal();
+  }
+});
+$('cdSub').addEventListener('click', openCdModal);
+
+$('cdOk').addEventListener('click',()=>{
+  // Read values — drums have settled by now
+  const h=cdH.getVal(), m=cdM.getVal();
+  $('cdModal').classList.add('hidden');
+  if(h===0&&m===0) return;
+  clearInterval(cdIv);cdIv=null;
+  cdTotal = h*3600 + m*60;
+  cdRemain = cdTotal;
+  cdState = 'running';
+  $('cdDone').classList.add('hidden');
+  $('cdGoBtn').textContent='Pause';
+  cdDisplay();
+  cdIv=setInterval(cdTick,1000);
+  showUI();
+});
+$('cdCancel').addEventListener('click',()=>{ $('cdModal').classList.add('hidden'); showUI(); });
+$('cdModal').addEventListener('click', e=>{ if(e.target===$('cdModal')){ $('cdModal').classList.add('hidden');showUI(); } });
+$('cdResetBtn').addEventListener('click',()=>{
+  clearInterval(cdIv);cdIv=null;cdState='idle';cdTotal=0;cdRemain=0;
+  $('cdGoBtn').textContent='Stellen';$('cdDigits').textContent='00:00';$('cdSec').textContent='00';
+  $('cdDone').classList.add('hidden');$('cdSub').classList.add('hidden');
+  setRing('cdRingFg',1);showUI();
+});
+
+/* ══ WECKER ══ */
+let wkActive=false, wkH_val=7, wkM_val=30, wkTotalSec=0;
+let wkIv=null, wkRinging=false, wkACtx=null, wkSndIv=null;
+
+/* Seconds until next occurrence of HH:MM:00 */
+function secUntilAlarm(h,m) {
+  const now   = new Date();
+  const alarm = new Date(now);
+  alarm.setHours(h, m, 0, 0);
+  if (alarm <= now) alarm.setDate(alarm.getDate()+1); // tomorrow
+  return Math.max(0, Math.round((alarm - now) / 1000));
+}
+
+function wkDisplay() {
+  if(!wkActive){ $('wkDigits').textContent='--:--'; $('wkSec').textContent='--'; setRing('wkRingFg',1); return; }
+  const rem = secUntilAlarm(wkH_val, wkM_val);
+  const h=Math.floor(rem/3600), m=Math.floor((rem%3600)/60), s=rem%60;
+  $('wkDigits').textContent=`${pad(h)}:${pad(m)}`;
+  $('wkSec').textContent=pad(s);
+  setRing('wkRingFg', wkTotalSec>0 ? rem/wkTotalSec : 1);
+}
+
+function wkBeep() {
+  try {
+    if(!wkACtx) wkACtx=new(window.AudioContext||window.webkitAudioContext)();
+    if(wkACtx.state==='suspended') wkACtx.resume();
+    [880,1046,1318].forEach((freq,i)=>{
+      const o=wkACtx.createOscillator(), g=wkACtx.createGain();
+      o.connect(g); g.connect(wkACtx.destination);
+      o.frequency.value=freq; o.type='sine';
+      const t=wkACtx.currentTime+i*0.14;
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(0.65,t+0.04);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.40);
+      o.start(t); o.stop(t+0.44);
+    });
+  } catch(e){}
+}
+
+function triggerAlarm() {
+  if(wkRinging) return;
+  wkRinging=true;
+  $('alarmTime').textContent=`${pad(wkH_val)}:${pad(wkM_val)}`;
+  $('alarmOverlay').classList.remove('hidden');
+  wkBeep();
+  wkSndIv=setInterval(wkBeep,900);
+  try{ if(navigator.vibrate) navigator.vibrate([500,200,500,200,500,200,500]); }catch(e){}
+}
+
+function stopAlarm() {
+  clearInterval(wkSndIv);wkSndIv=null;
+  try{ if(wkACtx){wkACtx.close();wkACtx=null;} }catch(e){}
+  try{ if(navigator.vibrate) navigator.vibrate(0); }catch(e){}
+  $('alarmOverlay').classList.add('hidden');
+  wkRinging=false; wkActive=false;
+  clearInterval(wkIv);wkIv=null;
+  $('wkSetBtn').textContent='Stellen'; $('wkSetBtn').classList.remove('armed');
+  $('wkSub').textContent='--:--';
+  $('wkDigits').textContent='--:--'; $('wkSec').textContent='--';
+  setRing('wkRingFg',1); showUI();
+}
+
+function wkTick() {
+  if(!wkActive||wkRinging) return;
+  wkDisplay();
+  const now=new Date();
+  if(now.getHours()===wkH_val && now.getMinutes()===wkM_val && now.getSeconds()===0) triggerAlarm();
+}
+
+function openWkModal() {
+  showUI();
+  $('wkModal').classList.remove('hidden');
+  requestAnimationFrame(()=>{
+    wkH.setVal(wkH.getVal(), false);
+    wkM.setVal(wkM.getVal(), false);
+  });
+}
+$('wkLbl').addEventListener('click', openWkModal);
+$('wkSub').addEventListener('click', openWkModal);
+$('wkSetBtn').addEventListener('click',()=>{
+  showUI();
+  if(wkActive){ stopAlarm(); return; }
+  openWkModal();
+});
+
+$('wkOk').addEventListener('click',()=>{
+  // Small delay — ensures any still-moving scroll has snapped
+  setTimeout(()=>{
+    const h=wkH.getVal(), m=wkM.getVal();
+    $('wkModal').classList.add('hidden');
+    const rem = secUntilAlarm(h, m);
+    if(rem < 30) {
+      $('wkInfo').textContent='Mind. 1 Min. in der Zukunft!';
+      $('wkInfo').classList.remove('hidden'); return;
     }
-    $('minMinus').onclick  = () => { if(!cdRun && cdMin>1)  { cdMin--;             updPick(); } };
-    $('minPlus').onclick   = () => { if(!cdRun && cdMin<99) { cdMin++;             updPick(); } };
-    $('min5Minus').onclick = () => { if(!cdRun) { cdMin=Math.max(1,  cdMin-5);    updPick(); } };
-    $('min5Plus').onclick  = () => { if(!cdRun) { cdMin=Math.min(99, cdMin+5);    updPick(); } };
+    if(wkActive){ clearInterval(wkIv);wkIv=null;wkActive=false; }
+    wkH_val=h; wkM_val=m; wkTotalSec=rem;
+    wkActive=true;
+    $('wkSetBtn').textContent='Aktiv ✓'; $('wkSetBtn').classList.add('armed');
+    $('wkSub').textContent=`${pad(h)}:${pad(m)}`;
+    $('wkInfo').classList.add('hidden');
+    wkDisplay();
+    clearInterval(wkIv);
+    wkIv=setInterval(wkTick,1000);
+    showUI();
+  }, 150); // 150 ms: enough for scroll-snap to fully settle
+});
+$('wkCancel').addEventListener('click',()=>{ $('wkModal').classList.add('hidden'); showUI(); });
+$('wkModal').addEventListener('click', e=>{ if(e.target===$('wkModal')){ $('wkModal').classList.add('hidden');showUI(); } });
+$('wkResetBtn').addEventListener('click',()=>{ stopAlarm(); $('wkInfo').classList.add('hidden'); });
+$('alarmOverlay').addEventListener('click', stopAlarm);
+$('alarmOverlay').addEventListener('touchstart', e=>{ e.preventDefault(); stopAlarm(); },{passive:false});
 
-    $('cdStart').onclick = () => {
-      if (cdRun) { clearInterval(cdIv); cdRun=false; $('cdStart').textContent='Weiter'; }
-      else {
-        if (cdRemain===0) { cdTotal=cdMin*60; cdRemain=cdTotal; $('cdDone').classList.add('hidden'); }
-        cdRun=true; $('cdStart').textContent='Pause';
-        updCd(); cdIv=setInterval(cdTick,1000);
-      }
-    };
-    $('cdReset').onclick = () => {
-      clearInterval(cdIv); cdRun=false; cdRemain=0; cdTotal=0;
-      $('cdStart').textContent='Start'; $('cdDigits').textContent='00:00';
-      $('cdDone').classList.add('hidden'); updRing(1);
-    };
-    updRing(1); updPick();
+/* ══ FULLSCREEN ══ */
+$('fsBtn').addEventListener('click',()=>{
+  try{
+    const el=document.documentElement;
+    const req=el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen;
+    const exit=document.exitFullscreen||document.webkitExitFullscreen;
+    const isF=document.fullscreenElement||document.webkitFullscreenElement;
+    if(!isF&&req){req.call(el);$('fsBtn').textContent='✕';}
+    else if(isF&&exit){exit.call(document);$('fsBtn').textContent='⛶';}
+  }catch(e){}
+});
 
-    /* ── Screen Switch ── */
-    let onClock = true;
-    $('switchBtn').onclick = () => {
-      onClock = !onClock;
-      $('clock-screen').classList.toggle('active', onClock);
-      $('countdown-screen').classList.toggle('active', !onClock);
-      $('switchBtn').textContent = onClock ? '⏱ Countdown' : '🕐 Uhr';
-      resize();
-    };
-
-    /* ── Vollbild ── */
-    $('fsBtn').onclick = () => {
-      try {
-        const el = document.documentElement;
-        const reqFS = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
-        const exitFS = document.exitFullscreen || document.webkitExitFullscreen;
-        const isFS = document.fullscreenElement || document.webkitFullscreenElement;
-        if (!isFS && reqFS) { reqFS.call(el); $('fsBtn').textContent='✕'; }
-        else if (isFS && exitFS) { exitFS.call(document); $('fsBtn').textContent='⛶'; }
-      } catch(e) {}
-    };
-
-    /* ── Hauptloop ── */
-    function loop() { if(onClock) tickClock(); requestAnimationFrame(loop); }
-    loop();
-  </script>
+/* ══ INIT & MAIN LOOP ══ */
+resize();
+function loop(){ tickClock(); requestAnimationFrame(loop); }
+loop();
+})();
+</script>
 
 </body>
 </html>
