@@ -117,30 +117,35 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 ══════════════════════════════════════════════ */
 #uhr-screen.active {
   -webkit-flex-direction:column; flex-direction:column;
+  gap: 0;
 }
 .uhr-content {
   display:-webkit-flex; display:flex;
   -webkit-flex-direction:column; flex-direction:column;
   -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
+  width:100%;
+  padding: 2vh 2vw;
 }
 .time-row {
   display:-webkit-flex; display:flex;
   -webkit-align-items:flex-end; align-items:flex-end;
 }
-/* 28vmin: portrait 375px→105px, landscape 375px(h)→105px. Stable. */
+/* Clock: portrait uses vw (wider = bigger), landscape uses vh (taller = bigger).
+   min(22vw, 45vh) gives a big clock in both orientations without overflow. */
 .time-main {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
   font-weight:700; letter-spacing:-0.02em; line-height:1;
   color:#fff; white-space:nowrap;
-  font-size: clamp(44px, 28vmin, 200px);
+  font-size: clamp(44px, min(42vw, 68vh), 380px);
 }
 .time-sec {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
   font-weight:700; color:rgba(255,255,255,.42);
   line-height:1; white-space:nowrap;
-  font-size:  clamp(16px, 11vmin, 82px);
-  padding-bottom: clamp(2px, 2.2vmin, 16px);
-  padding-left:   clamp(2px, 1.1vmin, 8px);
+  font-size:  clamp(16px, min(17vw, 28vh), 170px);
+  padding-bottom: clamp(2px, min(3.4vw, 5.6vh), 32px);
+  padding-left:   clamp(2px, min(1.8vw, 3vh), 18px);
 }
 .date-block {
   display:-webkit-flex; display:flex;
@@ -148,20 +153,20 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   margin-top:1.5vmin;
 }
 .weekday  { color:rgba(255,255,255,.36); letter-spacing:.4em;
-            text-transform:uppercase; font-size:clamp(8px,2.2vmin,18px); }
+            text-transform:uppercase; font-size:clamp(11px,min(3.6vw,4.8vh),34px); }
 .date-txt { color:rgba(255,255,255,.48); letter-spacing:.2em;
-            font-size:clamp(8px,2.2vmin,18px); }
+            font-size:clamp(11px,min(3.6vw,4.8vh),34px); }
 .progress-bar-wrap {
   margin-top:2vmin;
   display:-webkit-flex; display:flex;
   -webkit-align-items:center; align-items:center;
   gap:1.5vmin;
-  width: clamp(200px, 80vmin, 600px);
+  width: clamp(200px, 94vw, 900px);
 }
-.bar-marker { width:2px; height:4vmin; min-height:10px;
+.bar-marker { width:2px; height:5vmin; min-height:12px;
               background:rgba(255,255,255,.32); border-radius:1px;
               -webkit-flex-shrink:0; flex-shrink:0; }
-.bar-track  { flex:1; height:clamp(6px,1.8vmin,14px);
+.bar-track  { flex:1; height:clamp(10px,2.6vmin,18px);
               background:rgba(255,255,255,.07); border-radius:6px;
               position:relative; overflow:hidden; }
 .bar-fill   { position:absolute; top:0; left:0; bottom:0; width:0%;
@@ -185,9 +190,9 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   display:-webkit-flex; display:flex;
   -webkit-align-items:center; align-items:center;
   -webkit-justify-content:center; justify-content:center;
-  /* vmin = shorter dimension = always stable on rotate */
-  width:  80vmin;
-  height: 80vmin;
+  /* Portrait: 86vw. Landscape: 90vh (height is the limit). */
+  width:  min(92vw, 94vh);
+  height: min(92vw, 94vh);
 }
 .ring-wrap svg {
   width:100%; height:100%;
@@ -213,31 +218,31 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
   font-weight:700; color:#fff; line-height:1;
   letter-spacing:-.02em; white-space:nowrap;
-  font-size: clamp(18px, 23vmin, 140px);
+  font-size: clamp(18px, min(26vw, 30vh), 210px);
 }
 .ring-sec {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
   font-weight:700; color:rgba(255,255,255,.55);
   letter-spacing:.15em; margin-top:.4vmin;
-  font-size: clamp(8px, 5.8vmin, 38px);
+  font-size: clamp(9px, min(7.5vw, 9.5vh), 66px);
 }
 .ring-label {
   font-family:'Share Tech Mono',monospace;
   color:rgba(255,255,255,.28); letter-spacing:.4em;
   text-transform:uppercase; margin-top:.8vmin;
-  font-size: clamp(6px, 2.6vmin, 18px);
+  font-size: clamp(8px, min(3.5vw, 4.6vh), 30px);
 }
 .ring-sub {
   font-family:'DIN Condensed',sans-serif; font-weight:700;
   color:rgba(255,128,0,.78); letter-spacing:.3em;
   margin-top:1vmin; cursor:pointer;
-  font-size: clamp(8px, 4.2vmin, 28px);
+  font-size: clamp(9px, min(4.8vw, 6vh), 38px);
 }
 .ring-sublbl {
   font-family:'Share Tech Mono',monospace;
   color:rgba(255,255,255,.22); letter-spacing:.3em;
   text-transform:uppercase; margin-top:1vmin; cursor:pointer;
-  font-size: clamp(6px, 2.4vmin, 16px);
+  font-size: clamp(7px, min(2.8vw, 3.5vh), 22px);
 }
 
 /* ══════════════════════════════════════════════
@@ -757,13 +762,16 @@ $('cdGoBtn').addEventListener('click',function(){
 },false);
 $('cdSub').addEventListener('click',openCdModal,false);
 $('cdOk').addEventListener('click',function(){
-  var h=cdH.getVal(),m=cdM.getVal();
-  $('cdModal').classList.add('hidden');
-  if(h===0&&m===0) return;
-  clearInterval(cdIv);cdIv=null;
-  cdTotal=h*3600+m*60;cdRemain=cdTotal;cdState='running';
-  $('cdDone').classList.add('hidden');$('cdGoBtn').textContent='Pause';
-  cdDisplay();cdIv=setInterval(cdTick,1000);showUI();
+  // 150ms delay — same as wkOk — ensures drum scroll has fully snapped
+  setTimeout(function(){
+    var h=cdH.getVal(),m=cdM.getVal();
+    $('cdModal').classList.add('hidden');
+    if(h===0&&m===0) return;
+    clearInterval(cdIv);cdIv=null;
+    cdTotal=h*3600+m*60;cdRemain=cdTotal;cdState='running';
+    $('cdDone').classList.add('hidden');$('cdGoBtn').textContent='Pause';
+    cdDisplay();cdIv=setInterval(cdTick,1000);showUI();
+  },150);
 },false);
 $('cdCancel').addEventListener('click',function(){$('cdModal').classList.add('hidden');showUI();},false);
 $('cdModal').addEventListener('click',function(e){
