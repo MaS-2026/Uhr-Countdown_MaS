@@ -147,7 +147,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   -webkit-align-items:center; align-items:center;
   -webkit-justify-content:center; justify-content:center;
   width:100%;
-  padding: 2vh 2vw;
+  padding: 2vmin;
 }
 .time-row {
   display:-webkit-flex; display:flex;
@@ -159,13 +159,13 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
   font-weight:700; letter-spacing:-0.02em; line-height:1;
   color:#fff; white-space:nowrap;
-  font-size: clamp(44px, min(42vw, 68vh), 380px);
+  font-size: clamp(44px, 38vmin, 320px);
 }
 .time-sec {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
   font-weight:700; color:rgba(255,255,255,.42);
   line-height:1; white-space:nowrap;
-  font-size:  clamp(16px, min(17vw, 28vh), 170px);
+  font-size:  clamp(16px, 15vmin, 130px);
   padding-bottom: clamp(2px, min(3.4vw, 5.6vh), 32px);
   padding-left:   clamp(2px, min(1.8vw, 3vh), 18px);
 }
@@ -175,15 +175,15 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   margin-top:1.5vmin;
 }
 .weekday  { color:rgba(255,255,255,.36); letter-spacing:.4em;
-            text-transform:uppercase; font-size:clamp(11px,min(3.6vw,4.8vh),34px); }
+            text-transform:uppercase; font-size:clamp(11px, 3.2vmin, 28px); }
 .date-txt { color:rgba(255,255,255,.48); letter-spacing:.2em;
-            font-size:clamp(11px,min(3.6vw,4.8vh),34px); }
+            font-size:clamp(11px, 3.2vmin, 28px); }
 .progress-bar-wrap {
   margin-top:2vmin;
   display:-webkit-flex; display:flex;
   -webkit-align-items:center; align-items:center;
   gap:1.5vmin;
-  width: clamp(200px, 94vw, 900px);
+  width: clamp(200px, min(94vw, 94vh), 900px);
 }
 .bar-marker { width:2px; height:5vmin; min-height:12px;
               background:rgba(255,255,255,.32); border-radius:1px;
@@ -930,7 +930,15 @@ $('alarmOverlay').addEventListener('touchstart',function(e){e.preventDefault();s
     // Track fullscreen state to toggle icon
     function onFSChange() {
       inFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
-      btn.textContent = inFS ? '✕' : '⛶';
+      if (inFS) {
+        // Im Vollbild: Button komplett verstecken
+        btn.style.display = 'none';
+      } else {
+        // Kein Vollbild: Button wieder zeigen
+        btn.style.display = '-webkit-flex';
+        btn.style.display = 'flex';
+        btn.textContent = '⛶';
+      }
     }
     document.addEventListener('fullscreenchange', onFSChange, false);
     document.addEventListener('webkitfullscreenchange', onFSChange, false);
