@@ -12,80 +12,118 @@
   <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed:wght@700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     :root { color-scheme: dark only; }
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    *, *::before, *::after {
+      margin:0; padding:0; box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+    html, body {
+      width:100%; height:100%;
+      overflow:hidden;
+      background:#000;
+      -webkit-user-select:none; user-select:none;
+    }
 
 ```
-html, body {
-  width:100%; height:100%;
-  overflow:hidden;
-  background:#000;
-  -webkit-user-select:none; user-select:none;
-}
-
-/* ── SINGLE FIXED CONTAINER ── */
+/* ══════════════════════════════════════════════
+   #app — THE single fixed root.
+   top/left/right/bottom instead of width/height
+   so the browser can never compute a stale size.
+   transform:translateZ(0) forces a GPU layer so
+   the compositor handles repaints without a JS
+   layout pass — eliminates the visual jump.
+══════════════════════════════════════════════ */
 #app {
   position: fixed;
-  top:0; left:0;
-  width:100%; height:100%;
+  top:0; left:0; right:0; bottom:0;
   overflow:hidden;
   background:#000;
   color:#fff;
-  font-family:'Share Tech Mono',monospace;
+  font-family:'Share Tech Mono', monospace;
+  -webkit-transform:translateZ(0);
+          transform:translateZ(0);
 }
 
-/* ── SCREENS (absolute inside #app) ── */
+/* ══════════════════════════════════════════════
+   SCREENS — absolute inside #app, same trick
+══════════════════════════════════════════════ */
 .screen {
   position:absolute;
-  top:0; left:0;
-  width:100%; height:100%;
+  top:0; left:0; right:0; bottom:0;
   display:none;
   background:#000;
-  -webkit-align-items:center; align-items:center;
-  -webkit-justify-content:center; justify-content:center;
 }
 .screen.active {
-  display:-webkit-box;
   display:-webkit-flex;
   display:flex;
+  -webkit-align-items:center;      align-items:center;
+  -webkit-justify-content:center;  justify-content:center;
 }
-/* Portrait: column layout */
+/* Portrait: column, no padding — centering via flex only */
 @media (orientation:portrait) {
   .screen.active {
-    -webkit-box-orient:vertical;
     -webkit-flex-direction:column;
     flex-direction:column;
+    gap:3vmin;
   }
 }
-/* Landscape: row layout with padding so buttons have room */
+/* Landscape: CSS Grid with equal side columns
+   grid-template-columns: 1fr [ring:auto] 1fr
+   → ring always in geometric center of screen,
+     regardless of button panel width.           */
 @media (orientation:landscape) {
   .screen.active {
-    -webkit-box-orient:horizontal;
-    -webkit-flex-direction:row;
-    flex-direction:row;
-    gap:20px;
-    padding:0 20px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    -webkit-align-items: center;
+            align-items: center;
+  }
+  /* ring sits in auto middle column = centered */
+  .screen.active .ring-wrap {
+    grid-column: 2;
+    justify-self: center;
+  }
+  /* buttons sit in right 1fr, left-aligned with breathing room */
+  .screen.active .side-panel {
+    grid-column: 3;
+    -webkit-align-self: center;
+            align-self: center;
+    justify-self: start;
+    padding-left: 4vmin;
+  }
+  /* clock screen: override back to plain flex-column */
+  #uhr-screen.active {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+            flex-direction: column;
+    gap: 3vmin;
   }
 }
 
-/* ── AUTO-HIDE ── */
+/* AUTO-HIDE */
 .btn-ui { -webkit-transition:opacity .8s; transition:opacity .8s; }
 body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 
-/* ── DOTS ── */
+/* DOTS */
 #dots {
-  position:absolute; bottom:13px; left:50%;
+  position:absolute; bottom:2vmin; left:50%;
   -webkit-transform:translateX(-50%); transform:translateX(-50%);
   display:-webkit-flex; display:flex;
-  gap:8px; z-index:99; pointer-events:none;
+  gap:2vmin; z-index:99; pointer-events:none;
 }
-.dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.2); -webkit-transition:all .3s; transition:all .3s; }
-.dot.active { background:#ff8000; -webkit-transform:scale(1.35); transform:scale(1.35); }
+.dot { width:1.5vmin; height:1.5vmin; min-width:5px; min-height:5px;
+       border-radius:50%; background:rgba(255,255,255,.2);
+       -webkit-transition:all .3s; transition:all .3s; }
+.dot.active { background:#ff8000; }
 
-/* ════════════════════════════════════════
-   CLOCK  — all sizes in CSS (instant on rotate)
-════════════════════════════════════════ */
-#uhr-screen.active { -webkit-flex-direction:column; flex-direction:column; }
-
+/* ══════════════════════════════════════════════
+   CLOCK SCREEN
+   All sizes in vmin — vmin = min(vw,vh) = always
+   the shorter screen dimension. Stable on rotate.
+══════════════════════════════════════════════ */
+#uhr-screen.active {
+  -webkit-flex-direction:column; flex-direction:column;
+}
 .uhr-content {
   display:-webkit-flex; display:flex;
   -webkit-flex-direction:column; flex-direction:column;
@@ -95,82 +133,80 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   display:-webkit-flex; display:flex;
   -webkit-align-items:flex-end; align-items:flex-end;
 }
-/* Portrait clock size */
+/* 28vmin: portrait 375px→105px, landscape 375px(h)→105px. Stable. */
 .time-main {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; letter-spacing:-2px; line-height:1; color:#fff; white-space:nowrap;
-  font-size: clamp(50px, 20vw, 300px);
+  font-weight:700; letter-spacing:-0.02em; line-height:1;
+  color:#fff; white-space:nowrap;
+  font-size: clamp(44px, 28vmin, 200px);
 }
 .time-sec {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; color:rgba(255,255,255,.42); line-height:1; white-space:nowrap;
-  font-size:  clamp(18px, 8.6vw, 130px);
-  padding-bottom: clamp(3px, 1.7vw, 20px);
-  padding-left:   clamp(3px, 1.0vw, 15px);
+  font-weight:700; color:rgba(255,255,255,.42);
+  line-height:1; white-space:nowrap;
+  font-size:  clamp(16px, 11vmin, 82px);
+  padding-bottom: clamp(2px, 2.2vmin, 16px);
+  padding-left:   clamp(2px, 1.1vmin, 8px);
 }
-/* Landscape clock size */
-@media (orientation:landscape) {
-  .time-main { font-size: clamp(50px, 17vh, 190px); }
-  .time-sec  { font-size: clamp(18px, 7.3vh, 82px);
-               padding-bottom: clamp(3px, 1.5vh, 14px);
-               padding-left:   clamp(3px, 0.9vh, 10px); }
-}
-
 .date-block {
   display:-webkit-flex; display:flex;
-  gap:10px; -webkit-align-items:baseline; align-items:baseline;
-  margin-top:6px;
+  gap:2vmin; -webkit-align-items:baseline; align-items:baseline;
+  margin-top:1.5vmin;
 }
-.weekday  { color:rgba(255,255,255,.36); letter-spacing:5px; text-transform:uppercase; font-size:clamp(9px, 2.2vw, 20px); }
-.date-txt { color:rgba(255,255,255,.48); letter-spacing:2px; font-size:clamp(9px, 2.2vw, 20px); }
-@media (orientation:landscape) {
-  .weekday  { font-size:clamp(9px, 2.1vh, 18px); }
-  .date-txt { font-size:clamp(9px, 2.1vh, 18px); }
-}
-
+.weekday  { color:rgba(255,255,255,.36); letter-spacing:.4em;
+            text-transform:uppercase; font-size:clamp(8px,2.2vmin,18px); }
+.date-txt { color:rgba(255,255,255,.48); letter-spacing:.2em;
+            font-size:clamp(8px,2.2vmin,18px); }
 .progress-bar-wrap {
-  margin-top:12px;
+  margin-top:2vmin;
   display:-webkit-flex; display:flex;
   -webkit-align-items:center; align-items:center;
-  gap:6px;
-  width: min(92vw, 600px);
+  gap:1.5vmin;
+  width: clamp(200px, 80vmin, 600px);
 }
-@media (orientation:landscape) {
-  .progress-bar-wrap { width: min(55vw, 500px); }
-}
-.bar-marker { width:2px; height:18px; background:rgba(255,255,255,.32); border-radius:1px; -webkit-flex-shrink:0; flex-shrink:0; }
-.bar-track  { flex:1; height:12px; background:rgba(255,255,255,.07); border-radius:6px; position:relative; overflow:hidden; min-width:60px; }
-.bar-fill   { position:absolute; top:0; left:0; bottom:0; width:0%; background:#ff8000; box-shadow:0 0 16px #ff8000; border-radius:6px; }
-.colon { -webkit-animation:blink 1s step-end infinite; animation:blink 1s step-end infinite; }
+.bar-marker { width:2px; height:4vmin; min-height:10px;
+              background:rgba(255,255,255,.32); border-radius:1px;
+              -webkit-flex-shrink:0; flex-shrink:0; }
+.bar-track  { flex:1; height:clamp(6px,1.8vmin,14px);
+              background:rgba(255,255,255,.07); border-radius:6px;
+              position:relative; overflow:hidden; }
+.bar-fill   { position:absolute; top:0; left:0; bottom:0; width:0%;
+              background:#ff8000; box-shadow:0 0 16px #ff8000;
+              border-radius:6px; }
+.colon { -webkit-animation:blink 1s step-end infinite;
+                 animation:blink 1s step-end infinite; }
 @-webkit-keyframes blink { 0%,100%{opacity:1} 50%{opacity:.1} }
-@keyframes blink         { 0%,100%{opacity:1} 50%{opacity:.1} }
+@keyframes blink          { 0%,100%{opacity:1} 50%{opacity:.1} }
 
-/* ════════════════════════════════════════
-   RING  — CSS-sized, instant on rotate
-   Portrait:  min(86vw, 50vh)
-   Landscape: min(78vh, 40vw)   ← capped at 40vw to leave room for buttons
-════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   RING
+   min(84vw, 74vh) — single expression, works in
+   both orientations without a media query switch.
+   Portrait  (375×812): min(315, 601) = 315px
+   Landscape (812×375): min(681, 277) = 277px  ✓
+══════════════════════════════════════════════ */
 .ring-wrap {
   position:relative;
   -webkit-flex-shrink:0; flex-shrink:0;
   display:-webkit-flex; display:flex;
   -webkit-align-items:center; align-items:center;
   -webkit-justify-content:center; justify-content:center;
-  /* CSS min() supported Safari 11.3+ */
-  width:  min(86vw, 50vh);
-  height: min(86vw, 50vh);
+  /* vmin = shorter dimension = always stable on rotate */
+  width:  80vmin;
+  height: 80vmin;
 }
-@media (orientation:landscape) {
-  .ring-wrap {
-    width:  min(78vh, 40vw);
-    height: min(78vh, 40vw);
-  }
+.ring-wrap svg {
+  width:100%; height:100%;
+  -webkit-transform:rotate(-90deg); transform:rotate(-90deg);
 }
-.ring-wrap svg { width:100%; height:100%; -webkit-transform:rotate(-90deg); transform:rotate(-90deg); }
 .ring-bg { fill:none; stroke:rgba(255,128,0,.12); }
-.ring-fg { fill:none; stroke:#ff8000; stroke-linecap:round;
-           -webkit-filter:drop-shadow(0 0 10px #ff8000); filter:drop-shadow(0 0 10px #ff8000);
-           -webkit-transition:stroke-dashoffset .3s linear; transition:stroke-dashoffset .3s linear; }
+.ring-fg {
+  fill:none; stroke:#ff8000; stroke-linecap:round;
+  -webkit-filter:drop-shadow(0 0 10px #ff8000);
+          filter:drop-shadow(0 0 10px #ff8000);
+  -webkit-transition:stroke-dashoffset .3s linear;
+          transition:stroke-dashoffset .3s linear;
+}
 .ring-center {
   position:absolute; top:0; left:0; right:0; bottom:0;
   display:-webkit-flex; display:flex;
@@ -178,79 +214,75 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   -webkit-align-items:center; align-items:center;
   -webkit-justify-content:center; justify-content:center;
 }
-
-/* Ring text — proportional to ring size via vw/vh
-   Portrait ring ≈ 86vw → digits ≈ 0.29*86vw = 24.9vw
-   Landscape ring ≈ 78vh → digits ≈ 0.29*78vh = 22.6vh  */
+/* Ring text — all vmin, consistent across orientations */
 .ring-digits {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; color:#fff; line-height:1; letter-spacing:-1px; white-space:nowrap;
-  font-size: clamp(20px, 24vw, 180px);
+  font-weight:700; color:#fff; line-height:1;
+  letter-spacing:-.02em; white-space:nowrap;
+  font-size: clamp(18px, 23vmin, 140px);
 }
 .ring-sec {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; color:rgba(255,255,255,.55); letter-spacing:2px; margin-top:2px;
-  font-size: clamp(9px, 6.5vw, 50px);
+  font-weight:700; color:rgba(255,255,255,.55);
+  letter-spacing:.15em; margin-top:.4vmin;
+  font-size: clamp(8px, 5.8vmin, 38px);
 }
 .ring-label {
-  color:rgba(255,255,255,.28); letter-spacing:4px; text-transform:uppercase; margin-top:4px;
   font-family:'Share Tech Mono',monospace;
-  font-size: clamp(7px, 3.1vw, 24px);
+  color:rgba(255,255,255,.28); letter-spacing:.4em;
+  text-transform:uppercase; margin-top:.8vmin;
+  font-size: clamp(6px, 2.6vmin, 18px);
 }
 .ring-sub {
   font-family:'DIN Condensed',sans-serif; font-weight:700;
-  color:rgba(255,128,0,.78); letter-spacing:3px; margin-top:6px; cursor:pointer;
-  font-size: clamp(9px, 4.8vw, 38px);
+  color:rgba(255,128,0,.78); letter-spacing:.3em;
+  margin-top:1vmin; cursor:pointer;
+  font-size: clamp(8px, 4.2vmin, 28px);
 }
 .ring-sublbl {
-  color:rgba(255,255,255,.22); letter-spacing:3px; text-transform:uppercase; margin-top:6px; cursor:pointer;
   font-family:'Share Tech Mono',monospace;
-  font-size: clamp(7px, 3.0vw, 24px);
-}
-@media (orientation:landscape) {
-  .ring-digits { font-size: clamp(20px, 22vh, 180px); }
-  .ring-sec    { font-size: clamp(9px,  6vh,  50px);  }
-  .ring-label  { font-size: clamp(7px,  2.9vh, 24px); }
-  .ring-sub    { font-size: clamp(9px,  4.4vh, 38px); }
-  .ring-sublbl { font-size: clamp(7px,  2.8vh, 24px); }
+  color:rgba(255,255,255,.22); letter-spacing:.3em;
+  text-transform:uppercase; margin-top:1vmin; cursor:pointer;
+  font-size: clamp(6px, 2.4vmin, 16px);
 }
 
-/* ════════════════════════════════════════
-   SIDE PANEL  — in normal flex flow (not absolute!)
-   Absolute positioning caused cutoff in landscape.
-════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   SIDE PANEL — stays in flow (no absolute)
+══════════════════════════════════════════════ */
 .side-panel {
   display:-webkit-flex; display:flex;
   -webkit-flex-direction:column; flex-direction:column;
   -webkit-align-items:center; align-items:center;
   -webkit-flex-shrink:0; flex-shrink:0;
+  gap:2vmin;
 }
-@media (orientation:portrait)  { .side-panel { gap:10px; margin-top:14px; } }
-@media (orientation:landscape) { .side-panel { gap:10px; } }
-
 .act-btn {
-  font-family:'Share Tech Mono',monospace; letter-spacing:2px; text-transform:uppercase;
-  border-radius:16px; cursor:pointer; border:none;
-  font-size: clamp(9px, 1.6vmin, 13px);
-  padding: clamp(6px,1.2vmin,10px) clamp(11px,2.4vmin,20px);
+  font-family:'Share Tech Mono',monospace;
+  letter-spacing:.15em; text-transform:uppercase;
+  border-radius:4vmin; cursor:pointer; border:none;
+  font-size:  clamp(9px, 2vmin, 14px);
+  padding:    clamp(5px,1.4vmin,11px) clamp(10px,2.8vmin,22px);
 }
 .act-go    { background:#ff8000; color:#000; box-shadow:0 0 14px rgba(255,128,0,.5); }
 .act-reset { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.2); color:#fff; }
 .act-set   { background:rgba(255,128,0,.14); border:1px solid rgba(255,128,0,.5); color:#ff8000; }
 .act-set.armed { background:#ff8000; color:#000; }
-.btn-row { display:-webkit-flex; display:flex; gap:8px; -webkit-align-items:center; align-items:center; }
+.btn-row { display:-webkit-flex; display:flex; gap:2vmin;
+           -webkit-align-items:center; align-items:center; }
 .info-msg {
-  color:#ff8000; letter-spacing:2px; text-transform:uppercase; text-align:center;
-  font-size:clamp(8px,1.8vmin,12px); font-family:'Share Tech Mono',monospace;
-  -webkit-animation:pulse 1s ease-in-out infinite alternate; animation:pulse 1s ease-in-out infinite alternate;
+  color:#ff8000; letter-spacing:.15em; text-transform:uppercase;
+  text-align:center; font-size:clamp(7px,1.8vmin,13px);
+  font-family:'Share Tech Mono',monospace;
+  -webkit-animation:pulse 1s ease-in-out infinite alternate;
+          animation:pulse 1s ease-in-out infinite alternate;
 }
 .info-msg.hidden { display:none; }
 @-webkit-keyframes pulse { from{opacity:.2} to{opacity:1} }
-@keyframes pulse         { from{opacity:.2} to{opacity:1} }
+@keyframes pulse          { from{opacity:.2} to{opacity:1} }
 
-/* ════════════════════════════════════════
+/* ══════════════════════════════════════════════
    PICKER MODAL
-════════════════════════════════════════ */
+══════════════════════════════════════════════ */
 .picker-modal {
   position:absolute; top:0; left:0; right:0; bottom:0;
   z-index:200;
@@ -264,25 +296,60 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   display:-webkit-flex; display:flex;
   -webkit-flex-direction:column; flex-direction:column;
   -webkit-align-items:center; align-items:center;
-  gap:22px;
-  background:rgb(13,13,13); border:1px solid rgba(255,128,0,.28);
-  border-radius:22px; padding:28px 34px;
+  gap:5vmin;
+  background:rgb(13,13,13);
+  border:1px solid rgba(255,128,0,.28);
+  border-radius:5vmin; padding:6vmin 8vmin;
 }
-.picker-title { color:rgba(255,255,255,.28); letter-spacing:4px; text-transform:uppercase; font-size:10px; font-family:'Share Tech Mono',monospace; }
-.drums-row { display:-webkit-flex; display:flex; -webkit-align-items:center; align-items:center; gap:12px; }
-.drum-wrap { display:-webkit-flex; display:flex; -webkit-flex-direction:column; flex-direction:column; -webkit-align-items:center; align-items:center; gap:6px; }
-.drum-lbl  { color:rgba(255,255,255,.22); letter-spacing:3px; text-transform:uppercase; font-size:9px; font-family:'Share Tech Mono',monospace; }
-.drum-sep  { font-family:'DIN Condensed',sans-serif; font-weight:700; color:rgba(255,128,0,.6); -webkit-align-self:center; align-self:center; margin-bottom:18px; }
-.drum-outer { position:relative; overflow:hidden; border-radius:10px; }
-.drum-hl    { position:absolute; left:0; right:0; z-index:4; pointer-events:none; border-top:1px solid rgba(255,128,0,.7); border-bottom:1px solid rgba(255,128,0,.7); background:rgba(255,128,0,.09); }
-.drum-fade  { position:absolute; top:0; left:0; right:0; bottom:0; z-index:3; pointer-events:none;
-  background:-webkit-linear-gradient(top, rgb(13,13,13) 0%, rgba(13,13,13,0) 30%, rgba(13,13,13,0) 70%, rgb(13,13,13) 100%);
-  background:linear-gradient(to bottom,   rgb(13,13,13) 0%, rgba(13,13,13,0) 30%, rgba(13,13,13,0) 70%, rgb(13,13,13) 100%);
+.picker-title {
+  color:rgba(255,255,255,.28); letter-spacing:.4em;
+  text-transform:uppercase; font-size:clamp(8px,2.2vmin,14px);
+  font-family:'Share Tech Mono',monospace;
+}
+.drums-row {
+  display:-webkit-flex; display:flex;
+  -webkit-align-items:center; align-items:center; gap:3vmin;
+}
+.drum-wrap {
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-align-items:center; align-items:center; gap:1.5vmin;
+}
+.drum-lbl {
+  color:rgba(255,255,255,.22); letter-spacing:.3em;
+  text-transform:uppercase; font-size:clamp(7px,1.8vmin,12px);
+  font-family:'Share Tech Mono',monospace;
+}
+.drum-sep {
+  font-family:'DIN Condensed',sans-serif; font-weight:700;
+  color:rgba(255,128,0,.6);
+  -webkit-align-self:center; align-self:center;
+  margin-bottom:4vmin;
+}
+.drum-outer { position:relative; overflow:hidden; border-radius:2vmin; }
+.drum-hl {
+  position:absolute; left:0; right:0; z-index:4; pointer-events:none;
+  border-top:1px solid rgba(255,128,0,.7);
+  border-bottom:1px solid rgba(255,128,0,.7);
+  background:rgba(255,128,0,.09);
+}
+.drum-fade {
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  z-index:3; pointer-events:none;
+  background:-webkit-linear-gradient(top,
+    rgb(13,13,13) 0%, rgba(13,13,13,0) 30%,
+    rgba(13,13,13,0) 70%, rgb(13,13,13) 100%);
+  background:linear-gradient(to bottom,
+    rgb(13,13,13) 0%, rgba(13,13,13,0) 30%,
+    rgba(13,13,13,0) 70%, rgb(13,13,13) 100%);
 }
 .drum-scroller {
-  display:block; overflow-y:scroll; overflow-x:hidden;
-  -webkit-scroll-snap-type:y mandatory; scroll-snap-type:y mandatory;
-  -webkit-overflow-scrolling:touch; scrollbar-width:none;
+  display:block;
+  overflow-y:scroll; overflow-x:hidden;
+  -webkit-scroll-snap-type:y mandatory;
+          scroll-snap-type:y mandatory;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
 }
 .drum-scroller::-webkit-scrollbar { display:none; }
 .drum-item {
@@ -294,28 +361,59 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   -webkit-flex-shrink:0; flex-shrink:0;
   -webkit-scroll-snap-align:center; scroll-snap-align:center;
 }
-.drum-spacer { -webkit-flex-shrink:0; flex-shrink:0; -webkit-scroll-snap-align:none; scroll-snap-align:none; }
-.picker-ok     { background:#ff8000; color:#000; border:none; border-radius:14px; font-family:'Share Tech Mono',monospace; letter-spacing:2px; text-transform:uppercase; cursor:pointer; padding:10px 26px; font-size:11px; }
-.picker-cancel { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15); color:rgba(255,255,255,.4); border-radius:14px; font-family:'Share Tech Mono',monospace; letter-spacing:2px; text-transform:uppercase; cursor:pointer; padding:10px 18px; font-size:11px; }
+.drum-spacer {
+  -webkit-flex-shrink:0; flex-shrink:0;
+  -webkit-scroll-snap-align:none; scroll-snap-align:none;
+}
+.picker-ok {
+  background:#ff8000; color:#000; border:none;
+  border-radius:3.5vmin; font-family:'Share Tech Mono',monospace;
+  letter-spacing:.15em; text-transform:uppercase;
+  cursor:pointer; padding:2.5vmin 6vmin;
+  font-size:clamp(9px,2.2vmin,14px);
+}
+.picker-cancel {
+  background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.4); border-radius:3.5vmin;
+  font-family:'Share Tech Mono',monospace; letter-spacing:.15em;
+  text-transform:uppercase; cursor:pointer;
+  padding:2.5vmin 4.5vmin; font-size:clamp(9px,2.2vmin,14px);
+}
 
-/* ════════════════════════════════════════
-   ALARM
-════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   ALARM OVERLAY
+══════════════════════════════════════════════ */
 #alarmOverlay {
   position:absolute; top:0; left:0; right:0; bottom:0; z-index:300;
   display:-webkit-flex; display:flex;
   -webkit-flex-direction:column; flex-direction:column;
   -webkit-align-items:center; align-items:center;
   -webkit-justify-content:center; justify-content:center;
-  gap:16px; cursor:pointer; touch-action:manipulation;
-  -webkit-animation:ablink .6s ease-in-out infinite; animation:ablink .6s ease-in-out infinite;
+  gap:4vmin; cursor:pointer; touch-action:manipulation;
+  -webkit-animation:ablink .6s ease-in-out infinite;
+          animation:ablink .6s ease-in-out infinite;
 }
 #alarmOverlay.hidden { display:none !important; }
-@-webkit-keyframes ablink { 0%,100%{background:rgba(0,0,0,.97)} 50%{background:rgba(200,40,0,.26)} }
-@keyframes ablink         { 0%,100%{background:rgba(0,0,0,.97)} 50%{background:rgba(200,40,0,.26)} }
-.a-title { font-family:'DIN Condensed',sans-serif; font-weight:700; color:#ff8000; letter-spacing:5px; text-transform:uppercase; font-size:clamp(28px,9vmin,72px); }
-.a-time  { font-family:'DIN Condensed',sans-serif; font-weight:700; color:#fff; line-height:1; font-size:clamp(60px,18vmin,130px); }
-.a-hint  { color:rgba(255,255,255,.3); letter-spacing:3px; text-transform:uppercase; font-size:clamp(10px,2vmin,14px); font-family:'Share Tech Mono',monospace; }
+@-webkit-keyframes ablink {
+  0%,100%{background:rgba(0,0,0,.97)} 50%{background:rgba(200,40,0,.26)}
+}
+@keyframes ablink {
+  0%,100%{background:rgba(0,0,0,.97)} 50%{background:rgba(200,40,0,.26)}
+}
+.a-title {
+  font-family:'DIN Condensed',sans-serif; font-weight:700;
+  color:#ff8000; letter-spacing:.5em; text-transform:uppercase;
+  font-size:clamp(22px,9vmin,72px);
+}
+.a-time {
+  font-family:'DIN Condensed',sans-serif; font-weight:700;
+  color:#fff; line-height:1; font-size:clamp(50px,18vmin,130px);
+}
+.a-hint {
+  color:rgba(255,255,255,.3); letter-spacing:.3em;
+  text-transform:uppercase; font-size:clamp(9px,2vmin,14px);
+  font-family:'Share Tech Mono',monospace;
+}
 ```
 
   </style>
@@ -332,7 +430,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
         <div class="time-sec"  id="timeSec">00</div>
       </div>
       <div class="date-block">
-        <span class="weekday" id="weekday">Montag</span>
+        <span class="weekday"  id="weekday">Montag</span>
         <span class="date-txt" id="dateTxt">01. Jan 2025</span>
       </div>
       <div class="progress-bar-wrap">
@@ -346,7 +444,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   <!-- COUNTDOWN -->
 
   <div class="screen" id="countdown-screen">
-    <div class="ring-wrap" id="cdRingWrap">
+    <div class="ring-wrap">
       <svg viewBox="0 0 200 200">
         <circle class="ring-bg" cx="100" cy="100" r="88" stroke-width="10"/>
         <circle class="ring-fg" cx="100" cy="100" r="88" stroke-width="10"
@@ -371,7 +469,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   <!-- WECKER -->
 
   <div class="screen" id="wecker-screen">
-    <div class="ring-wrap" id="wkRingWrap">
+    <div class="ring-wrap">
       <svg viewBox="0 0 200 200">
         <circle class="ring-bg" cx="100" cy="100" r="88" stroke-width="10"/>
         <circle class="ring-fg" cx="100" cy="100" r="88" stroke-width="10"
@@ -401,17 +499,25 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
       <div class="picker-title">Countdown einstellen</div>
       <div class="drums-row">
         <div class="drum-wrap">
-          <div class="drum-outer" id="cdHOuter"><div class="drum-hl" id="cdHhl"></div><div class="drum-fade"></div><div class="drum-scroller" id="cdHScroll"></div></div>
+          <div class="drum-outer" id="cdHOuter">
+            <div class="drum-hl" id="cdHhl"></div>
+            <div class="drum-fade"></div>
+            <div class="drum-scroller" id="cdHScroll"></div>
+          </div>
           <div class="drum-lbl">Stunden</div>
         </div>
         <div class="drum-sep" id="cdSep1">h</div>
         <div class="drum-wrap">
-          <div class="drum-outer" id="cdMOuter"><div class="drum-hl" id="cdMhl"></div><div class="drum-fade"></div><div class="drum-scroller" id="cdMScroll"></div></div>
+          <div class="drum-outer" id="cdMOuter">
+            <div class="drum-hl" id="cdMhl"></div>
+            <div class="drum-fade"></div>
+            <div class="drum-scroller" id="cdMScroll"></div>
+          </div>
           <div class="drum-lbl">Minuten</div>
         </div>
         <div class="drum-sep" id="cdSep2">m</div>
       </div>
-      <div style="display:-webkit-flex;display:flex;gap:10px">
+      <div style="display:-webkit-flex;display:flex;gap:3vmin">
         <button class="picker-ok"     id="cdOk">Start</button>
         <button class="picker-cancel" id="cdCancel">Abbrechen</button>
       </div>
@@ -425,16 +531,24 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
       <div class="picker-title">Weckzeit einstellen</div>
       <div class="drums-row">
         <div class="drum-wrap">
-          <div class="drum-outer" id="wkHOuter"><div class="drum-hl" id="wkHhl"></div><div class="drum-fade"></div><div class="drum-scroller" id="wkHScroll"></div></div>
+          <div class="drum-outer" id="wkHOuter">
+            <div class="drum-hl" id="wkHhl"></div>
+            <div class="drum-fade"></div>
+            <div class="drum-scroller" id="wkHScroll"></div>
+          </div>
           <div class="drum-lbl">Stunde</div>
         </div>
         <div class="drum-sep" id="wkSep">:</div>
         <div class="drum-wrap">
-          <div class="drum-outer" id="wkMOuter"><div class="drum-hl" id="wkMhl"></div><div class="drum-fade"></div><div class="drum-scroller" id="wkMScroll"></div></div>
+          <div class="drum-outer" id="wkMOuter">
+            <div class="drum-hl" id="wkMhl"></div>
+            <div class="drum-fade"></div>
+            <div class="drum-scroller" id="wkMScroll"></div>
+          </div>
           <div class="drum-lbl">Minute</div>
         </div>
       </div>
-      <div style="display:-webkit-flex;display:flex;gap:10px">
+      <div style="display:-webkit-flex;display:flex;gap:3vmin">
         <button class="picker-ok"     id="wkOk">OK</button>
         <button class="picker-cancel" id="wkCancel">Abbrechen</button>
       </div>
@@ -452,10 +566,12 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   <!-- DOTS -->
 
   <div id="dots" class="btn-ui">
-    <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
   </div>
 
-</div><!-- #app -->
+</div><!-- /#app -->
 
 <script>
 (function(){
@@ -466,33 +582,36 @@ var CIRC = 2 * Math.PI * 88;
 var DAYS = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
 var MONS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 
-/* ═══════════════════════════════════
-   DRUM ENGINE  —  only JS-sized part
-   Everything else is CSS.
-═══════════════════════════════════ */
+/* ══════════════════════════════════════════
+   DRUM ENGINE
+   Only JS-sized component: needs real pixels
+   for scroll-snap math.
+══════════════════════════════════════════ */
 var IH = 48, REPS = 41, MID = 20;
 
 function createDrum(scrollId, outerId, hlId, count, initVal) {
-  var sc = $(scrollId), ou = $(outerId), hl = $(hlId);
+  var sc=$(scrollId), ou=$(outerId), hl=$(hlId);
 
-  sc.innerHTML = '';
-  var ts = document.createElement('div'); ts.className='drum-spacer'; sc.appendChild(ts);
-  for (var r=0; r<REPS; r++) {
-    for (var v=0; v<count; v++) {
-      var el = document.createElement('div');
+  // Build DOM
+  sc.innerHTML='';
+  var ts=document.createElement('div'); ts.className='drum-spacer'; sc.appendChild(ts);
+  for (var r=0;r<REPS;r++) {
+    for (var v=0;v<count;v++) {
+      var el=document.createElement('div');
       el.className='drum-item'; el.textContent=pad(v); sc.appendChild(el);
     }
   }
-  var bs = document.createElement('div'); bs.className='drum-spacer'; sc.appendChild(bs);
+  var bs=document.createElement('div'); bs.className='drum-spacer'; sc.appendChild(bs);
 
   function applySize() {
-    var w = Math.round(IH*2.15);
+    var w=Math.round(IH*2.2);
     ou.style.width=w+'px'; ou.style.height=(IH*3)+'px';
     sc.style.width=w+'px'; sc.style.height=(IH*3)+'px';
-    var els=sc.querySelectorAll('.drum-item,.drum-spacer');
-    for (var i=0;i<els.length;i++){
-      els[i].style.height=IH+'px'; els[i].style.width=w+'px';
-      els[i].style.fontSize=Math.round(IH*0.70)+'px';
+    var items=sc.querySelectorAll('.drum-item,.drum-spacer');
+    for (var i=0;i<items.length;i++) {
+      items[i].style.height=IH+'px';
+      items[i].style.width=w+'px';
+      items[i].style.fontSize=Math.round(IH*0.68)+'px';
     }
     hl.style.top=IH+'px'; hl.style.height=IH+'px';
   }
@@ -505,12 +624,12 @@ function createDrum(scrollId, outerId, hlId, count, initVal) {
     else{ sc.scrollTop=t; }
   }
 
-  var normTmr=null;
+  var norm=null;
   sc.addEventListener('scroll',function(){
-    clearTimeout(normTmr);
-    normTmr=setTimeout(function(){
-      var v=getVal();
-      if(Math.abs(sc.scrollTop-snapTop(v,MID))>IH*0.5) sc.scrollTop=snapTop(v,MID);
+    clearTimeout(norm);
+    norm=setTimeout(function(){
+      var v=getVal(), t=snapTop(v,MID);
+      if(Math.abs(sc.scrollTop-t)>IH*0.5) sc.scrollTop=t;
     },400);
   },false);
 
@@ -526,61 +645,53 @@ var cdM=createDrum('cdMScroll','cdMOuter','cdMhl',60,5);
 var wkH=createDrum('wkHScroll','wkHOuter','wkHhl',24,7);
 var wkM=createDrum('wkMScroll','wkMOuter','wkMhl',60,30);
 
-/* ═══════════════════════════════════
-   RESIZE  — JS only updates drum sizes.
-   All text/ring sizes handled by CSS above → instant on rotate, no flash.
-
-   orientationchange fires BEFORE new viewport on iOS Safari,
-   so we fire at t=0, 150, 350 ms to catch whenever it settles.
-═══════════════════════════════════ */
-function doResize() {
-  var H = $('app').offsetHeight;
-  IH = Math.max(40, Math.min(64, Math.round(H*0.08)));
+/* ══════════════════════════════════════════
+   RESIZE — only updates drum pixel sizes.
+   All layout/text sizes are pure CSS (vmin).
+   No JS font/ring sizing at all = no flash.
+══════════════════════════════════════════ */
+function updateDrums() {
+  var H=$('app').offsetHeight;
+  IH=Math.max(38,Math.min(62,Math.round(H*0.08)));
   cdH.applySize(); cdM.applySize(); wkH.applySize(); wkM.applySize();
-  var sepFs = Math.round(IH*0.70);
-  [$('cdSep1'),$('cdSep2'),$('wkSep')].forEach(function(e){ if(e) e.style.fontSize=sepFs+'px'; });
+  var sf=Math.round(IH*0.68);
+  [$('cdSep1'),$('cdSep2'),$('wkSep')].forEach(function(e){if(e)e.style.fontSize=sf+'px';});
   setTimeout(function(){
     cdH.setVal(cdH.getVal(),false); cdM.setVal(cdM.getVal(),false);
     wkH.setVal(wkH.getVal(),false); wkM.setVal(wkM.getVal(),false);
-  }, 60);
+  },60);
 }
 
-window.addEventListener('resize', doResize, false);
-window.addEventListener('orientationchange', function(){
-  // Fire at multiple times: iOS Safari viewport settles unpredictably
-  setTimeout(doResize, 0);
-  setTimeout(doResize, 150);
-  setTimeout(doResize, 350);
-}, false);
+// resize fires reliably after the viewport has settled
+window.addEventListener('resize', updateDrums, false);
 
-/* ═══════════════════════════════════
-   AUTO-HIDE
-═══════════════════════════════════ */
-var hideTimer;
+/* ══════════════════════════════════════════
+   AUTO-HIDE UI
+══════════════════════════════════════════ */
+var hideT;
 function showUI(){
-  clearTimeout(hideTimer);
+  clearTimeout(hideT);
   document.body.classList.remove('ui-hidden');
-  hideTimer=setTimeout(function(){ document.body.classList.add('ui-hidden'); },4000);
+  hideT=setTimeout(function(){ document.body.classList.add('ui-hidden'); },4000);
 }
 document.addEventListener('mousemove',showUI,false);
 document.addEventListener('click',showUI,false);
 showUI();
 
-/* ═══════════════════════════════════
+/* ══════════════════════════════════════════
    SWIPE NAVIGATION
-═══════════════════════════════════ */
-var curScreen=0, sx=0, sy=0, inDrum=false;
-var app=$('app');
-app.addEventListener('touchstart',function(e){
+══════════════════════════════════════════ */
+var cur=0, sx=0, sy=0, inDrum=false;
+$('app').addEventListener('touchstart',function(e){
   sx=e.touches[0].clientX; sy=e.touches[0].clientY;
   inDrum=!!(e.target.closest&&e.target.closest('.drum-scroller,.picker-box'));
   showUI();
 },false);
-app.addEventListener('touchend',function(e){
+$('app').addEventListener('touchend',function(e){
   if(inDrum) return;
   if(!$('cdModal').classList.contains('hidden')||!$('wkModal').classList.contains('hidden')) return;
   var dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
-  if(Math.abs(dx)>Math.abs(dy)*1.5&&Math.abs(dx)>50) goTo(dx<0?curScreen+1:curScreen-1);
+  if(Math.abs(dx)>Math.abs(dy)*1.5&&Math.abs(dx)>50) goTo(dx<0?cur+1:cur-1);
 },false);
 
 function goTo(i){
@@ -595,18 +706,16 @@ function goTo(i){
     if(d===i) dots[d].classList.add('active');
     else      dots[d].classList.remove('active');
   }
-  curScreen=i; doResize(); showUI();
+  cur=i; showUI();
 }
 
-/* ═══════════════════════════════════
-   RING HELPER
-═══════════════════════════════════ */
+/* RING HELPER */
 function setRing(id,f){ $(id).style.strokeDashoffset=CIRC*(1-Math.max(0,Math.min(1,f))); }
 setRing('cdRingFg',1); setRing('wkRingFg',1);
 
-/* ═══════════════════════════════════
+/* ══════════════════════════════════════════
    CLOCK
-═══════════════════════════════════ */
+══════════════════════════════════════════ */
 function tickClock(){
   var now=new Date();
   var p=((now.getSeconds()*1000+now.getMilliseconds())/60000)*100;
@@ -617,9 +726,9 @@ function tickClock(){
   $('barFill').style.width=p+'%';
 }
 
-/* ═══════════════════════════════════
+/* ══════════════════════════════════════════
    COUNTDOWN
-═══════════════════════════════════ */
+══════════════════════════════════════════ */
 var cdTotal=0,cdRemain=0,cdIv=null,cdState='idle';
 
 function cdDisplay(){
@@ -645,6 +754,7 @@ function openCdModal(){
   showUI();$('cdModal').classList.remove('hidden');
   requestAnimationFrame(function(){ cdH.setVal(cdH.getVal(),false); cdM.setVal(cdM.getVal(),false); });
 }
+
 $('cdGoBtn').addEventListener('click',function(){
   showUI();
   if(cdState==='running'){clearInterval(cdIv);cdIv=null;cdState='paused';$('cdGoBtn').textContent='Weiter';}
@@ -662,7 +772,9 @@ $('cdOk').addEventListener('click',function(){
   cdDisplay();cdIv=setInterval(cdTick,1000);showUI();
 },false);
 $('cdCancel').addEventListener('click',function(){$('cdModal').classList.add('hidden');showUI();},false);
-$('cdModal').addEventListener('click',function(e){if(e.target===$('cdModal')){$('cdModal').classList.add('hidden');showUI();}},false);
+$('cdModal').addEventListener('click',function(e){
+  if(e.target===$('cdModal')){$('cdModal').classList.add('hidden');showUI();}
+},false);
 $('cdResetBtn').addEventListener('click',function(){
   clearInterval(cdIv);cdIv=null;cdState='idle';cdTotal=0;cdRemain=0;
   $('cdGoBtn').textContent='Stellen';$('cdDigits').textContent='00:00';$('cdSec').textContent='00';
@@ -670,9 +782,9 @@ $('cdResetBtn').addEventListener('click',function(){
   setRing('cdRingFg',1);showUI();
 },false);
 
-/* ═══════════════════════════════════
+/* ══════════════════════════════════════════
    WECKER
-═══════════════════════════════════ */
+══════════════════════════════════════════ */
 var wkActive=false,wkHval=7,wkMval=30,wkTotalSec=0;
 var wkIv=null,wkRinging=false,wkACtx=null,wkSndIv=null;
 
@@ -709,7 +821,7 @@ function triggerAlarm(){
   if(wkRinging) return; wkRinging=true;
   $('alarmTime').textContent=pad(wkHval)+':'+pad(wkMval);
   $('alarmOverlay').classList.remove('hidden');
-  wkBeep();wkSndIv=setInterval(wkBeep,900);
+  wkBeep(); wkSndIv=setInterval(wkBeep,900);
   try{if(navigator.vibrate)navigator.vibrate([500,200,500,200,500]);}catch(e){}
 }
 function stopAlarm(){
@@ -750,15 +862,17 @@ $('wkOk').addEventListener('click',function(){
   },150);
 },false);
 $('wkCancel').addEventListener('click',function(){$('wkModal').classList.add('hidden');showUI();},false);
-$('wkModal').addEventListener('click',function(e){if(e.target===$('wkModal')){$('wkModal').classList.add('hidden');showUI();}},false);
+$('wkModal').addEventListener('click',function(e){
+  if(e.target===$('wkModal')){$('wkModal').classList.add('hidden');showUI();}
+},false);
 $('wkResetBtn').addEventListener('click',function(){stopAlarm();$('wkInfo').classList.add('hidden');},false);
 $('alarmOverlay').addEventListener('click',stopAlarm,false);
 $('alarmOverlay').addEventListener('touchstart',function(e){e.preventDefault();stopAlarm();},false);
 
-/* ═══════════════════════════════════
+/* ══════════════════════════════════════════
    INIT
-═══════════════════════════════════ */
-doResize();
+══════════════════════════════════════════ */
+updateDrums();
 function loop(){ tickClock(); requestAnimationFrame(loop); }
 loop();
 
