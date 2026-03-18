@@ -32,11 +32,6 @@
 ```
 /* ══════════════════════════════════════════════
    #app — THE single fixed root.
-   top/left/right/bottom instead of width/height
-   so the browser can never compute a stale size.
-   transform:translateZ(0) forces a GPU layer so
-   the compositor handles repaints without a JS
-   layout pass — eliminates the visual jump.
 ══════════════════════════════════════════════ */
 #app {
   position: fixed;
@@ -50,7 +45,7 @@
 }
 
 /* ══════════════════════════════════════════════
-   SCREENS — absolute inside #app, same trick
+   SCREENS
 ══════════════════════════════════════════════ */
 .screen {
   position:absolute;
@@ -64,7 +59,6 @@
   -webkit-align-items:center;      align-items:center;
   -webkit-justify-content:center;  justify-content:center;
 }
-/* Portrait: column, no padding — centering via flex only */
 @media (orientation:portrait) {
   .screen.active {
     -webkit-flex-direction:column;
@@ -72,24 +66,18 @@
     gap:3vmin;
   }
 }
-/* Landscape: ring stays in flex flow → Flexbox centers it.
-   Buttons float absolutely over the right side.
-   This way: ring = geometrically centered, buttons = never
-   affect centering, no grid, no broken Safari positioning. */
 @media (orientation:landscape) {
   #countdown-screen.active,
   #wecker-screen.active {
     -webkit-flex-direction: row;
             flex-direction: row;
   }
-  /* Ring in flow — flexbox centers it perfectly */
   #countdown-screen .ring-wrap,
   #wecker-screen    .ring-wrap {
     position: relative;
     -webkit-flex-shrink: 0;
             flex-shrink: 0;
   }
-  /* Buttons float over right side, out of flow */
   #countdown-screen .side-panel,
   #wecker-screen    .side-panel {
     position: absolute;
@@ -104,9 +92,9 @@
 .btn-ui { -webkit-transition:opacity .8s; transition:opacity .8s; }
 body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 
-/* FULLSCREEN BTN — only shown on Android via JS */
+/* FULLSCREEN BTN */
 #fsBtn {
-  display: none; /* shown only on non-iOS via JS */
+  display: none;
   position: absolute;
   bottom: 14px; left: 14px;
   width: 44px; height: 44px;
@@ -134,8 +122,6 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 
 /* ══════════════════════════════════════════════
    CLOCK SCREEN
-   All sizes in vmin — vmin = min(vw,vh) = always
-   the shorter screen dimension. Stable on rotate.
 ══════════════════════════════════════════════ */
 #uhr-screen.active {
   -webkit-flex-direction:column; flex-direction:column;
@@ -153,20 +139,35 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   display:-webkit-flex; display:flex;
   -webkit-align-items:flex-end; align-items:flex-end;
 }
-/* Clock: portrait uses vw (wider = bigger), landscape uses vh (taller = bigger).
-   min(22vw, 45vh) gives a big clock in both orientations without overflow. */
+
+/*
+ * CLOCK SIZING STRATEGY
+ * ─────────────────────
+ * min(41vw, 68vh) covers both orientations without a media query:
+ *
+ *   Portrait  (375×812) : min(154px, 552px) = 154px
+ *     "00:00" ≈ 154 × 1.85 em = 285px  ← fits in 375px ✓
+ *
+ *   Landscape (812×375) : min(333px, 255px) = 255px
+ *     "00:00" ≈ 255 × 1.85 em = 472px  ← fits in 812px ✓ (was 142px before!)
+ *
+ *   Landscape tablet (1024×768) : min(419px, 522px) = 419px
+ *     "00:00" ≈ 419 × 1.85 em = 775px  ← fits in 1024px ✓
+ *
+ * Seconds use ~39 % of that size, same dual-axis constraint.
+*/
 .time-main {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
   font-weight:700; letter-spacing:-0.02em; line-height:1;
   color:#fff; white-space:nowrap;
-  font-size: clamp(44px, 38vmin, 320px);
+  font-size: clamp(44px, min(41vw, 68vh), 500px);
 }
 .time-sec {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; color:rgba(255,255,255,.42);
+  font-weight:700; color:rgba(255,255,255,.52);
   line-height:1; white-space:nowrap;
-  font-size:  clamp(16px, 15vmin, 130px);
-  padding-bottom: clamp(2px, min(3.4vw, 5.6vh), 32px);
+  font-size:  clamp(18px, min(16vw, 27vh), 200px);
+  padding-bottom: clamp(2px, min(3.7vw, 6vh), 40px);
   padding-left:   clamp(2px, min(1.8vw, 3vh), 18px);
 }
 .date-block {
@@ -201,10 +202,6 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 
 /* ══════════════════════════════════════════════
    RING
-   min(84vw, 74vh) — single expression, works in
-   both orientations without a media query switch.
-   Portrait  (375×812): min(315, 601) = 315px
-   Landscape (812×375): min(681, 277) = 277px  ✓
 ══════════════════════════════════════════════ */
 .ring-wrap {
   position:relative;
@@ -212,7 +209,6 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   display:-webkit-flex; display:flex;
   -webkit-align-items:center; align-items:center;
   -webkit-justify-content:center; justify-content:center;
-  /* Portrait: 86vw. Landscape: 90vh (height is the limit). */
   width:  min(92vw, 94vh);
   height: min(92vw, 94vh);
 }
@@ -235,18 +231,31 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   -webkit-align-items:center; align-items:center;
   -webkit-justify-content:center; justify-content:center;
 }
-/* Ring text — all vmin, consistent across orientations */
+
+/*
+ * RING DIGITS SIZING
+ * ──────────────────
+ * Ring inner clear diameter = (r − stroke/2) / r_total × ring_size
+ *   = (88 − 5) / 100 × ring_size = 83 % of ring-wrap side.
+ * "00:00" in DIN Condensed (letter-spacing −.02em) ≈ 2.45 em wide.
+ * Safety factor 0.92 → max_fs = 0.83 × 0.92 / 2.45 × ring ≈ 0.312 × ring.
+ *
+ * min(24vw, 29vh) gives:
+ *   Portrait  375×812 : min( 90, 235) =  90px  →  220px < 286px inner ✓
+ *   Landscape 812×375 : min(195, 108) = 108px  →  265px < 292px inner ✓
+ *   Tablet    1024×768: min(246, 222) = 222px  →  544px < 599px inner ✓
+*/
 .ring-digits {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
   font-weight:700; color:#fff; line-height:1;
   letter-spacing:-.02em; white-space:nowrap;
-  font-size: clamp(18px, min(26vw, 30vh), 210px);
+  font-size: clamp(20px, min(24vw, 29vh), 200px);
 }
 .ring-sec {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; color:rgba(255,255,255,.55);
-  letter-spacing:.15em; margin-top:.4vmin;
-  font-size: clamp(9px, min(7.5vw, 9.5vh), 66px);
+  font-weight:700; color:rgba(255,255,255,.62);
+  letter-spacing:.15em; margin-top:0;
+  font-size: clamp(10px, min(9vw, 12vh), 75px);
 }
 .ring-label {
   font-family:'Share Tech Mono',monospace;
@@ -268,7 +277,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 }
 
 /* ══════════════════════════════════════════════
-   SIDE PANEL — stays in flow (no absolute)
+   SIDE PANEL
 ══════════════════════════════════════════════ */
 .side-panel {
   display:-webkit-flex; display:flex;
@@ -609,15 +618,12 @@ var MONS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','
 
 /* ══════════════════════════════════════════
    DRUM ENGINE
-   Only JS-sized component: needs real pixels
-   for scroll-snap math.
 ══════════════════════════════════════════ */
 var IH = 48, REPS = 41, MID = 20;
 
 function createDrum(scrollId, outerId, hlId, count, initVal) {
   var sc=$(scrollId), ou=$(outerId), hl=$(hlId);
 
-  // Build DOM
   sc.innerHTML='';
   var ts=document.createElement('div'); ts.className='drum-spacer'; sc.appendChild(ts);
   for (var r=0;r<REPS;r++) {
@@ -671,9 +677,7 @@ var wkH=createDrum('wkHScroll','wkHOuter','wkHhl',24,7);
 var wkM=createDrum('wkMScroll','wkMOuter','wkMhl',60,30);
 
 /* ══════════════════════════════════════════
-   RESIZE — only updates drum pixel sizes.
-   All layout/text sizes are pure CSS (vmin).
-   No JS font/ring sizing at all = no flash.
+   RESIZE
 ══════════════════════════════════════════ */
 function updateDrums() {
   var H=$('app').offsetHeight;
@@ -687,7 +691,6 @@ function updateDrums() {
   },60);
 }
 
-// resize fires reliably after the viewport has settled
 window.addEventListener('resize', updateDrums, false);
 
 /* ══════════════════════════════════════════
@@ -788,7 +791,6 @@ $('cdGoBtn').addEventListener('click',function(){
 },false);
 $('cdSub').addEventListener('click',openCdModal,false);
 $('cdOk').addEventListener('click',function(){
-  // 150ms delay — same as wkOk — ensures drum scroll has fully snapped
   setTimeout(function(){
     var h=cdH.getVal(),m=cdM.getVal();
     $('cdModal').classList.add('hidden');
@@ -899,16 +901,11 @@ $('alarmOverlay').addEventListener('touchstart',function(e){e.preventDefault();s
 
 /* ══════════════════════════════════════════
    FULLSCREEN — Android only
-   iOS Safari doesn't support requestFullscreen in browser.
-   Android Chrome does. We detect and show the button only
-   where it actually works.
 ══════════════════════════════════════════ */
 (function(){
   var isIOS = /iP(hone|ad|od)/i.test(navigator.userAgent);
-  var isAndroid = /android/i.test(navigator.userAgent);
   var btn = $('fsBtn');
 
-  // Show button everywhere except iOS Safari (where it doesn't work)
   if (!isIOS && btn) {
     btn.style.display = '-webkit-flex';
     btn.style.display = 'flex';
@@ -927,14 +924,11 @@ $('alarmOverlay').addEventListener('touchstart',function(e){e.preventDefault();s
       showUI();
     }, false);
 
-    // Track fullscreen state to toggle icon
     function onFSChange() {
       inFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
       if (inFS) {
-        // Im Vollbild: Button komplett verstecken
         btn.style.display = 'none';
       } else {
-        // Kein Vollbild: Button wieder zeigen
         btn.style.display = '-webkit-flex';
         btn.style.display = 'flex';
         btn.textContent = '⛶';
