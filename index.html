@@ -137,7 +137,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 }
 .time-row {
   display:-webkit-flex; display:flex;
-  -webkit-align-items:flex-end; align-items:flex-end;
+  -webkit-align-items:baseline; align-items:baseline;
 }
 
 /*
@@ -167,8 +167,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   font-weight:700; color:rgba(255,255,255,.52);
   line-height:1; white-space:nowrap;
   font-size:  clamp(18px, min(16vw, 27vh), 200px);
-  padding-bottom: clamp(2px, min(3.7vw, 6vh), 40px);
-  padding-left:   clamp(2px, min(1.8vw, 3vh), 18px);
+  padding-left: clamp(2px, min(1.8vw, 3vh), 18px);
 }
 .date-block {
   display:-webkit-flex; display:flex;
@@ -176,15 +175,15 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   margin-top:1.5vmin;
 }
 .weekday  { color:rgba(255,255,255,.36); letter-spacing:.4em;
-            text-transform:uppercase; font-size:clamp(11px, 3.2vmin, 28px); }
+            text-transform:uppercase; font-size:clamp(13px, 4.8vmin, 38px); }
 .date-txt { color:rgba(255,255,255,.48); letter-spacing:.2em;
-            font-size:clamp(11px, 3.2vmin, 28px); }
+            font-size:clamp(13px, 4.8vmin, 38px); }
 .progress-bar-wrap {
   margin-top:2vmin;
   display:-webkit-flex; display:flex;
   -webkit-align-items:center; align-items:center;
   gap:1.5vmin;
-  width: clamp(200px, min(94vw, 94vh), 900px);
+  width: clamp(200px, 94vw, 1400px);
 }
 .bar-marker { width:2px; height:5vmin; min-height:12px;
               background:rgba(255,255,255,.32); border-radius:1px;
@@ -444,6 +443,30 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   text-transform:uppercase; font-size:clamp(9px,2vmin,14px);
   font-family:'Share Tech Mono',monospace;
 }
+
+/* ══════════════════════════════════════════════
+   WAKE LOCK TOGGLE
+══════════════════════════════════════════════ */
+.wl-btn {
+  position: absolute;
+  top: 14px; right: 14px;
+  background: rgba(255,128,0,.12);
+  border: 1px solid rgba(255,128,0,.4);
+  color: rgba(255,128,0,.6);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: clamp(8px, 2vmin, 13px);
+  letter-spacing: .15em; text-transform: uppercase;
+  border-radius: 3vmin;
+  padding: clamp(4px,1.2vmin,10px) clamp(8px,2.2vmin,16px);
+  cursor: pointer; z-index: 50;
+  -webkit-transition: background .3s, color .3s, border-color .3s;
+          transition: background .3s, color .3s, border-color .3s;
+}
+.wl-btn.on {
+  background: rgba(255,128,0,.88);
+  border-color: #ff8000;
+  color: #000;
+}
 ```
 
   </style>
@@ -469,6 +492,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
         <div class="bar-marker"></div>
       </div>
     </div>
+    <button class="wl-btn btn-ui" id="uhrWlBtn">☀ Anbleiben</button>
   </div>
 
   <!-- COUNTDOWN -->
@@ -519,6 +543,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
         <button class="act-btn act-reset" id="wkResetBtn">Reset</button>
       </div>
       <div class="info-msg hidden" id="wkInfo">–</div>
+      <button class="wl-btn btn-ui" id="wkWlBtn" style="position:relative;top:auto;right:auto;margin-top:1vmin;">☀ Anbleiben</button>
     </div>
   </div>
 
@@ -616,6 +641,12 @@ var CIRC = 2 * Math.PI * 88;
 var DAYS = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
 var MONS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 
+/* WAKE LOCK TOGGLE STATE */
+var uhrKeepOn = false;
+var wkKeepOn  = false;
+var cdWakeLock = false;  // true while countdown running + 5min after
+var cdWlOffT   = null;   // timer for 5-min post-countdown release
+
 /* ══════════════════════════════════════════
    DRUM ENGINE
 ══════════════════════════════════════════ */
@@ -692,6 +723,34 @@ function updateDrums() {
 }
 
 window.addEventListener('resize', updateDrums, false);
+
+/* ══════════════════════════════════════════
+   WAKE LOCK
+   Acquires/releases screen wake lock.
+   Called whenever relevant state changes.
+══════════════════════════════════════════ */
+var wlSentinel = null;
+
+function wlAcquire(){
+  if(!navigator.wakeLock) return;
+  if(wlSentinel) return;
+  navigator.wakeLock.request('screen').then(function(s){
+    wlSentinel = s;
+    wlSentinel.addEventListener('release', function(){ wlSentinel = null; }, false);
+  }).catch(function(){});
+}
+function wlRelease(){
+  if(wlSentinel){ wlSentinel.release().catch(function(){}); wlSentinel = null; }
+}
+// Re-acquire after tab becomes visible again (iOS/Android release on hide)
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'visible') wlUpdate();
+}, false);
+
+function wlUpdate(){
+  var need = uhrKeepOn || cdWakeLock || (wkKeepOn && wkActive);
+  if(need) wlAcquire(); else wlRelease();
+}
 
 /* ══════════════════════════════════════════
    AUTO-HIDE UI
@@ -774,7 +833,11 @@ function cdTick(){
   if(cdRemain<=0){
     clearInterval(cdIv);cdIv=null;cdState='idle';cdRemain=0;
     cdDisplay();$('cdDone').classList.remove('hidden');
-    $('cdGoBtn').textContent='Stellen';$('cdSub').classList.add('hidden');return;
+    $('cdGoBtn').textContent='Stellen';$('cdSub').classList.add('hidden');
+    // Keep screen on for 5 more minutes after countdown ends
+    clearTimeout(cdWlOffT);
+    cdWlOffT = setTimeout(function(){ cdWakeLock=false; wlUpdate(); }, 5*60*1000);
+    return;
   }
   cdRemain--;cdDisplay();
 }
@@ -798,6 +861,7 @@ $('cdOk').addEventListener('click',function(){
     clearInterval(cdIv);cdIv=null;
     cdTotal=h*3600+m*60;cdRemain=cdTotal;cdState='running';
     $('cdDone').classList.add('hidden');$('cdGoBtn').textContent='Pause';
+    clearTimeout(cdWlOffT);cdWakeLock=true;wlUpdate();
     cdDisplay();cdIv=setInterval(cdTick,1000);showUI();
   },150);
 },false);
@@ -807,6 +871,7 @@ $('cdModal').addEventListener('click',function(e){
 },false);
 $('cdResetBtn').addEventListener('click',function(){
   clearInterval(cdIv);cdIv=null;cdState='idle';cdTotal=0;cdRemain=0;
+  clearTimeout(cdWlOffT);cdWakeLock=false;wlUpdate();
   $('cdGoBtn').textContent='Stellen';$('cdDigits').textContent='00:00';$('cdSec').textContent='00';
   $('cdDone').classList.add('hidden');$('cdSub').classList.add('hidden');
   setRing('cdRingFg',1);showUI();
@@ -863,7 +928,7 @@ function stopAlarm(){
   clearInterval(wkIv);wkIv=null;
   $('wkSetBtn').textContent='Stellen';$('wkSetBtn').classList.remove('armed');
   $('wkSub').textContent='--:--';$('wkDigits').textContent='--:--';$('wkSec').textContent='--';
-  setRing('wkRingFg',1);showUI();
+  setRing('wkRingFg',1);wlUpdate();showUI();
 }
 function wkTick(){
   if(!wkActive||wkRinging) return; wkDisplay();
@@ -888,6 +953,7 @@ $('wkOk').addEventListener('click',function(){
     $('wkSetBtn').textContent='Aktiv ✓';$('wkSetBtn').classList.add('armed');
     $('wkSub').textContent=pad(h)+':'+pad(m);
     $('wkInfo').classList.add('hidden');
+    wlUpdate();
     wkDisplay();clearInterval(wkIv);wkIv=setInterval(wkTick,1000);showUI();
   },150);
 },false);
@@ -898,6 +964,31 @@ $('wkModal').addEventListener('click',function(e){
 $('wkResetBtn').addEventListener('click',function(){stopAlarm();$('wkInfo').classList.add('hidden');},false);
 $('alarmOverlay').addEventListener('click',stopAlarm,false);
 $('alarmOverlay').addEventListener('touchstart',function(e){e.preventDefault();stopAlarm();},false);
+
+/* ══════════════════════════════════════════
+   WAKE LOCK TOGGLE BUTTONS
+══════════════════════════════════════════ */
+function initWlBtn(btnId, getState, setState){
+  var btn = $(btnId);
+  if(!btn) return;
+  function refresh(){
+    if(getState()){ btn.classList.add('on'); btn.textContent='☀ Anbleiben'; }
+    else           { btn.classList.remove('on'); btn.textContent='☀ Anbleiben'; }
+  }
+  btn.addEventListener('click', function(){
+    setState(!getState());
+    wlUpdate(); refresh(); showUI();
+  }, false);
+  refresh();
+}
+initWlBtn('uhrWlBtn',
+  function(){ return uhrKeepOn; },
+  function(v){ uhrKeepOn = v; }
+);
+initWlBtn('wkWlBtn',
+  function(){ return wkKeepOn; },
+  function(v){ wkKeepOn = v; }
+);
 
 /* ══════════════════════════════════════════
    FULLSCREEN — Android only
