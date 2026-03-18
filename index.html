@@ -134,6 +134,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   -webkit-justify-content:center; justify-content:center;
   width:100%;
   padding: 2vmin;
+  padding-top: clamp(8px, 10vh, 90px);
 }
 .time-row {
   display:-webkit-flex; display:flex;
@@ -172,12 +173,16 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 .date-block {
   display:-webkit-flex; display:flex;
   gap:2vmin; -webkit-align-items:baseline; align-items:baseline;
-  margin-top:1.5vmin;
+  margin-top:0.4vmin;
+  white-space:nowrap;
+  -webkit-flex-wrap:nowrap; flex-wrap:nowrap;
 }
-.weekday  { color:rgba(255,255,255,.36); letter-spacing:.4em;
-            text-transform:uppercase; font-size:clamp(13px, 4.8vmin, 38px); }
-.date-txt { color:rgba(255,255,255,.48); letter-spacing:.2em;
-            font-size:clamp(13px, 4.8vmin, 38px); }
+.weekday  { color:rgba(255,255,255,.38); letter-spacing:.4em;
+            text-transform:uppercase; font-size:clamp(11px, 3.6vw, 44px);
+            white-space:nowrap; }
+.date-txt { color:rgba(255,255,255,.5); letter-spacing:.2em;
+            font-size:clamp(11px, 3.6vw, 44px);
+            white-space:nowrap; }
 .progress-bar-wrap {
   margin-top:2vmin;
   display:-webkit-flex; display:flex;
@@ -244,6 +249,11 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
  *   Landscape 812×375 : min(195, 108) = 108px  →  265px < 292px inner ✓
  *   Tablet    1024×768: min(246, 222) = 222px  →  544px < 599px inner ✓
 */
+.ring-digits.idle {
+  font-family:'Share Tech Mono',monospace !important;
+  font-size: clamp(16px, min(14vw, 18vh), 130px) !important;
+  color:rgba(255,255,255,.28);
+}
 .ring-digits {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
   font-weight:700; color:#fff; line-height:1;
@@ -281,7 +291,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 .side-panel {
   display:-webkit-flex; display:flex;
   -webkit-flex-direction:column; flex-direction:column;
-  -webkit-align-items:center; align-items:center;
+  -webkit-align-items:flex-end; align-items:flex-end;
   -webkit-flex-shrink:0; flex-shrink:0;
   gap:2vmin;
 }
@@ -289,6 +299,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   font-family:'Share Tech Mono',monospace;
   letter-spacing:.15em; text-transform:uppercase;
   border-radius:4vmin; cursor:pointer; border:none;
+  text-align:center;
   font-size:  clamp(9px, 2vmin, 14px);
   padding:    clamp(5px,1.4vmin,11px) clamp(10px,2.8vmin,22px);
 }
@@ -296,8 +307,10 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 .act-reset { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.2); color:#fff; }
 .act-set   { background:rgba(255,128,0,.14); border:1px solid rgba(255,128,0,.5); color:#ff8000; }
 .act-set.armed { background:#ff8000; color:#000; }
-.btn-row { display:-webkit-flex; display:flex; gap:2vmin;
-           -webkit-align-items:center; align-items:center; }
+.btn-row { display:-webkit-flex; display:flex;
+           -webkit-flex-direction:column; flex-direction:column;
+           gap:2vmin;
+           -webkit-align-items:stretch; align-items:stretch; }
 .info-msg {
   color:#ff8000; letter-spacing:.15em; text-transform:uppercase;
   text-align:center; font-size:clamp(7px,1.8vmin,13px);
@@ -419,15 +432,16 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   -webkit-align-items:center; align-items:center;
   -webkit-justify-content:center; justify-content:center;
   gap:4vmin; cursor:pointer; touch-action:manipulation;
-  -webkit-animation:ablink .6s ease-in-out infinite;
-          animation:ablink .6s ease-in-out infinite;
+  background:#000;
+  -webkit-animation:ablink .55s ease-in-out infinite;
+          animation:ablink .55s ease-in-out infinite;
 }
 #alarmOverlay.hidden { display:none !important; }
 @-webkit-keyframes ablink {
-  0%,100%{background:rgba(0,0,0,.97)} 50%{background:rgba(200,40,0,.26)}
+  0%,100%{background:rgba(0,0,0,1)} 50%{background:rgba(210,45,0,.75)}
 }
 @keyframes ablink {
-  0%,100%{background:rgba(0,0,0,.97)} 50%{background:rgba(200,40,0,.26)}
+  0%,100%{background:rgba(0,0,0,1)} 50%{background:rgba(210,45,0,.75)}
 }
 .a-title {
   font-family:'DIN Condensed',sans-serif; font-weight:700;
@@ -449,7 +463,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 ══════════════════════════════════════════════ */
 .wl-btn {
   position: absolute;
-  top: 14px; right: 14px;
+  top: clamp(52px, 14vh, 130px); right: 14px;
   background: rgba(255,128,0,.12);
   border: 1px solid rgba(255,128,0,.4);
   color: rgba(255,128,0,.6);
@@ -492,7 +506,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
         <div class="bar-marker"></div>
       </div>
     </div>
-    <button class="wl-btn btn-ui" id="uhrWlBtn">☀ Anbleiben</button>
+    <button class="wl-btn btn-ui" id="uhrWlBtn">Anbleiben</button>
   </div>
 
   <!-- COUNTDOWN -->
@@ -543,7 +557,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
         <button class="act-btn act-reset" id="wkResetBtn">Reset</button>
       </div>
       <div class="info-msg hidden" id="wkInfo">–</div>
-      <button class="wl-btn btn-ui" id="wkWlBtn" style="position:relative;top:auto;right:auto;margin-top:1vmin;">☀ Anbleiben</button>
+      <button class="wl-btn btn-ui" id="wkWlBtn" style="position:relative;top:auto;right:auto;">Anbleiben</button>
     </div>
   </div>
 
@@ -613,7 +627,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   <!-- ALARM -->
 
   <div id="alarmOverlay" class="hidden">
-    <div class="a-title">Aufwachen!</div>
+    <div class="a-title">Achtung!</div>
     <div class="a-time" id="alarmTime"></div>
     <div class="a-hint">Tippen zum Stoppen</div>
   </div>
@@ -890,7 +904,11 @@ function secUntilAlarm(h,m){
   return Math.max(0,Math.round((alarm-now)/1000));
 }
 function wkDisplay(){
-  if(!wkActive){$('wkDigits').textContent='--:--';$('wkSec').textContent='--';setRing('wkRingFg',1);return;}
+  if(!wkActive){
+    $('wkDigits').textContent='--:--';$('wkDigits').classList.add('idle');
+    $('wkSec').textContent='--';setRing('wkRingFg',1);return;
+  }
+  $('wkDigits').classList.remove('idle');
   var rem=secUntilAlarm(wkHval,wkMval);
   $('wkDigits').textContent=pad(Math.floor(rem/3600))+':'+pad(Math.floor((rem%3600)/60));
   $('wkSec').textContent=pad(rem%60);
@@ -900,15 +918,17 @@ function wkBeep(){
   try{
     if(!wkACtx) wkACtx=new(window.AudioContext||window.webkitAudioContext)();
     if(wkACtx.state==='suspended') wkACtx.resume();
-    [880,1046,1318].forEach(function(freq,i){
+    // Attention: 3 short sharp beeps + 1 long
+    [{f:1047,d:0.00,l:0.11},{f:1047,d:0.16,l:0.11},
+     {f:1047,d:0.32,l:0.11},{f:784, d:0.50,l:0.40}].forEach(function(p){
       var o=wkACtx.createOscillator(),g=wkACtx.createGain();
       o.connect(g);g.connect(wkACtx.destination);
-      o.frequency.value=freq;o.type='sine';
-      var t=wkACtx.currentTime+i*0.14;
+      o.frequency.value=p.f; o.type='square';
+      var t=wkACtx.currentTime+p.d;
       g.gain.setValueAtTime(0,t);
-      g.gain.linearRampToValueAtTime(0.65,t+0.04);
-      g.gain.exponentialRampToValueAtTime(0.001,t+0.40);
-      o.start(t);o.stop(t+0.44);
+      g.gain.linearRampToValueAtTime(0.7,t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.001,t+p.l);
+      o.start(t);o.stop(t+p.l+0.02);
     });
   }catch(e){}
 }
@@ -916,7 +936,7 @@ function triggerAlarm(){
   if(wkRinging) return; wkRinging=true;
   $('alarmTime').textContent=pad(wkHval)+':'+pad(wkMval);
   $('alarmOverlay').classList.remove('hidden');
-  wkBeep(); wkSndIv=setInterval(wkBeep,900);
+  wkBeep(); wkSndIv=setInterval(wkBeep,1200);
   try{if(navigator.vibrate)navigator.vibrate([500,200,500,200,500]);}catch(e){}
 }
 function stopAlarm(){
@@ -927,7 +947,7 @@ function stopAlarm(){
   wkRinging=false;wkActive=false;
   clearInterval(wkIv);wkIv=null;
   $('wkSetBtn').textContent='Stellen';$('wkSetBtn').classList.remove('armed');
-  $('wkSub').textContent='--:--';$('wkDigits').textContent='--:--';$('wkSec').textContent='--';
+  $('wkSub').textContent='--:--';$('wkDigits').textContent='--:--';$('wkDigits').classList.add('idle');$('wkSec').textContent='--';
   setRing('wkRingFg',1);wlUpdate();showUI();
 }
 function wkTick(){
@@ -972,8 +992,8 @@ function initWlBtn(btnId, getState, setState){
   var btn = $(btnId);
   if(!btn) return;
   function refresh(){
-    if(getState()){ btn.classList.add('on'); btn.textContent='☀ Anbleiben'; }
-    else           { btn.classList.remove('on'); btn.textContent='☀ Anbleiben'; }
+    if(getState()){ btn.classList.add('on'); btn.textContent='● Anbleiben'; }
+    else           { btn.classList.remove('on'); btn.textContent='Anbleiben'; }
   }
   btn.addEventListener('click', function(){
     setState(!getState());
@@ -994,10 +1014,10 @@ initWlBtn('wkWlBtn',
    FULLSCREEN — Android only
 ══════════════════════════════════════════ */
 (function(){
-  var isIOS = /iP(hone|ad|od)/i.test(navigator.userAgent);
   var btn = $('fsBtn');
+  var canFS = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
 
-  if (!isIOS && btn) {
+  if (canFS && btn) {
     btn.style.display = '-webkit-flex';
     btn.style.display = 'flex';
     var inFS = false;
