@@ -166,10 +166,14 @@ iPad   (768×1024): min(246px,451px)=246px ✓ */
 font-size: clamp(44px, min(32vw, 44vh), 600px);
 }
 @media (orientation:landscape) {
-/* ── GEÄNDERT: px-Cap bei 320px ──
-In Landscape gilt vmin=vh. Ohne px-Cap: iPad 65×7.5px=488px → Schrift breiter als Screen.
-Mit Cap: iPhone(vmin=375px)→244px ✓  iPad→320px(cap) ✓  Desktop→320px(cap) ✓ */
-.time-main { font-size: clamp(44px, 65vmin, 320px); }
+/* min(28vw, 52vh) — selbstregulierend auf jedem Gerät:
+vw-Arm: hh:mm (5 Zeichen) passt horizontal  → 28vw × 5 × 0.45 ≈ 63vw ✓
+vh-Arm: Ziffern wachsen nie über 52% der Höhe hinaus
+iPhone LS 844×390:  min(236px, 203px) = 203px ✓
+iPad LS   1024×768: min(287px, 399px) = 287px ✓
+Desktop   1920×1080:min(538px, 562px) = 538px ✓
+4K        3840×2160:min(1075px,1123px)= 1075px (cap bei 900px) ✓ */
+.time-main { font-size: clamp(44px, min(28vw, 52vh), 900px); }
 }
 .time-sec {
 font-family:‘DIN Condensed’,‘Arial Narrow’,sans-serif;
@@ -180,8 +184,8 @@ font-size: clamp(18px, min(12.5vw, 17vh), 280px);
 padding-left: clamp(2px,min(1.8vw,3vh),18px);
 }
 @media (orientation:landscape) {
-/* proportional: 125px/320px ≈ 39% von time-main */
-.time-sec { font-size: clamp(18px, 25vmin, 125px); }
+/* proportional 39% von time-main: min(11vw, 20vh) */
+.time-sec { font-size: clamp(18px, min(11vw, 20vh), 350px); }
 }
 .date-block {
 display:-webkit-flex; display:flex;
@@ -256,8 +260,12 @@ letter-spacing:-0.02em; white-space:nowrap;
 font-size: clamp(44px, min(32vw, 44vh), 600px);
 }
 @media (orientation:landscape) {
-/* px-Cap 300px: iPhone→225px(60vmin) ✓  iPad→300px(cap) ✓  Desktop→300px(cap) ✓ */
-.xt-digits { font-size: clamp(44px, 60vmin, 300px); }
+/* min(26vw, 50vh) — etwas kleiner als time-main wegen Landscape-Buttons rechts:
+iPhone LS 844×390:  min(219px, 195px) = 195px ✓
+iPad LS   1024×768: min(266px, 384px) = 266px ✓
+Desktop   1920×1080:min(499px, 540px) = 499px ✓
+4K        3840×2160:min(998px, 1080px)= 998px (cap bei 900px) ✓ */
+.xt-digits { font-size: clamp(44px, min(26vw, 50vh), 900px); }
 }
 .xt-digits.idle {
 font-family:‘Share Tech Mono’,monospace !important;
@@ -275,8 +283,8 @@ font-size: clamp(18px, min(12.5vw, 17vh), 280px);
 padding-left: clamp(2px,min(1.8vw,3vh),18px);
 }
 @media (orientation:landscape) {
-/* proportional: 118px/300px ≈ 39% von xt-digits */
-.xt-secs { font-size: clamp(18px, 23vmin, 118px); }
+/* proportional 39% von xt-digits: min(10vw, 19vh) */
+.xt-secs { font-size: clamp(18px, min(10vw, 19vh), 350px); }
 }
 
 /* xt-info sitzt jetzt in sc-bar-zone, über dem Balken */
