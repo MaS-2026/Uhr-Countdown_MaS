@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="de">
 <head>
   <meta charset="UTF-8">
@@ -29,73 +28,73 @@
     #app { color: #000 !important; }
 
 /* ══════════════════════════════════════════════════
-#app — einziger fixed Root
+   #app — einziger fixed Root
 ══════════════════════════════════════════════════ */
 #app {
-position:fixed; top:0; left:0; right:0; bottom:0;
-overflow:hidden; background:#000; color:#fff;
-font-family:‘Share Tech Mono’, monospace;
--webkit-transform:translateZ(0); transform:translateZ(0);
+  position:fixed; top:0; left:0; right:0; bottom:0;
+  overflow:hidden; background:#000; color:#fff;
+  font-family:'Share Tech Mono', monospace;
+  -webkit-transform:translateZ(0); transform:translateZ(0);
 }
 
 /* ══════════════════════════════════════════════════
-SCREENS
+   SCREENS
 ══════════════════════════════════════════════════ */
 .screen {
-position:absolute; top:0; left:0; right:0; bottom:0;
-display:none; background:#000;
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  display:none; background:#000;
 }
 
 /* PORTRAIT */
 .screen.active {
-display:-webkit-flex; display:flex;
--webkit-flex-direction:column; flex-direction:column;
--webkit-justify-content:center; justify-content:center;
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-justify-content:center; justify-content:center;
 }
 .sc-main {
-/* ── GEÄNDERT: 38vw → 32vw (passend zur neuen font-size 32vw) ── */
-position:relative; overflow:visible;
--webkit-flex-shrink:0; flex-shrink:0;
-height: calc(32vw + 14vmin);
+  /* ── GEÄNDERT: 38vw → 32vw (passend zur neuen font-size 32vw) ── */
+  position:relative; overflow:visible;
+  -webkit-flex-shrink:0; flex-shrink:0;
+  height: calc(32vw + 14vmin);
 }
 
 /* LANDSCAPE — überschreibt Portrait-Regeln */
 @media (orientation:landscape) {
-/* center + margin-top-Offset: stabiler als flex-end auf allen iPad-Größen
-margin-top 0 = exakt mittig, negativ = leicht nach unten, positiv = nach oben */
-.screen.active {
--webkit-justify-content:center; justify-content:center;
-}
-/* Höhe skaliert mit 25vw-Basis */
-.sc-main {
-height: calc(min(25vw, 52vh) * 1.4);
--webkit-flex-shrink:0; flex-shrink:0;
-overflow:visible;
-}
+  /* center + margin-top-Offset: stabiler als flex-end auf allen iPad-Größen
+     margin-top 0 = exakt mittig, negativ = leicht nach unten, positiv = nach oben */
+  .screen.active {
+    -webkit-justify-content:center; justify-content:center;
+  }
+  /* Höhe skaliert mit 25vw-Basis */
+  .sc-main {
+    height: calc(min(25vw, 52vh) * 1.4);
+    -webkit-flex-shrink:0; flex-shrink:0;
+    overflow:visible;
+  }
 }
 
 .sc-bar-zone {
--webkit-flex-shrink:0; flex-shrink:0;
-display:-webkit-flex; display:flex;
--webkit-flex-direction:column; flex-direction:column;
--webkit-align-items:stretch; align-items:stretch;
-padding: 0 clamp(8px,1.5vmin,14px)
-calc(clamp(8px,2vmin,16px) + env(safe-area-inset-bottom, 0px));
+  -webkit-flex-shrink:0; flex-shrink:0;
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-align-items:stretch; align-items:stretch;
+  padding: 0 clamp(8px,1.5vmin,14px)
+           calc(clamp(8px,2vmin,16px) + env(safe-area-inset-bottom, 0px));
 }
 @media (orientation:landscape) {
-#countdown-screen .sc-bar-zone,
-#wecker-screen   .sc-bar-zone {
-padding-bottom: calc(clamp(18px, 4.5vmin, 36px) + env(safe-area-inset-bottom, 0px));
-}
+  #countdown-screen .sc-bar-zone,
+  #wecker-screen   .sc-bar-zone {
+    padding-bottom: calc(clamp(18px, 4.5vmin, 36px) + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* Gemeinsamer Balken-Track */
 .sc-bar-track {
-height: clamp(14px, 4.2vmin, 30px);
-background: rgba(255,255,255,.07);
-border-radius: 6px;
-position: relative;
-overflow: hidden;
+  height: clamp(14px, 4.2vmin, 30px);
+  background: rgba(255,255,255,.07);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
 }
 
 /* AUTO-HIDE */
@@ -104,148 +103,165 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 
 /* FULLSCREEN BTN */
 #fsBtn {
-display:none; position:absolute; bottom:14px; left:14px;
-width:44px; height:44px; background:rgba(255,128,0,.18);
-border:1px solid rgba(255,128,0,.5); color:#ff8000;
-font-size:22px; border-radius:10px; cursor:pointer; z-index:999;
--webkit-align-items:center; align-items:center;
--webkit-justify-content:center; justify-content:center;
-font-family:sans-serif;
+  display:none; position:absolute; bottom:14px; left:14px;
+  width:44px; height:44px; background:rgba(255,128,0,.18);
+  border:1px solid rgba(255,128,0,.5); color:#ff8000;
+  font-size:22px; border-radius:10px; cursor:pointer; z-index:999;
+  -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
+  font-family:sans-serif;
 }
 
 /* DOTS */
 #dots {
-position:absolute; left:50%;
--webkit-transform:translateX(-50%); transform:translateX(-50%);
-display:-webkit-flex; display:flex;
-gap:clamp(8px,2.5vmin,20px); z-index:200; pointer-events:auto; overflow:visible;
+  position:absolute; left:50%;
+  -webkit-transform:translateX(-50%); transform:translateX(-50%);
+  display:-webkit-flex; display:flex;
+  gap:clamp(8px,2.5vmin,20px); z-index:200; pointer-events:auto; overflow:visible;
 }
 @media (orientation:portrait) {
-#dots { bottom: calc(clamp(12px,3.5vmin,28px) + env(safe-area-inset-bottom, 0px)); top:auto; }
+  #dots { bottom: calc(clamp(12px,3.5vmin,28px) + env(safe-area-inset-bottom, 0px)); top:auto; }
 }
 @media (orientation:landscape) {
-/* Mittig oben — genug Abstand damit Dots nicht am Browser-Rand kleben */
-#dots { top: calc(clamp(10px,2.5vmin,20px) + env(safe-area-inset-top, 0px)); bottom:auto; }
+  /* Mittig oben — genug Abstand damit Dots nicht am Browser-Rand kleben */
+  #dots { top: calc(clamp(10px,2.5vmin,20px) + env(safe-area-inset-top, 0px)); bottom:auto; }
 }
 .dot {
-width:  clamp(8px, 1.5vmin, 12px);
-height: clamp(8px, 1.5vmin, 12px);
-border-radius: 50%;
-/* Gefüllt — immer sichtbar auf schwarzem Hintergrund */
-background: rgba(255,255,255,.45);
-cursor: pointer;
-/* Großzügiges Click-Target ohne box-sizing-Tricks */
-margin: clamp(8px,2vmin,16px);
--webkit-transition: background .3s, box-shadow .3s;
-transition: background .3s, box-shadow .3s;
-/* Kein flex-shrink damit Dots nie kollabieren */
--webkit-flex-shrink:0; flex-shrink:0;
+  width:  clamp(8px, 1.5vmin, 12px);
+  height: clamp(8px, 1.5vmin, 12px);
+  border-radius: 50%;
+  /* Gefüllt — immer sichtbar auf schwarzem Hintergrund */
+  background: rgba(255,255,255,.45);
+  cursor: pointer;
+  /* Großzügiges Click-Target ohne box-sizing-Tricks */
+  margin: clamp(8px,2vmin,16px);
+  -webkit-transition: background .3s, box-shadow .3s;
+          transition: background .3s, box-shadow .3s;
+  /* Kein flex-shrink damit Dots nie kollabieren */
+  -webkit-flex-shrink:0; flex-shrink:0;
 }
 .dot.active {
-background: #ff8000;
-box-shadow: 0 0 8px #ff8000, 0 0 16px rgba(255,128,0,.5);
+  background: #ff8000;
+  box-shadow: 0 0 8px #ff8000, 0 0 16px rgba(255,128,0,.5);
 }
 
 /* ══════════════════════════════════════════════════
-UHR — Content absolut in sc-main, zentriert
+   UHR — Content absolut in sc-main, zentriert
 ══════════════════════════════════════════════════ */
 .uhr-content {
-position:absolute; top:0; left:0; right:0; bottom:0;
-display:-webkit-flex; display:flex;
--webkit-flex-direction:column; flex-direction:column;
--webkit-align-items:center; align-items:center;
--webkit-justify-content:center; justify-content:center;
-padding: 0 2vmin;
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
+  padding: 0 2vmin;
 }
 @media (orientation:landscape) {
-/* sc-main ist jetzt auto-height → justify-content spielt keine Rolle mehr,
-aber center ist semantisch korrekt */
-.uhr-content {
--webkit-justify-content:center; justify-content:center;
-padding-bottom: 0;
-}
+  /* sc-main ist jetzt auto-height → justify-content spielt keine Rolle mehr,
+     aber center ist semantisch korrekt */
+  .uhr-content {
+    -webkit-justify-content:center; justify-content:center;
+    padding-bottom: 0;
+  }
 }
 .time-row {
-display:-webkit-flex; display:flex;
--webkit-align-items:baseline; align-items:baseline;
-max-width:96vw; overflow:visible;
+  display:-webkit-flex; display:flex;
+  -webkit-align-items:baseline; align-items:baseline;
+  max-width:96vw; overflow:visible;
 }
 .time-main {
-font-family:‘DIN Condensed’,‘Arial Narrow’,sans-serif;
-font-weight:700; letter-spacing:-0.02em;
-line-height:1.0;
-color:#fff; white-space:nowrap;
-/* ── GEÄNDERT: 38vw → 34vw, max 900px → 600px ──
-34vw verhindert horizontalen Overflow auf Tablet/Desktop-Portrait.
-Auf iPhone (390px): 34vw=133px ≈ gleich wie zuvor.             */
-/* Portrait: min(32vw, 44vh)
-iPhone (390×844): min(125px, 372px)=125px ✓
-iPad   (768×1024): min(246px,451px)=246px ✓ */
-font-size: clamp(44px, min(32vw, 44vh), 600px);
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700; letter-spacing:-0.02em;
+  line-height:1.0;
+  color:#fff; white-space:nowrap;
+  /* ── GEÄNDERT: 38vw → 34vw, max 900px → 600px ──
+     34vw verhindert horizontalen Overflow auf Tablet/Desktop-Portrait.
+     Auf iPhone (390px): 34vw=133px ≈ gleich wie zuvor.             */
+  /* Portrait: min(32vw, 44vh)
+     iPhone (390×844): min(125px, 372px)=125px ✓
+     iPad   (768×1024): min(246px,451px)=246px ✓ */
+  font-size: clamp(44px, min(32vw, 44vh), 600px);
 }
 @media (orientation:landscape) {
-/* 24vw: etwas größer als 22vw — mehr Fläche auf iPad/Desktop genutzt
-iPhone LS 844×390:  min(202px, 203px) = 202px ✓
-iPad LS   1024×768: min(246px, 399px) = 246px ✓
-Desktop   1920×1080:min(461px, 562px) = 461px ✓
-4K        3840×2160:min(922px,1123px) = 900px (cap) ✓ */
-.time-main { font-size: clamp(44px, min(25vw, 52vh), 900px); }
+  /* 24vw: etwas größer als 22vw — mehr Fläche auf iPad/Desktop genutzt
+     iPhone LS 844×390:  min(202px, 203px) = 202px ✓
+     iPad LS   1024×768: min(246px, 399px) = 246px ✓
+     Desktop   1920×1080:min(461px, 562px) = 461px ✓
+     4K        3840×2160:min(922px,1123px) = 900px (cap) ✓ */
+  .time-main { font-size: clamp(44px, min(25vw, 52vh), 900px); }
 }
 .time-sec {
-font-family:‘DIN Condensed’,‘Arial Narrow’,sans-serif;
-font-weight:700; color:rgba(255,255,255,.52);
-line-height:1.0; white-space:nowrap;
-/* proportional zu 32vw: 12.5/32 ≈ 39% */
-font-size: clamp(18px, min(12.5vw, 17vh), 280px);
-padding-left: clamp(2px,min(1.8vw,3vh),18px);
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700; color:rgba(255,255,255,.52);
+  line-height:1.0; white-space:nowrap;
+  /* proportional zu 32vw: 12.5/32 ≈ 39% */
+  font-size: clamp(18px, min(12.5vw, 17vh), 280px);
+  padding-left: clamp(2px,min(1.8vw,3vh),18px);
 }
 @media (orientation:landscape) {
-/* 28% von time-main: min(6.7vw, 14vh) — Sekunden dezenter, Hauptziffern dominieren */
-.time-sec { font-size: clamp(18px, min(6.7vw, 14vh), 350px); }
+  /* 28% von time-main: min(6.7vw, 14vh) — Sekunden dezenter, Hauptziffern dominieren */
+  .time-sec { font-size: clamp(18px, min(6.7vw, 14vh), 350px); }
 }
 .date-block {
-display:-webkit-flex; display:flex;
-gap:2vmin; -webkit-align-items:baseline; align-items:baseline;
-margin-top: -0.45em;
-white-space:nowrap; -webkit-flex-wrap:nowrap; flex-wrap:nowrap;
+  display:-webkit-flex; display:flex;
+  gap: 0.5em;
+  -webkit-align-items:baseline; align-items:baseline;
+  margin-top: -0.45em;
+  white-space:nowrap; -webkit-flex-wrap:nowrap; flex-wrap:nowrap;
+  /* Breite = hh:mm = 4 Ziffern + 1 Doppelpunkt
+     DIN Condensed: ~0.52em pro Zeichen, 5 Zeichen = 2.6 × font-size
+     Portrait: font-size = 32vw → Breite ≈ 2.6 × 32vw = 83.2vw
+     date-block soll nur unter hh:mm → max-width = font-size × 2.6 */
+  overflow:hidden;
 }
 @media (orientation:landscape) {
-.date-block { margin-top: calc(min(25vw, 52vh) * -0.12); }
+  .date-block {
+    margin-top: calc(min(25vw, 52vh) * -0.12);
+  }
 }
-.weekday  { color:rgba(255,255,255,.38); letter-spacing:.4em;
-text-transform:uppercase; font-size:clamp(11px,3.6vw,44px); }
-.date-txt { color:rgba(255,255,255,.5);  letter-spacing:.2em;
-font-size:clamp(11px,3.6vw,44px); }
-/* Landscape: Datum-Schrift füllt die Breite der Ziffernzeile
-letter-spacing 0.1em (statt 0.4/0.2em Portrait) damit Datum nicht breiter als Ziffern
-iPad LS 1024×768:  50px → “DONNERSTAG 19. Mär 2026” ≈ 800px ≈ Ziffernbreite ✓
-Desktop 1920×1080: 94px → ≈ 1450px ≈ Ziffernbreite ✓ */
-/* Landscape: Datum-Breite = hh:mm (ohne Sekunden)
-“14:15” = 5 Zeichen × 0.45 × 25vw = 56.25vw
-“DONNERSTAG 19. Mär 2026” = 23 Zeichen × 0.58 × X = 56.25vw → X ≈ 4.2vw
--0.02em letter-spacing bereits eingerechnet */
+
+/* Portrait: Wochentag + Datum füllen die Breite von hh:mm
+   "Do" = 2 Zeichen + "19. Mär 2026" = 12 Zeichen → 14 total
+   font-size so dass 14 Zeichen × 0.6em = 32vw (Ziffernbreite)
+   → font-size ≈ 32vw / (14 × 0.6) = 32vw / 8.4 ≈ 3.8vw */
+.weekday {
+  color:rgba(255,255,255,.38);
+  letter-spacing: 0.05em;
+  text-transform:uppercase;
+  font-size: clamp(11px, 3.8vw, 44px);
+}
+.date-txt {
+  color:rgba(255,255,255,.5);
+  letter-spacing: 0.05em;
+  font-size: clamp(11px, 3.8vw, 44px);
+}
+
+/* Landscape: "Do 19. Mär 2026" = 14 Zeichen unter hh:mm (5 Zeichen × 25vw-Basis)
+   Ziffernbreite ≈ 5 × 0.52 × 25vw = 65vw
+   font-size = 65vw / (14 × 0.6) ≈ 65vw / 8.4 ≈ 7.7vw
+   vh-Bremse: 14vh */
 @media (orientation:landscape) {
-.weekday, .date-txt {
-font-size: clamp(12px, min(4.2vw, 8vh), 200px);
-letter-spacing: -0.02em;
-}
+  .weekday, .date-txt {
+    font-size: clamp(12px, min(7.7vw, 14vh), 300px);
+    letter-spacing: 0.05em;
+  }
 }
 
 /* Uhr-Balken mit seitlichen Markern */
 .uhr-bar-wrap {
-display:-webkit-flex; display:flex;
--webkit-align-items:center; align-items:center;
-gap:1.5vmin; width:100%;
+  display:-webkit-flex; display:flex;
+  -webkit-align-items:center; align-items:center;
+  gap:1.5vmin; width:100%;
 }
 .bar-marker { width:2px; height:5vmin; min-height:12px;
-background:rgba(255,255,255,.32); border-radius:1px;
--webkit-flex-shrink:0; flex-shrink:0; }
+              background:rgba(255,255,255,.32); border-radius:1px;
+              -webkit-flex-shrink:0; flex-shrink:0; }
 /* Balken-Fill Uhr: läuft von links */
 .bar-fill {
-position:absolute; top:0; left:0; bottom:0; width:0%;
-background:#ff8000;
-box-shadow:0 0 10px #ff8000,0 0 28px rgba(255,128,0,.7),0 0 50px rgba(255,128,0,.3);
-border-radius:6px;
+  position:absolute; top:0; left:0; bottom:0; width:0%;
+  background:#ff8000;
+  box-shadow:0 0 10px #ff8000,0 0 28px rgba(255,128,0,.7),0 0 50px rgba(255,128,0,.3);
+  border-radius:6px;
 }
 
 .colon { -webkit-animation:blink 1s step-end infinite; animation:blink 1s step-end infinite; }
@@ -253,128 +269,128 @@ border-radius:6px;
 @keyframes blink          { 0%,100%{opacity:1} 50%{opacity:.1} }
 
 /* ══════════════════════════════════════════════════
-COUNTDOWN & WECKER
+   COUNTDOWN & WECKER
 ══════════════════════════════════════════════════ */
 
 .xt-center {
-position:absolute; top:0; left:0; right:0; bottom:0;
-overflow:visible;
-display:-webkit-flex; display:flex;
--webkit-flex-direction:column; flex-direction:column;
--webkit-align-items:center; align-items:center;
--webkit-justify-content:center; justify-content:center;
-padding: 0 clamp(4px,1vmin,10px);
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  overflow:visible;
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
+  padding: 0 clamp(4px,1vmin,10px);
 }
 @media (orientation:landscape) {
-.xt-center {
--webkit-justify-content:center; justify-content:center;
-padding-bottom: 0;
-}
+  .xt-center {
+    -webkit-justify-content:center; justify-content:center;
+    padding-bottom: 0;
+  }
 }
 
 .xt-time-row {
-display:-webkit-flex; display:flex;
--webkit-align-items:baseline; align-items:baseline;
-max-width:96vw; overflow:visible;
+  display:-webkit-flex; display:flex;
+  -webkit-align-items:baseline; align-items:baseline;
+  max-width:96vw; overflow:visible;
 }
 @media (orientation:landscape) {
-/* War für flex-end-Layout gedacht — mit justify-content:center nicht mehr nötig */
-.xt-time-row { margin-bottom: 0; }
+  /* War für flex-end-Layout gedacht — mit justify-content:center nicht mehr nötig */
+  .xt-time-row { margin-bottom: 0; }
 }
 
 .xt-digits {
-font-family:‘DIN Condensed’,‘Arial Narrow’,sans-serif;
-font-weight:700; color:#fff;
-line-height:1.0;
-letter-spacing:-0.02em; white-space:nowrap;
-/* Portrait: gleiche Logik wie time-main */
-font-size: clamp(44px, min(32vw, 44vh), 600px);
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700; color:#fff;
+  line-height:1.0;
+  letter-spacing:-0.02em; white-space:nowrap;
+  /* Portrait: gleiche Logik wie time-main */
+  font-size: clamp(44px, min(32vw, 44vh), 600px);
 }
 @media (orientation:landscape) {
-/* 24vw — konsistent mit time-main */
-.xt-digits { font-size: clamp(44px, min(25vw, 52vh), 900px); }
+  /* 24vw — konsistent mit time-main */
+  .xt-digits { font-size: clamp(44px, min(25vw, 52vh), 900px); }
 }
 .xt-digits.idle {
-font-family:‘Share Tech Mono’,monospace !important;
-color:rgba(255,255,255,.28);
-font-size: clamp(18px, min(14vw, 22vh), 180px) !important;
+  font-family:'Share Tech Mono',monospace !important;
+  color:rgba(255,255,255,.28);
+  font-size: clamp(18px, min(14vw, 22vh), 180px) !important;
 }
 
 .xt-secs {
-font-family:‘DIN Condensed’,‘Arial Narrow’,sans-serif;
-font-weight:700; color:rgba(255,255,255,.52);
-line-height:1.0;
-letter-spacing:.1em; white-space:nowrap;
-/* proportional zu 32vw: 12.5/32 ≈ 39% */
-font-size: clamp(18px, min(12.5vw, 17vh), 280px);
-padding-left: clamp(2px,min(1.8vw,3vh),18px);
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700; color:rgba(255,255,255,.52);
+  line-height:1.0;
+  letter-spacing:.1em; white-space:nowrap;
+  /* proportional zu 32vw: 12.5/32 ≈ 39% */
+  font-size: clamp(18px, min(12.5vw, 17vh), 280px);
+  padding-left: clamp(2px,min(1.8vw,3vh),18px);
 }
 @media (orientation:landscape) {
-/* 28% von xt-digits: min(6.7vw, 14vh) */
-.xt-secs { font-size: clamp(18px, min(6.7vw, 14vh), 350px); }
+  /* 28% von xt-digits: min(6.7vw, 14vh) */
+  .xt-secs { font-size: clamp(18px, min(6.7vw, 14vh), 350px); }
 }
 
 /* xt-info sitzt jetzt in sc-bar-zone, über dem Balken */
 .xt-info {
-font-family:‘DIN Condensed’,sans-serif; font-weight:700;
-color:rgba(255,128,0,.85); letter-spacing:.3em;
-font-size: clamp(11px, min(4vw, 5.5vh), 44px);
-white-space:nowrap; cursor:pointer;
-text-align:center;
-display:block;
-margin-bottom: clamp(4px, 1vmin, 8px);
+  font-family:'DIN Condensed',sans-serif; font-weight:700;
+  color:rgba(255,128,0,.85); letter-spacing:.3em;
+  font-size: clamp(11px, min(4vw, 5.5vh), 44px);
+  white-space:nowrap; cursor:pointer;
+  text-align:center;
+  display:block;
+  margin-bottom: clamp(4px, 1vmin, 8px);
 }
 @media (orientation:landscape) { .xt-info { display:none; } }
 
 .xt-info-corner {
-display:none;
-/* Relativ zum .screen (position:absolute), nicht zu sc-main —
-damit keine Überlappung mit Ziffern egal welche sc-main-Höhe */
-position:absolute;
-top: calc(clamp(8px, 2vmin, 16px) + env(safe-area-inset-top, 0px));
-right: calc(clamp(8px, 2vmin, 16px) + env(safe-area-inset-right, 0px));
-font-family:‘DIN Condensed’,sans-serif; font-weight:700;
-color:rgba(255,128,0,.85); letter-spacing:.3em;
-font-size: clamp(12px, min(3vw, 5vh), 48px);
-white-space:nowrap; text-align:right; cursor:pointer;
-z-index:20;
+  display:none;
+  /* Relativ zum .screen (position:absolute), nicht zu sc-main —
+     damit keine Überlappung mit Ziffern egal welche sc-main-Höhe */
+  position:absolute;
+  top: calc(clamp(8px, 2vmin, 16px) + env(safe-area-inset-top, 0px));
+  right: calc(clamp(8px, 2vmin, 16px) + env(safe-area-inset-right, 0px));
+  font-family:'DIN Condensed',sans-serif; font-weight:700;
+  color:rgba(255,128,0,.85); letter-spacing:.3em;
+  font-size: clamp(12px, min(3vw, 5vh), 48px);
+  white-space:nowrap; text-align:right; cursor:pointer;
+  z-index:20;
 }
 @media (orientation:landscape) { .xt-info-corner { display:block; } }
 
 /* Portrait-Buttons: unter dem Balken, zentriert */
 .sc-btn-zone {
--webkit-flex-shrink:0; flex-shrink:0;
-display:-webkit-flex; display:flex;
--webkit-flex-direction:row; flex-direction:row;
--webkit-align-items:center; align-items:center;
--webkit-justify-content:center; justify-content:center;
-gap:2.5vmin;
-padding: clamp(8px,2vmin,16px) 0
-calc(clamp(4px,1vmin,8px) + env(safe-area-inset-bottom, 0px));
+  -webkit-flex-shrink:0; flex-shrink:0;
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:row; flex-direction:row;
+  -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
+  gap:2.5vmin;
+  padding: clamp(8px,2vmin,16px) 0
+           calc(clamp(4px,1vmin,8px) + env(safe-area-inset-bottom, 0px));
 }
 @media (orientation:landscape) { .sc-btn-zone { display:none !important; } }
 
 /* Landscape-Buttons */
 .xt-btns-ls { display:none; }
 @media (orientation:landscape) {
-.xt-btns-ls {
-display:-webkit-flex; display:flex;
-position:absolute;
-right: calc(3vmin + env(safe-area-inset-right, 0px));
-top:50%;
--webkit-transform:translateY(-50%); transform:translateY(-50%);
--webkit-flex-direction:column; flex-direction:column;
--webkit-align-items:stretch; align-items:stretch;
-gap:2vmin; z-index:10;
-}
+  .xt-btns-ls {
+    display:-webkit-flex; display:flex;
+    position:absolute;
+    right: calc(3vmin + env(safe-area-inset-right, 0px));
+    top:50%;
+    -webkit-transform:translateY(-50%); transform:translateY(-50%);
+    -webkit-flex-direction:column; flex-direction:column;
+    -webkit-align-items:stretch; align-items:stretch;
+    gap:2vmin; z-index:10;
+  }
 }
 
 .act-btn {
-font-family:‘Share Tech Mono’,monospace;
-letter-spacing:.15em; text-transform:uppercase;
-border-radius:4vmin; cursor:pointer; border:none; text-align:center;
-font-size:clamp(9px,2vmin,14px);
-padding:clamp(5px,1.4vmin,11px) clamp(10px,2.8vmin,22px);
+  font-family:'Share Tech Mono',monospace;
+  letter-spacing:.15em; text-transform:uppercase;
+  border-radius:4vmin; cursor:pointer; border:none; text-align:center;
+  font-size:clamp(9px,2vmin,14px);
+  padding:clamp(5px,1.4vmin,11px) clamp(10px,2.8vmin,22px);
 }
 .act-go    { background:#ff8000; color:#000; box-shadow:0 0 14px rgba(255,128,0,.5); }
 .act-reset { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.2); color:#fff; }
@@ -382,11 +398,11 @@ padding:clamp(5px,1.4vmin,11px) clamp(10px,2.8vmin,22px);
 .act-set.armed { background:#ff8000; color:#000; }
 
 .info-msg {
-color:#ff8000; letter-spacing:.15em; text-transform:uppercase;
-text-align:center; font-size:clamp(7px,1.8vmin,13px);
-font-family:‘Share Tech Mono’,monospace;
--webkit-animation:pulse 1s ease-in-out infinite alternate;
-animation:pulse 1s ease-in-out infinite alternate;
+  color:#ff8000; letter-spacing:.15em; text-transform:uppercase;
+  text-align:center; font-size:clamp(7px,1.8vmin,13px);
+  font-family:'Share Tech Mono',monospace;
+  -webkit-animation:pulse 1s ease-in-out infinite alternate;
+          animation:pulse 1s ease-in-out infinite alternate;
 }
 .info-msg.hidden { display:none; }
 @-webkit-keyframes pulse { from{opacity:.2} to{opacity:1} }
@@ -394,142 +410,141 @@ animation:pulse 1s ease-in-out infinite alternate;
 
 /* Balken-Fill CD/WK: läuft von rechts */
 .xt-bar-fill {
-position:absolute; top:0; right:0; bottom:0; width:0%;
-background:#ff8000;
-box-shadow:0 0 10px #ff8000,0 0 28px rgba(255,128,0,.6),0 0 50px rgba(255,128,0,.25);
--webkit-transition:width .6s linear; transition:width .6s linear;
+  position:absolute; top:0; right:0; bottom:0; width:0%;
+  background:#ff8000;
+  box-shadow:0 0 10px #ff8000,0 0 28px rgba(255,128,0,.6),0 0 50px rgba(255,128,0,.25);
+  -webkit-transition:width .6s linear; transition:width .6s linear;
 }
 
 /* ══════════════════════════════════════════════════
-PICKER MODAL
+   PICKER MODAL
 ══════════════════════════════════════════════════ */
 .picker-modal {
-position:absolute; top:0; left:0; right:0; bottom:0; z-index:200;
-display:-webkit-flex; display:flex;
--webkit-align-items:center; align-items:center;
--webkit-justify-content:center; justify-content:center;
-background:rgba(0,0,0,.88);
+  position:absolute; top:0; left:0; right:0; bottom:0; z-index:200;
+  display:-webkit-flex; display:flex;
+  -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
+  background:rgba(0,0,0,.88);
 }
 .picker-modal.hidden { display:none !important; }
 .picker-box {
-display:-webkit-flex; display:flex;
--webkit-flex-direction:column; flex-direction:column;
--webkit-align-items:center; align-items:center;
-gap:5vmin; background:rgb(13,13,13);
-border:1px solid rgba(255,128,0,.28);
-border-radius:4vmin; padding:4vmin 6vmin;
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-align-items:center; align-items:center;
+  gap:5vmin; background:rgb(13,13,13);
+  border:1px solid rgba(255,128,0,.28);
+  border-radius:4vmin; padding:4vmin 6vmin;
 }
 .picker-title {
-color:rgba(255,255,255,.28); letter-spacing:.4em;
-text-transform:uppercase; font-size:clamp(8px,1.8vmin,12px);
-font-family:‘Share Tech Mono’,monospace;
+  color:rgba(255,255,255,.28); letter-spacing:.4em;
+  text-transform:uppercase; font-size:clamp(8px,1.8vmin,12px);
+  font-family:'Share Tech Mono',monospace;
 }
 .drums-row {
-display:-webkit-flex; display:flex;
--webkit-align-items:center; align-items:center; gap:3vmin;
+  display:-webkit-flex; display:flex;
+  -webkit-align-items:center; align-items:center; gap:3vmin;
 }
 .drum-wrap {
-display:-webkit-flex; display:flex;
--webkit-flex-direction:column; flex-direction:column;
--webkit-align-items:center; align-items:center; gap:1.5vmin;
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-align-items:center; align-items:center; gap:1.5vmin;
 }
 .drum-lbl {
-color:rgba(255,255,255,.22); letter-spacing:.3em;
-text-transform:uppercase; font-size:clamp(7px,1.8vmin,12px);
-font-family:‘Share Tech Mono’,monospace;
+  color:rgba(255,255,255,.22); letter-spacing:.3em;
+  text-transform:uppercase; font-size:clamp(7px,1.8vmin,12px);
+  font-family:'Share Tech Mono',monospace;
 }
 .drum-sep {
-font-family:‘DIN Condensed’,sans-serif; font-weight:700;
-color:rgba(255,128,0,.6);
--webkit-align-self:center; align-self:center; margin-bottom:4vmin;
+  font-family:'DIN Condensed',sans-serif; font-weight:700;
+  color:rgba(255,128,0,.6);
+  -webkit-align-self:center; align-self:center; margin-bottom:4vmin;
 }
 .drum-outer { position:relative; overflow:hidden; border-radius:2vmin; }
 .drum-hl {
-position:absolute; left:0; right:0; z-index:4; pointer-events:none;
-border-top:1px solid rgba(255,128,0,.7);
-border-bottom:1px solid rgba(255,128,0,.7);
-background:rgba(255,128,0,.09);
+  position:absolute; left:0; right:0; z-index:4; pointer-events:none;
+  border-top:1px solid rgba(255,128,0,.7);
+  border-bottom:1px solid rgba(255,128,0,.7);
+  background:rgba(255,128,0,.09);
 }
 .drum-fade {
-position:absolute; top:0; left:0; right:0; bottom:0;
-z-index:3; pointer-events:none;
-background:-webkit-linear-gradient(top,rgb(13,13,13) 0%,rgba(13,13,13,0) 30%,rgba(13,13,13,0) 70%,rgb(13,13,13) 100%);
-background:linear-gradient(to bottom,rgb(13,13,13) 0%,rgba(13,13,13,0) 30%,rgba(13,13,13,0) 70%,rgb(13,13,13) 100%);
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  z-index:3; pointer-events:none;
+  background:-webkit-linear-gradient(top,rgb(13,13,13) 0%,rgba(13,13,13,0) 30%,rgba(13,13,13,0) 70%,rgb(13,13,13) 100%);
+  background:linear-gradient(to bottom,rgb(13,13,13) 0%,rgba(13,13,13,0) 30%,rgba(13,13,13,0) 70%,rgb(13,13,13) 100%);
 }
 .drum-scroller {
-display:block; overflow-y:scroll; overflow-x:hidden;
--webkit-scroll-snap-type:y mandatory; scroll-snap-type:y mandatory;
--webkit-overflow-scrolling:touch; scrollbar-width:none;
+  display:block; overflow-y:scroll; overflow-x:hidden;
+  -webkit-scroll-snap-type:y mandatory; scroll-snap-type:y mandatory;
+  -webkit-overflow-scrolling:touch; scrollbar-width:none;
 }
 .drum-scroller::-webkit-scrollbar { display:none; }
 .drum-item {
-display:-webkit-flex; display:flex;
--webkit-align-items:center; align-items:center;
--webkit-justify-content:center; justify-content:center;
-font-family:‘DIN Condensed’,sans-serif; font-weight:700;
-color:rgba(255,255,255,.22);
--webkit-flex-shrink:0; flex-shrink:0;
--webkit-scroll-snap-align:center; scroll-snap-align:center;
+  display:-webkit-flex; display:flex;
+  -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
+  font-family:'DIN Condensed',sans-serif; font-weight:700;
+  color:rgba(255,255,255,.22);
+  -webkit-flex-shrink:0; flex-shrink:0;
+  -webkit-scroll-snap-align:center; scroll-snap-align:center;
 }
 .drum-spacer {
--webkit-flex-shrink:0; flex-shrink:0;
--webkit-scroll-snap-align:none; scroll-snap-align:none;
+  -webkit-flex-shrink:0; flex-shrink:0;
+  -webkit-scroll-snap-align:none; scroll-snap-align:none;
 }
 .picker-ok {
-background:#ff8000; color:#000; border:none; border-radius:2.5vmin;
-font-family:‘Share Tech Mono’,monospace; letter-spacing:.15em;
-text-transform:uppercase; cursor:pointer;
-padding:1.6vmin 4vmin; font-size:clamp(9px,1.8vmin,13px);
+  background:#ff8000; color:#000; border:none; border-radius:2.5vmin;
+  font-family:'Share Tech Mono',monospace; letter-spacing:.15em;
+  text-transform:uppercase; cursor:pointer;
+  padding:1.6vmin 4vmin; font-size:clamp(9px,1.8vmin,13px);
 }
 .picker-cancel {
-background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15);
-color:rgba(255,255,255,.4); border-radius:2.5vmin;
-font-family:‘Share Tech Mono’,monospace; letter-spacing:.15em;
-text-transform:uppercase; cursor:pointer;
-padding:1.6vmin 3.5vmin; font-size:clamp(9px,1.8vmin,13px);
+  background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.4); border-radius:2.5vmin;
+  font-family:'Share Tech Mono',monospace; letter-spacing:.15em;
+  text-transform:uppercase; cursor:pointer;
+  padding:1.6vmin 3.5vmin; font-size:clamp(9px,1.8vmin,13px);
 }
 
 /* ══════════════════════════════════════════════════
-ALARM OVERLAY
+   ALARM OVERLAY
 ══════════════════════════════════════════════════ */
 #alarmOverlay {
-position:absolute; top:0; left:0; right:0; bottom:0; z-index:300;
-display:-webkit-flex; display:flex;
--webkit-flex-direction:column; flex-direction:column;
--webkit-align-items:center; align-items:center;
--webkit-justify-content:center; justify-content:center;
-gap:4vmin; cursor:pointer; touch-action:manipulation;
-background:#000;
--webkit-animation:ablink .55s ease-in-out infinite; animation:ablink .55s ease-in-out infinite;
+  position:absolute; top:0; left:0; right:0; bottom:0; z-index:300;
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
+  gap:4vmin; cursor:pointer; touch-action:manipulation;
+  background:#000;
+  -webkit-animation:ablink .55s ease-in-out infinite; animation:ablink .55s ease-in-out infinite;
 }
 #alarmOverlay.hidden { display:none !important; }
 @-webkit-keyframes ablink { 0%,100%{background:rgba(0,0,0,1)} 50%{background:rgba(210,45,0,.75)} }
 @keyframes ablink          { 0%,100%{background:rgba(0,0,0,1)} 50%{background:rgba(210,45,0,.75)} }
-.a-title { font-family:‘DIN Condensed’,sans-serif; font-weight:700;
-color:#ff8000; letter-spacing:.5em; text-transform:uppercase;
-font-size:clamp(22px,9vmin,72px); }
-.a-time  { font-family:‘DIN Condensed’,sans-serif; font-weight:700;
-color:#fff; line-height:1; font-size:clamp(50px,18vmin,130px); }
+.a-title { font-family:'DIN Condensed',sans-serif; font-weight:700;
+           color:#ff8000; letter-spacing:.5em; text-transform:uppercase;
+           font-size:clamp(22px,9vmin,72px); }
+.a-time  { font-family:'DIN Condensed',sans-serif; font-weight:700;
+           color:#fff; line-height:1; font-size:clamp(50px,18vmin,130px); }
 .a-hint  { color:rgba(255,255,255,.3); letter-spacing:.3em;
-text-transform:uppercase; font-size:clamp(9px,2vmin,14px);
-font-family:‘Share Tech Mono’,monospace; }
+           text-transform:uppercase; font-size:clamp(9px,2vmin,14px);
+           font-family:'Share Tech Mono',monospace; }
 
 /* WAKE LOCK TOGGLE */
 .wl-btn {
-position:absolute;
-top: calc(clamp(8px,2vmin,18px) + env(safe-area-inset-top, 0px));
-right: calc(clamp(8px,2vmin,18px) + env(safe-area-inset-right, 0px));
-background:rgba(255,128,0,.12); border:1px solid rgba(255,128,0,.4);
-color:rgba(255,128,0,.6); font-family:‘Share Tech Mono’,monospace;
-font-size:clamp(8px,2vmin,13px); letter-spacing:.15em; text-transform:uppercase;
-border-radius:3vmin; padding:clamp(4px,1.2vmin,10px) clamp(8px,2.2vmin,16px);
-cursor:pointer; z-index:50;
--webkit-transition:background .3s,color .3s,border-color .3s;
-transition:background .3s,color .3s,border-color .3s;
+  position:absolute;
+  top: calc(clamp(8px,2vmin,18px) + env(safe-area-inset-top, 0px));
+  right: calc(clamp(8px,2vmin,18px) + env(safe-area-inset-right, 0px));
+  background:rgba(255,128,0,.12); border:1px solid rgba(255,128,0,.4);
+  color:rgba(255,128,0,.6); font-family:'Share Tech Mono',monospace;
+  font-size:clamp(8px,2vmin,13px); letter-spacing:.15em; text-transform:uppercase;
+  border-radius:3vmin; padding:clamp(4px,1.2vmin,10px) clamp(8px,2.2vmin,16px);
+  cursor:pointer; z-index:50;
+  -webkit-transition:background .3s,color .3s,border-color .3s;
+          transition:background .3s,color .3s,border-color .3s;
 }
 .wl-btn.on { background:rgba(255,128,0,.88); border-color:#ff8000; color:#000; }
-</style>
-
+  </style>
 </head>
 <body>
 <div id="app">
@@ -540,32 +555,30 @@ transition:background .3s,color .3s,border-color .3s;
 
   <div class="screen active" id="uhr-screen">
 
-```
-<div class="sc-main">
-  <div class="uhr-content">
-    <div class="time-row">
-      <div class="time-main" id="timeMain">00<span class="colon">:</span>00</div>
-      <div class="time-sec"  id="timeSec">00</div>
+    <div class="sc-main">
+      <div class="uhr-content">
+        <div class="time-row">
+          <div class="time-main" id="timeMain">00<span class="colon">:</span>00</div>
+          <div class="time-sec"  id="timeSec">00</div>
+        </div>
+        <div class="date-block">
+          <span class="weekday"  id="weekday">Montag</span>
+          <span class="date-txt" id="dateTxt">01. Jan 2025</span>
+        </div>
+      </div>
     </div>
-    <div class="date-block">
-      <span class="weekday"  id="weekday">Montag</span>
-      <span class="date-txt" id="dateTxt">01. Jan 2025</span>
-    </div>
-  </div>
-</div>
 
-<button class="wl-btn btn-ui" id="uhrWlBtn">Anbleiben</button>
+    <button class="wl-btn btn-ui" id="uhrWlBtn">Anbleiben</button>
 
-<div class="sc-bar-zone">
-  <div class="uhr-bar-wrap">
-    <div class="bar-marker"></div>
-    <div class="sc-bar-track" style="-webkit-flex:1;flex:1;">
-      <div class="bar-fill" id="barFill"></div>
+    <div class="sc-bar-zone">
+      <div class="uhr-bar-wrap">
+        <div class="bar-marker"></div>
+        <div class="sc-bar-track" style="-webkit-flex:1;flex:1;">
+          <div class="bar-fill" id="barFill"></div>
+        </div>
+        <div class="bar-marker"></div>
+      </div>
     </div>
-    <div class="bar-marker"></div>
-  </div>
-</div>
-```
 
   </div>
 
@@ -575,37 +588,35 @@ transition:background .3s,color .3s,border-color .3s;
 
   <div class="screen" id="countdown-screen">
 
-```
-<div class="sc-main">
-  <div class="xt-center">
-    <div class="xt-time-row">
-      <div class="xt-digits" id="cdDigits">00:00</div>
-      <div class="xt-secs"   id="cdSec">00</div>
+    <div class="sc-main">
+      <div class="xt-center">
+        <div class="xt-time-row">
+          <div class="xt-digits" id="cdDigits">00:00</div>
+          <div class="xt-secs"   id="cdSec">00</div>
+        </div>
+      </div>
+      <div class="xt-btns btn-ui xt-btns-ls">
+        <button class="act-btn act-go"    id="cdGoBtn">Stellen</button>
+        <button class="act-btn act-reset" id="cdResetBtn">Reset</button>
+        <div class="info-msg hidden"      id="cdDone">Zeit abgelaufen!</div>
+      </div>
     </div>
-  </div>
-  <div class="xt-btns btn-ui xt-btns-ls">
-    <button class="act-btn act-go"    id="cdGoBtn">Stellen</button>
-    <button class="act-btn act-reset" id="cdResetBtn">Reset</button>
-    <div class="info-msg hidden"      id="cdDone">Zeit abgelaufen!</div>
-  </div>
-</div>
 
-<!-- xt-info-corner direkt im screen — nicht in sc-main -->
-<div class="xt-info-corner" id="cdInfoL"></div>
+    <!-- xt-info-corner direkt im screen — nicht in sc-main -->
+    <div class="xt-info-corner" id="cdInfoL"></div>
 
-<div class="sc-bar-zone">
-  <div class="xt-info" id="cdInfoP"></div>
-  <div class="sc-bar-track">
-    <div class="xt-bar-fill" id="cdBarFill"></div>
-  </div>
-</div>
+    <div class="sc-bar-zone">
+      <div class="xt-info" id="cdInfoP"></div>
+      <div class="sc-bar-track">
+        <div class="xt-bar-fill" id="cdBarFill"></div>
+      </div>
+    </div>
 
-<div class="sc-btn-zone btn-ui">
-  <button class="act-btn act-go"    id="cdGoBtnP">Stellen</button>
-  <button class="act-btn act-reset" id="cdResetBtnP">Reset</button>
-  <div class="info-msg hidden"      id="cdDoneP">Zeit abgelaufen!</div>
-</div>
-```
+    <div class="sc-btn-zone btn-ui">
+      <button class="act-btn act-go"    id="cdGoBtnP">Stellen</button>
+      <button class="act-btn act-reset" id="cdResetBtnP">Reset</button>
+      <div class="info-msg hidden"      id="cdDoneP">Zeit abgelaufen!</div>
+    </div>
 
   </div>
 
@@ -615,39 +626,37 @@ transition:background .3s,color .3s,border-color .3s;
 
   <div class="screen" id="wecker-screen">
 
-```
-<div class="sc-main">
-  <div class="xt-center">
-    <div class="xt-time-row">
-      <div class="xt-digits idle" id="wkDigits">--:--</div>
-      <div class="xt-secs"        id="wkSec">--</div>
+    <div class="sc-main">
+      <div class="xt-center">
+        <div class="xt-time-row">
+          <div class="xt-digits idle" id="wkDigits">--:--</div>
+          <div class="xt-secs"        id="wkSec">--</div>
+        </div>
+      </div>
+      <div class="xt-btns btn-ui xt-btns-ls">
+        <button class="act-btn act-set"   id="wkSetBtn">Stellen</button>
+        <button class="act-btn act-reset" id="wkResetBtn">Reset</button>
+        <button class="wl-btn btn-ui"     id="wkWlBtn"
+                style="position:relative;top:auto;right:auto;">Anbleiben</button>
+        <div class="info-msg hidden" id="wkMsg"></div>
+      </div>
     </div>
-  </div>
-  <div class="xt-btns btn-ui xt-btns-ls">
-    <button class="act-btn act-set"   id="wkSetBtn">Stellen</button>
-    <button class="act-btn act-reset" id="wkResetBtn">Reset</button>
-    <button class="wl-btn btn-ui"     id="wkWlBtn"
-            style="position:relative;top:auto;right:auto;">Anbleiben</button>
-    <div class="info-msg hidden" id="wkMsg"></div>
-  </div>
-</div>
 
-<!-- xt-info-corner direkt im screen — nicht in sc-main -->
-<div class="xt-info-corner" id="wkInfoL"></div>
+    <!-- xt-info-corner direkt im screen — nicht in sc-main -->
+    <div class="xt-info-corner" id="wkInfoL"></div>
 
-<div class="sc-bar-zone">
-  <div class="xt-info" id="wkInfoP"></div>
-  <div class="sc-bar-track">
-    <div class="xt-bar-fill" id="wkBarFill"></div>
-  </div>
-</div>
+    <div class="sc-bar-zone">
+      <div class="xt-info" id="wkInfoP"></div>
+      <div class="sc-bar-track">
+        <div class="xt-bar-fill" id="wkBarFill"></div>
+      </div>
+    </div>
 
-<div class="sc-btn-zone btn-ui">
-  <button class="act-btn act-set"   id="wkSetBtnP">Stellen</button>
-  <button class="act-btn act-reset" id="wkResetBtnP">Reset</button>
-  <div class="info-msg hidden" id="wkMsgP"></div>
-</div>
-```
+    <div class="sc-btn-zone btn-ui">
+      <button class="act-btn act-set"   id="wkSetBtnP">Stellen</button>
+      <button class="act-btn act-reset" id="wkResetBtnP">Reset</button>
+      <div class="info-msg hidden" id="wkMsgP"></div>
+    </div>
 
   </div>
 
@@ -727,11 +736,9 @@ transition:background .3s,color .3s,border-color .3s;
   </div>
 
   <!-- FULLSCREEN (Android only) -->
-
-<button id="fsBtn" title="Vollbild">⛶</button>
+  <button id="fsBtn" title="Vollbild">⛶</button>
 
   <!-- DOTS -->
-
   <div id="dots">
     <div class="dot active"></div>
     <div class="dot"></div>
@@ -745,7 +752,7 @@ transition:background .3s,color .3s,border-color .3s;
 'use strict';
 var $ = function(id){ return document.getElementById(id); };
 var pad = function(n){ return String(n).padStart(2,'0'); };
-var DAYS = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+var DAYS = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 var MONS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 
 var uhrKeepOn=false, wkKeepOn=false, cdWakeLock=false, cdWlOffT=null;
