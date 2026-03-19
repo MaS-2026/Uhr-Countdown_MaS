@@ -199,8 +199,11 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   padding-left: clamp(2px,min(1.8vw,3vh),18px);
 }
 @media (orientation:landscape) {
-  /* 28% von time-main: min(6.7vw, 14vh) — Sekunden dezenter, Hauptziffern dominieren */
-  .time-sec { font-size: clamp(18px, min(6.7vw, 14vh), 350px); }
+  /* Größer (9vw statt 6.7vw) + mehr Abstand vom hh:mm-Block */
+  .time-sec {
+    font-size: clamp(18px, min(9vw, 18vh), 350px);
+    padding-left: clamp(6px, min(2.5vw, 4vh), 32px);
+  }
 }
 .date-block {
   display:-webkit-flex; display:flex;
@@ -216,8 +219,8 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 @media (orientation:landscape) {
   .date-block {
     margin-top: calc(min(25vw, 52vh) * -0.12);
-    /* Landscape: hh:mm-Breite ≈ 5 × 0.52 × 25vw = 65vw */
-    max-width: min(65vw, 130vh);
+    /* hh:mm bei 25vw: 4 Ziffern × 0.48 × 25vw + Doppelpunkt ≈ 50vw */
+    max-width: min(50vw, 100vh);
   }
 }
 
@@ -567,7 +570,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
           <div class="time-sec"  id="timeSec">00</div>
         </div>
         <div class="date-block">
-          <span class="weekday"  id="weekday">Do</span><span class="date-sep"> </span><span class="date-txt" id="dateTxt">19. Mär 2026</span>
+          <span class="weekday"  id="weekday">Fr</span><span class="date-txt" id="dateTxt"> 20. Mär 2026</span>
         </div>
       </div>
     </div>
@@ -916,7 +919,7 @@ function tickClock(){
   $('timeMain').innerHTML=pad(now.getHours())+'<span class="colon">:</span>'+pad(now.getMinutes());
   $('timeSec').textContent=pad(now.getSeconds());
   $('weekday').textContent=DAYS[now.getDay()];
-  $('dateTxt').textContent=pad(now.getDate())+'. '+MONS[now.getMonth()]+' '+now.getFullYear();
+  $('dateTxt').textContent=' '+pad(now.getDate())+'. '+MONS[now.getMonth()]+' '+now.getFullYear();
   $('barFill').style.width=p+'%';
 }
 
