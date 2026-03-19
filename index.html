@@ -24,6 +24,11 @@
       /* Sicherheitsnetz: kein Text außerhalb #app sichtbar */
       color: #000;
     }
+    /* Stray-Text direkt in #app (z.B. Backticks aus altem GitHub-Stand) unsichtbar */
+    #app > *:not(.screen):not(.picker-modal):not(#alarmOverlay):not(#fsBtn):not(#dots) {
+      color: transparent !important;
+      font-size: 0 !important;
+    }
 
 /* ══════════════════════════════════════════════════
 #app — einziger fixed Root
@@ -217,9 +222,13 @@ font-size:clamp(11px,3.6vw,44px); }
 letter-spacing 0.1em (statt 0.4/0.2em Portrait) damit Datum nicht breiter als Ziffern
 iPad LS 1024×768:  50px → “DONNERSTAG 19. Mär 2026” ≈ 800px ≈ Ziffernbreite ✓
 Desktop 1920×1080: 94px → ≈ 1450px ≈ Ziffernbreite ✓ */
+/* Landscape: Datum-Breite = hh:mm (ohne Sekunden)
+“14:15” = 5 Zeichen × 0.45 × 25vw = 56.25vw
+“DONNERSTAG 19. Mär 2026” = 23 Zeichen × 0.58 × X = 56.25vw → X ≈ 4.2vw
+-0.02em letter-spacing bereits eingerechnet */
 @media (orientation:landscape) {
 .weekday, .date-txt {
-font-size: clamp(14px, min(4.9vw, 9.5vh), 200px);
+font-size: clamp(12px, min(4.2vw, 8vh), 200px);
 letter-spacing: -0.02em;
 }
 }
