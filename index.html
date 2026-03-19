@@ -204,22 +204,27 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 }
 .date-block {
   display:-webkit-flex; display:flex;
-  gap: 0.5em;
+  gap: 0;
   -webkit-align-items:baseline; align-items:baseline;
   margin-top: -0.45em;
   white-space:nowrap; -webkit-flex-wrap:nowrap; flex-wrap:nowrap;
-  /* Breite = hh:mm = 4 Ziffern + 1 Doppelpunkt
-     DIN Condensed: ~0.52em pro Zeichen, 5 Zeichen = 2.6 × font-size
-     Portrait: font-size = 32vw → Breite ≈ 2.6 × 32vw = 83.2vw
-     date-block soll nur unter hh:mm → max-width = font-size × 2.6 */
-  overflow:hidden;
+  /* Harter Stopper: max-width = hh:mm-Breite
+     Portrait: 4 Ziffern+Doppelpunkt × ~0.52 × 32vw ≈ 83vw */
+  max-width: min(83vw, 108vh);
+  overflow: hidden;
 }
 @media (orientation:landscape) {
   .date-block {
     margin-top: calc(min(25vw, 52vh) * -0.12);
+    /* Landscape: hh:mm-Breite ≈ 5 × 0.52 × 25vw = 65vw */
+    max-width: min(65vw, 130vh);
   }
 }
 
+.date-sep { font-size: clamp(11px, 3.8vw, 44px); color: transparent; }
+@media (orientation:landscape) {
+  .date-sep { font-size: clamp(12px, min(7.7vw, 14vh), 300px); }
+}
 /* Portrait: Wochentag + Datum füllen die Breite von hh:mm
    "Do" = 2 Zeichen + "19. Mär 2026" = 12 Zeichen → 14 total
    font-size so dass 14 Zeichen × 0.6em = 32vw (Ziffernbreite)
@@ -562,8 +567,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
           <div class="time-sec"  id="timeSec">00</div>
         </div>
         <div class="date-block">
-          <span class="weekday"  id="weekday">Montag</span>
-          <span class="date-txt" id="dateTxt">01. Jan 2025</span>
+          <span class="weekday"  id="weekday">Do</span><span class="date-sep"> </span><span class="date-txt" id="dateTxt">19. Mär 2026</span>
         </div>
       </div>
     </div>
