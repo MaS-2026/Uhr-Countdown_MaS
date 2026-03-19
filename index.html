@@ -4,92 +4,109 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <!-- iOS PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Uhr">
-  <!-- Android: färbt Chrome-Toolbar + Statusleiste schwarz -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#000000">
-  <!-- Inline Web App Manifest für Android "Zum Startbildschirm" -->
   <link rel="manifest" href='data:application/manifest+json,{"name":"Uhr","short_name":"Uhr","display":"standalone","background_color":"#000000","theme_color":"#000000","orientation":"any","start_url":".","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'50\' fill=\'%23000\'/%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'42\' fill=\'none\' stroke=\'%23ff8000\' stroke-width=\'6\'/%3E%3C/svg%3E","sizes":"any","type":"image/svg+xml"}]}'>
   <title>Uhr</title>
   <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed:wght@700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
-    :root { color-scheme: dark only; }
-    :root { background:#000; }
+    :root { color-scheme: dark only; background:#000; }
     *, *::before, *::after {
       margin:0; padding:0; box-sizing:border-box;
       -webkit-tap-highlight-color:transparent;
     }
     html, body {
-      width:100%; height:100%;
-      overflow:hidden;
-      background:#000;
+      width:100%; height:100%; overflow:hidden; background:#000;
       -webkit-user-select:none; user-select:none;
     }
 
 ```
-/* ══════════════════════════════════════════════
-   #app — THE single fixed root.
-══════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════
+   #app — einziger fixed Root
+══════════════════════════════════════════════════ */
 #app {
-  position: fixed;
-  top:0; left:0; right:0; bottom:0;
-  overflow:hidden;
-  background:#000;
-  color:#fff;
+  position:fixed; top:0; left:0; right:0; bottom:0;
+  overflow:hidden; background:#000; color:#fff;
   font-family:'Share Tech Mono', monospace;
-  -webkit-transform:translateZ(0);
-          transform:translateZ(0);
+  -webkit-transform:translateZ(0); transform:translateZ(0);
 }
 
-/* ══════════════════════════════════════════════
-   SCREENS
-══════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════
+   SCREENS — alle drei identische Struktur:
+   ┌─────────────────────────────┐
+   │  .sc-main  (flex:1)         │  ← Content zentriert hier
+   ├─────────────────────────────┤
+   │  .sc-bar-zone               │  ← Balken im Flow, mit Abstand
+   └─────────────────────────────┘
+══════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════
+   SCREENS — zwei komplett verschiedene Strategien:
+
+   PORTRAIT:  screen.active → justify-content:center
+              sc-main → height:auto (Inhalt bestimmt Höhe)
+              Content-Box → justify-content:center
+              → Block (sc-main + sc-bar-zone) landet zusammen in der Mitte
+
+   LANDSCAPE: screen.active → justify-content:flex-start
+              sc-main → flex:1 (füllt Platz)
+              Content-Box → justify-content:flex-end
+              → Ziffern hängen nah am Balken, Leerraum geht nach oben
+══════════════════════════════════════════════════ */
 .screen {
-  position:absolute;
-  top:0; left:0; right:0; bottom:0;
-  display:none;
-  background:#000;
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  display:none; background:#000;
 }
+
+/* PORTRAIT */
 .screen.active {
-  display:-webkit-flex;
-  display:flex;
-  -webkit-align-items:center;      align-items:center;
-  -webkit-justify-content:center;  justify-content:center;
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-justify-content:center; justify-content:center;
 }
-@media (orientation:portrait) {
+.sc-main {
+  /* Portrait: Höhe = Ziffern (46vw) + Buttons-Zone (14vmin) */
+  position:relative; overflow:visible;
+  -webkit-flex-shrink:0; flex-shrink:0;
+  height: calc(46vw + 14vmin);
+}
+
+/* LANDSCAPE — überschreibt Portrait-Regeln */
+@media (orientation:landscape) {
   .screen.active {
-    -webkit-flex-direction:column;
-    flex-direction:column;
-    gap:3vmin;
+    -webkit-justify-content:flex-start; justify-content:flex-start;
+  }
+  .sc-main {
+    height: auto;
+    -webkit-flex:1; flex:1;
+    min-height:0;
   }
 }
-@media (min-width:900px) {
-  .ring-bg { stroke-width:7 !important; }
-  .ring-fg { stroke-width:7 !important; }
+
+.sc-bar-zone {
+  -webkit-flex-shrink:0; flex-shrink:0;
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-align-items:stretch; align-items:stretch;
+  padding: 0 clamp(8px,1.5vmin,14px)
+           calc(clamp(8px,2vmin,16px) + env(safe-area-inset-bottom, 0px));
 }
 @media (orientation:landscape) {
-  #countdown-screen.active,
-  #wecker-screen.active {
-    -webkit-flex-direction: row;
-            flex-direction: row;
+  #countdown-screen .sc-bar-zone,
+  #wecker-screen   .sc-bar-zone {
+    padding-bottom: calc(clamp(18px, 4.5vmin, 36px) + env(safe-area-inset-bottom, 0px));
   }
-  #countdown-screen .ring-wrap,
-  #wecker-screen    .ring-wrap {
-    position: relative;
-    -webkit-flex-shrink: 0;
-            flex-shrink: 0;
-  }
-  #countdown-screen .side-panel,
-  #wecker-screen    .side-panel {
-    position: absolute;
-    right: 4vmin;
-    top:   50%;
-    -webkit-transform: translateY(-50%);
-            transform: translateY(-50%);
-  }
+}
+
+/* Gemeinsamer Balken-Track — etwas höher */
+.sc-bar-track {
+  height: clamp(14px, 4.2vmin, 30px);
+  background: rgba(255,255,255,.07);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
 }
 
 /* AUTO-HIDE */
@@ -98,34 +115,32 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 
 /* FULLSCREEN BTN */
 #fsBtn {
-  display: none;
-  position: absolute;
-  bottom: 14px; left: 14px;
-  width: 44px; height: 44px;
-  background: rgba(255,128,0,.18);
-  border: 1px solid rgba(255,128,0,.5);
-  color: #ff8000;
-  font-size: 22px; border-radius: 10px;
-  cursor: pointer; z-index: 999;
-  -webkit-align-items: center; align-items: center;
-  -webkit-justify-content: center; justify-content: center;
-  font-family: sans-serif;
+  display:none; position:absolute; bottom:14px; left:14px;
+  width:44px; height:44px; background:rgba(255,128,0,.18);
+  border:1px solid rgba(255,128,0,.5); color:#ff8000;
+  font-size:22px; border-radius:10px; cursor:pointer; z-index:999;
+  -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
+  font-family:sans-serif;
 }
 
 /* DOTS */
 #dots {
-  position:absolute; bottom:3vmin; left:50%;
+  position:absolute; left:50%;
   -webkit-transform:translateX(-50%); transform:translateX(-50%);
   display:-webkit-flex; display:flex;
-  gap:3vmin; z-index:99; pointer-events:auto;
-  overflow:visible;
+  gap:3vmin; z-index:99; pointer-events:auto; overflow:visible;
+}
+@media (orientation:portrait) {
+  #dots { bottom: calc(clamp(10px,3vmin,24px) + env(safe-area-inset-bottom, 0px)); top:auto; }
+}
+@media (orientation:landscape) {
+  #dots { top: calc(clamp(6px,1.8vmin,14px) + env(safe-area-inset-top, 0px)); bottom:auto; }
 }
 .dot {
   width:clamp(10px,2.2vmin,18px); height:clamp(10px,2.2vmin,18px);
-  border-radius:50%; background:rgba(255,255,255,.2);
-  cursor:pointer;
-  padding:clamp(6px,1.8vmin,14px);
-  box-sizing:content-box;
+  border-radius:50%; background:rgba(255,255,255,.2); cursor:pointer;
+  padding:clamp(6px,1.8vmin,14px); box-sizing:content-box;
   background-clip:content-box;
   -webkit-transition:all .3s; transition:all .3s;
 }
@@ -134,200 +149,214 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   box-shadow:0 0 8px #ff8000, 0 0 16px rgba(255,128,0,.5);
 }
 
-/* ══════════════════════════════════════════════
-   CLOCK SCREEN
-══════════════════════════════════════════════ */
-#uhr-screen.active {
-  -webkit-flex-direction:column; flex-direction:column;
-  gap: 0;
-}
+/* ══════════════════════════════════════════════════
+   UHR — Content absolut in sc-main, zentriert
+══════════════════════════════════════════════════ */
 .uhr-content {
-  display:-webkit-flex; display:flex;
-  -webkit-flex-direction:column; flex-direction:column;
-  -webkit-align-items:center; align-items:center;
-  -webkit-justify-content:center; justify-content:center;
-  width:100%;
-  padding: 2vmin;
-  padding-top: clamp(8px, 5vh, 50px);
-}
-.time-row {
-  display:-webkit-flex; display:flex;
-  -webkit-align-items:baseline; align-items:baseline;
-  max-width:96vw; overflow:hidden;
-}
-
-/*
- * CLOCK SIZING STRATEGY
- * ─────────────────────
- * min(41vw, 68vh) covers both orientations without a media query:
- *
- *   Portrait  (375×812) : min(154px, 552px) = 154px
- *     "00:00" ≈ 154 × 1.85 em = 285px  ← fits in 375px ✓
- *
- *   Landscape (812×375) : min(333px, 255px) = 255px
- *     "00:00" ≈ 255 × 1.85 em = 472px  ← fits in 812px ✓ (was 142px before!)
- *
- *   Landscape tablet (1024×768) : min(419px, 522px) = 419px
- *     "00:00" ≈ 419 × 1.85 em = 775px  ← fits in 1024px ✓
- *
- * Seconds use ~39 % of that size, same dual-axis constraint.
-*/
-.time-main {
-  font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; letter-spacing:-0.02em; line-height:1;
-  color:#fff; white-space:nowrap;
-  font-size: clamp(44px, min(28vw, 65vh), 700px);
-}
-.time-sec {
-  font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; color:rgba(255,255,255,.52);
-  line-height:1; white-space:nowrap;
-  font-size:  clamp(18px, min(11vw, 26vh), 280px);
-  padding-left: clamp(2px, min(1.8vw, 3vh), 18px);
-}
-.date-block {
-  display:-webkit-flex; display:flex;
-  gap:2vmin; -webkit-align-items:baseline; align-items:baseline;
-  margin-top:0.4vmin;
-  white-space:nowrap;
-  -webkit-flex-wrap:nowrap; flex-wrap:nowrap;
-}
-.weekday  { color:rgba(255,255,255,.38); letter-spacing:.4em;
-            text-transform:uppercase; font-size:clamp(11px, 3.6vw, 44px);
-            white-space:nowrap; }
-.date-txt { color:rgba(255,255,255,.5); letter-spacing:.2em;
-            font-size:clamp(11px, 3.6vw, 44px);
-            white-space:nowrap; }
-.progress-bar-wrap {
-  margin-top:2vmin;
-  display:-webkit-flex; display:flex;
-  -webkit-align-items:center; align-items:center;
-  gap:1.5vmin;
-  width: clamp(200px, 94vw, 1400px);
-}
-.bar-marker { width:2px; height:5vmin; min-height:12px;
-              background:rgba(255,255,255,.32); border-radius:1px;
-              -webkit-flex-shrink:0; flex-shrink:0; }
-.bar-track  { flex:1; height:clamp(12px,3vmin,22px);
-              background:rgba(255,255,255,.07); border-radius:6px;
-              position:relative; overflow:hidden; }
-.bar-fill   { position:absolute; top:0; left:0; bottom:0; width:0%;
-              background:#ff8000;
-              box-shadow:0 0 10px #ff8000, 0 0 28px rgba(255,128,0,.7), 0 0 50px rgba(255,128,0,.3);
-              border-radius:6px; }
-.colon { -webkit-animation:blink 1s step-end infinite;
-                 animation:blink 1s step-end infinite; }
-@-webkit-keyframes blink { 0%,100%{opacity:1} 50%{opacity:.1} }
-@keyframes blink          { 0%,100%{opacity:1} 50%{opacity:.1} }
-
-/* ══════════════════════════════════════════════
-   RING
-══════════════════════════════════════════════ */
-.ring-wrap {
-  position:relative;
-  -webkit-flex-shrink:0; flex-shrink:0;
-  display:-webkit-flex; display:flex;
-  -webkit-align-items:center; align-items:center;
-  -webkit-justify-content:center; justify-content:center;
-  width:  min(92vw, 94vh);
-  height: min(92vw, 94vh);
-}
-.ring-wrap svg {
-  width:100%; height:100%;
-  -webkit-transform:rotate(-90deg); transform:rotate(-90deg);
-}
-.ring-bg { fill:none; stroke:rgba(255,128,0,.12); stroke-width:10; }
-.ring-fg {
-  stroke-width:10;
-  fill:none; stroke:#ff8000; stroke-linecap:round;
-  -webkit-filter:drop-shadow(0 0 8px #ff8000) drop-shadow(0 0 20px rgba(255,128,0,.6));
-          filter:drop-shadow(0 0 8px #ff8000) drop-shadow(0 0 20px rgba(255,128,0,.6));
-  -webkit-transition:stroke-dashoffset .3s linear;
-          transition:stroke-dashoffset .3s linear;
-}
-.ring-center {
   position:absolute; top:0; left:0; right:0; bottom:0;
   display:-webkit-flex; display:flex;
   -webkit-flex-direction:column; flex-direction:column;
   -webkit-align-items:center; align-items:center;
+  /* Portrait: zentriert in sc-main */
   -webkit-justify-content:center; justify-content:center;
+  padding: 0 2vmin;
+}
+@media (orientation:landscape) {
+  .uhr-content {
+    -webkit-justify-content:flex-end; justify-content:flex-end;
+    padding-bottom: 0;
+  }
+}
+.time-row {
+  display:-webkit-flex; display:flex;
+  /* baseline = visuelle Unterkante der Ziffern — exakter als flex-end für Text */
+  -webkit-align-items:baseline; align-items:baseline;
+  max-width:96vw; overflow:visible;
+}
+.time-main {
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700; letter-spacing:-0.02em;
+  line-height:1.0;
+  color:#fff; white-space:nowrap;
+  font-size: clamp(44px, 38vw, 900px);
+}
+@media (orientation:landscape) {
+  .time-main { font-size: clamp(44px, 75vmin, 900px); }
+}
+.time-sec {
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700; color:rgba(255,255,255,.52);
+  line-height:1.0; white-space:nowrap;
+  font-size: clamp(18px, 15vw, 280px);
+  padding-left: clamp(2px,min(1.8vw,3vh),18px);
+}
+@media (orientation:landscape) {
+  .time-sec { font-size: clamp(18px, 29vmin, 280px); }
+}
+.date-block {
+  display:-webkit-flex; display:flex;
+  gap:2vmin; -webkit-align-items:baseline; align-items:baseline;
+  margin-top: -0.45em;
+  white-space:nowrap; -webkit-flex-wrap:nowrap; flex-wrap:nowrap;
+}
+@media (orientation:landscape) {
+  /* vmin statt em: em=16px-basiert → Änderungen waren unsichtbar
+     -14vmin = -52px auf iPhone SE → ~13px Abstand Ziffern↔Datum */
+  .date-block { margin-top: -14vmin; }
+}
+.weekday  { color:rgba(255,255,255,.38); letter-spacing:.4em;
+            text-transform:uppercase; font-size:clamp(11px,3.6vw,44px); }
+.date-txt { color:rgba(255,255,255,.5);  letter-spacing:.2em;
+            font-size:clamp(11px,3.6vw,44px); }
+
+/* Uhr-Balken mit seitlichen Markern */
+.uhr-bar-wrap {
+  display:-webkit-flex; display:flex;
+  -webkit-align-items:center; align-items:center;
+  gap:1.5vmin; width:100%;
+}
+.bar-marker { width:2px; height:5vmin; min-height:12px;
+              background:rgba(255,255,255,.32); border-radius:1px;
+              -webkit-flex-shrink:0; flex-shrink:0; }
+/* Balken-Fill Uhr: läuft von links */
+.bar-fill {
+  position:absolute; top:0; left:0; bottom:0; width:0%;
+  background:#ff8000;
+  box-shadow:0 0 10px #ff8000,0 0 28px rgba(255,128,0,.7),0 0 50px rgba(255,128,0,.3);
+  border-radius:6px;
 }
 
-/*
- * RING DIGITS SIZING
- * ──────────────────
- * Ring inner clear diameter = (r − stroke/2) / r_total × ring_size
- *   = (88 − 5) / 100 × ring_size = 83 % of ring-wrap side.
- * "00:00" in DIN Condensed (letter-spacing −.02em) ≈ 2.45 em wide.
- * Safety factor 0.92 → max_fs = 0.83 × 0.92 / 2.45 × ring ≈ 0.312 × ring.
- *
- * min(24vw, 29vh) gives:
- *   Portrait  375×812 : min( 90, 235) =  90px  →  220px < 286px inner ✓
- *   Landscape 812×375 : min(195, 108) = 108px  →  265px < 292px inner ✓
- *   Tablet    1024×768: min(246, 222) = 222px  →  544px < 599px inner ✓
-*/
-.ring-digits.idle {
-  font-family:'Share Tech Mono',monospace !important;
-  font-size: clamp(16px, min(14vw, 18vh), 130px) !important;
-  color:rgba(255,255,255,.28);
-}
-.ring-digits {
-  font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; color:#fff; line-height:1;
-  letter-spacing:-.02em; white-space:nowrap;
-  font-size: clamp(20px, min(22vw, 27vh), 200px);
-}
-.ring-sec {
-  font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; color:rgba(255,255,255,.62);
-  letter-spacing:.15em; margin-top:0;
-  font-size: clamp(10px, min(9vw, 12vh), 75px);
-}
-.ring-label {
-  font-family:'Share Tech Mono',monospace;
-  color:rgba(255,255,255,.28); letter-spacing:.4em;
-  text-transform:uppercase; margin-top:.8vmin;
-  font-size: clamp(8px, min(3.5vw, 4.6vh), 30px);
-}
-.ring-sub {
-  font-family:'DIN Condensed',sans-serif; font-weight:700;
-  color:rgba(255,128,0,.78); letter-spacing:.3em;
-  margin-top:1vmin; cursor:pointer;
-  font-size: clamp(9px, min(4.8vw, 6vh), 38px);
-}
-.ring-sublbl {
-  font-family:'Share Tech Mono',monospace;
-  color:rgba(255,255,255,.22); letter-spacing:.3em;
-  text-transform:uppercase; margin-top:1vmin; cursor:pointer;
-  font-size: clamp(7px, min(2.8vw, 3.5vh), 22px);
-}
+.colon { -webkit-animation:blink 1s step-end infinite; animation:blink 1s step-end infinite; }
+@-webkit-keyframes blink { 0%,100%{opacity:1} 50%{opacity:.1} }
+@keyframes blink          { 0%,100%{opacity:1} 50%{opacity:.1} }
 
-/* ══════════════════════════════════════════════
-   SIDE PANEL
-══════════════════════════════════════════════ */
-.side-panel {
+/* ══════════════════════════════════════════════════
+   COUNTDOWN & WECKER — gleiche Logik wie Uhr
+══════════════════════════════════════════════════ */
+
+/* Zentrierter Content in sc-main */
+.xt-center {
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  overflow:visible;
   display:-webkit-flex; display:flex;
   -webkit-flex-direction:column; flex-direction:column;
-  -webkit-align-items:flex-end; align-items:flex-end;
-  -webkit-flex-shrink:0; flex-shrink:0;
-  gap:2vmin;
+  -webkit-align-items:center; align-items:center;
+  /* Portrait: zentriert in sc-main */
+  -webkit-justify-content:center; justify-content:center;
+  padding: 0 clamp(4px,1vmin,10px);
 }
+@media (orientation:landscape) {
+  .xt-center {
+    -webkit-justify-content:flex-end; justify-content:flex-end;
+    padding-bottom: 0;
+  }
+}
+
+.xt-time-row {
+  display:-webkit-flex; display:flex;
+  /* baseline = visuelle Unterkante der Ziffern */
+  -webkit-align-items:baseline; align-items:baseline;
+  max-width:96vw; overflow:visible;
+}
+@media (orientation:landscape) {
+  /* Negative margin-bottom zieht Ziffern visuell näher an den Balken —
+     kompensiert unsichtbaren Descender-Raum der DIN Condensed */
+  .xt-time-row { margin-bottom: -10vmin; }
+}
+
+.xt-digits {
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700; color:#fff;
+  line-height:1.0;
+  letter-spacing:-0.02em; white-space:nowrap;
+  /* Portrait: vw = kurze Seite, nutzt fast volle Breite */
+  font-size: clamp(44px, 46vw, 900px);
+}
+@media (orientation:landscape) {
+  /* 70vmin + 4vmin padding = safe on all devices incl. iPad */
+  .xt-digits { font-size: clamp(44px, 70vmin, 900px); }
+}
+.xt-digits.idle {
+  font-family:'Share Tech Mono',monospace !important;
+  color:rgba(255,255,255,.28);
+  font-size: clamp(18px, min(14vw, 22vh), 180px) !important;
+}
+
+.xt-secs {
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700; color:rgba(255,255,255,.52);
+  line-height:1.0;
+  letter-spacing:.1em; white-space:nowrap;
+  font-size: clamp(18px, 18vw, 280px);
+  padding-left: clamp(2px,min(1.8vw,3vh),18px);
+}
+@media (orientation:landscape) {
+  .xt-secs { font-size: clamp(18px, 31vmin, 280px); }
+}
+
+/* xt-info sitzt jetzt in sc-bar-zone, über dem Balken */
+.xt-info {
+  font-family:'DIN Condensed',sans-serif; font-weight:700;
+  color:rgba(255,128,0,.85); letter-spacing:.3em;
+  font-size: clamp(11px, min(4vw, 5.5vh), 44px);
+  white-space:nowrap; cursor:pointer;
+  text-align:center;
+  display:block;
+  margin-bottom: clamp(4px, 1vmin, 8px);
+}
+/* In Landscape: xt-info in sc-bar-zone ausblenden — dort ist xt-info-corner */
+@media (orientation:landscape) { .xt-info { display:none; } }
+
+.xt-info-corner {
+  display:none; position:absolute; top:13%; right:3vmin;
+  font-family:'DIN Condensed',sans-serif; font-weight:700;
+  color:rgba(255,128,0,.85); letter-spacing:.3em;
+  font-size: clamp(12px,min(4.5vw,7vh),54px);
+  white-space:nowrap; text-align:right; cursor:pointer;
+}
+@media (orientation:landscape) { .xt-info-corner { display:block; } }
+
+/* Portrait-Buttons: unter dem Balken, zentriert */
+.sc-btn-zone {
+  -webkit-flex-shrink:0; flex-shrink:0;
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:row; flex-direction:row;
+  -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
+  gap:2.5vmin;
+  padding: clamp(8px,2vmin,16px) 0
+           calc(clamp(4px,1vmin,8px) + env(safe-area-inset-bottom, 0px));
+}
+/* In Landscape ausblenden */
+@media (orientation:landscape) { .sc-btn-zone { display:none !important; } }
+
+/* Landscape-Buttons (xt-btns-ls): in Portrait ausblenden */
+.xt-btns-ls { display:none; }
+@media (orientation:landscape) {
+  .xt-btns-ls {
+    display:-webkit-flex; display:flex;
+    position:absolute;
+    right: calc(3vmin + env(safe-area-inset-right, 0px));
+    top:50%;
+    -webkit-transform:translateY(-50%); transform:translateY(-50%);
+    -webkit-flex-direction:column; flex-direction:column;
+    -webkit-align-items:stretch; align-items:stretch;
+    gap:2vmin; z-index:10;
+  }
+}
+
 .act-btn {
   font-family:'Share Tech Mono',monospace;
   letter-spacing:.15em; text-transform:uppercase;
-  border-radius:4vmin; cursor:pointer; border:none;
-  text-align:center;
-  font-size:  clamp(9px, 2vmin, 14px);
-  padding:    clamp(5px,1.4vmin,11px) clamp(10px,2.8vmin,22px);
+  border-radius:4vmin; cursor:pointer; border:none; text-align:center;
+  font-size:clamp(9px,2vmin,14px);
+  padding:clamp(5px,1.4vmin,11px) clamp(10px,2.8vmin,22px);
 }
 .act-go    { background:#ff8000; color:#000; box-shadow:0 0 14px rgba(255,128,0,.5); }
 .act-reset { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.2); color:#fff; }
 .act-set   { background:rgba(255,128,0,.14); border:1px solid rgba(255,128,0,.5); color:#ff8000; }
 .act-set.armed { background:#ff8000; color:#000; }
-.btn-row { display:-webkit-flex; display:flex;
-           -webkit-flex-direction:column; flex-direction:column;
-           gap:2vmin;
-           -webkit-align-items:stretch; align-items:stretch; }
+
 .info-msg {
   color:#ff8000; letter-spacing:.15em; text-transform:uppercase;
   text-align:center; font-size:clamp(7px,1.8vmin,13px);
@@ -339,12 +368,19 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 @-webkit-keyframes pulse { from{opacity:.2} to{opacity:1} }
 @keyframes pulse          { from{opacity:.2} to{opacity:1} }
 
-/* ══════════════════════════════════════════════
+/* Balken-Fill CD/WK: läuft von rechts */
+.xt-bar-fill {
+  position:absolute; top:0; right:0; bottom:0; width:0%;
+  background:#ff8000;
+  box-shadow:0 0 10px #ff8000,0 0 28px rgba(255,128,0,.6),0 0 50px rgba(255,128,0,.25);
+  -webkit-transition:width .6s linear; transition:width .6s linear;
+}
+
+/* ══════════════════════════════════════════════════
    PICKER MODAL
-══════════════════════════════════════════════ */
+══════════════════════════════════════════════════ */
 .picker-modal {
-  position:absolute; top:0; left:0; right:0; bottom:0;
-  z-index:200;
+  position:absolute; top:0; left:0; right:0; bottom:0; z-index:200;
   display:-webkit-flex; display:flex;
   -webkit-align-items:center; align-items:center;
   -webkit-justify-content:center; justify-content:center;
@@ -355,8 +391,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   display:-webkit-flex; display:flex;
   -webkit-flex-direction:column; flex-direction:column;
   -webkit-align-items:center; align-items:center;
-  gap:5vmin;
-  background:rgb(13,13,13);
+  gap:5vmin; background:rgb(13,13,13);
   border:1px solid rgba(255,128,0,.28);
   border-radius:4vmin; padding:4vmin 6vmin;
 }
@@ -382,8 +417,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 .drum-sep {
   font-family:'DIN Condensed',sans-serif; font-weight:700;
   color:rgba(255,128,0,.6);
-  -webkit-align-self:center; align-self:center;
-  margin-bottom:4vmin;
+  -webkit-align-self:center; align-self:center; margin-bottom:4vmin;
 }
 .drum-outer { position:relative; overflow:hidden; border-radius:2vmin; }
 .drum-hl {
@@ -395,20 +429,13 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 .drum-fade {
   position:absolute; top:0; left:0; right:0; bottom:0;
   z-index:3; pointer-events:none;
-  background:-webkit-linear-gradient(top,
-    rgb(13,13,13) 0%, rgba(13,13,13,0) 30%,
-    rgba(13,13,13,0) 70%, rgb(13,13,13) 100%);
-  background:linear-gradient(to bottom,
-    rgb(13,13,13) 0%, rgba(13,13,13,0) 30%,
-    rgba(13,13,13,0) 70%, rgb(13,13,13) 100%);
+  background:-webkit-linear-gradient(top,rgb(13,13,13) 0%,rgba(13,13,13,0) 30%,rgba(13,13,13,0) 70%,rgb(13,13,13) 100%);
+  background:linear-gradient(to bottom,rgb(13,13,13) 0%,rgba(13,13,13,0) 30%,rgba(13,13,13,0) 70%,rgb(13,13,13) 100%);
 }
 .drum-scroller {
-  display:block;
-  overflow-y:scroll; overflow-x:hidden;
-  -webkit-scroll-snap-type:y mandatory;
-          scroll-snap-type:y mandatory;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
+  display:block; overflow-y:scroll; overflow-x:hidden;
+  -webkit-scroll-snap-type:y mandatory; scroll-snap-type:y mandatory;
+  -webkit-overflow-scrolling:touch; scrollbar-width:none;
 }
 .drum-scroller::-webkit-scrollbar { display:none; }
 .drum-item {
@@ -425,11 +452,10 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   -webkit-scroll-snap-align:none; scroll-snap-align:none;
 }
 .picker-ok {
-  background:#ff8000; color:#000; border:none;
-  border-radius:2.5vmin; font-family:'Share Tech Mono',monospace;
-  letter-spacing:.15em; text-transform:uppercase;
-  cursor:pointer; padding:1.6vmin 4vmin;
-  font-size:clamp(9px,1.8vmin,13px);
+  background:#ff8000; color:#000; border:none; border-radius:2.5vmin;
+  font-family:'Share Tech Mono',monospace; letter-spacing:.15em;
+  text-transform:uppercase; cursor:pointer;
+  padding:1.6vmin 4vmin; font-size:clamp(9px,1.8vmin,13px);
 }
 .picker-cancel {
   background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15);
@@ -439,9 +465,9 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   padding:1.6vmin 3.5vmin; font-size:clamp(9px,1.8vmin,13px);
 }
 
-/* ══════════════════════════════════════════════
+/* ══════════════════════════════════════════════════
    ALARM OVERLAY
-══════════════════════════════════════════════ */
+══════════════════════════════════════════════════ */
 #alarmOverlay {
   position:absolute; top:0; left:0; right:0; bottom:0; z-index:300;
   display:-webkit-flex; display:flex;
@@ -450,54 +476,34 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   -webkit-justify-content:center; justify-content:center;
   gap:4vmin; cursor:pointer; touch-action:manipulation;
   background:#000;
-  -webkit-animation:ablink .55s ease-in-out infinite;
-          animation:ablink .55s ease-in-out infinite;
+  -webkit-animation:ablink .55s ease-in-out infinite; animation:ablink .55s ease-in-out infinite;
 }
 #alarmOverlay.hidden { display:none !important; }
-@-webkit-keyframes ablink {
-  0%,100%{background:rgba(0,0,0,1)} 50%{background:rgba(210,45,0,.75)}
-}
-@keyframes ablink {
-  0%,100%{background:rgba(0,0,0,1)} 50%{background:rgba(210,45,0,.75)}
-}
-.a-title {
-  font-family:'DIN Condensed',sans-serif; font-weight:700;
-  color:#ff8000; letter-spacing:.5em; text-transform:uppercase;
-  font-size:clamp(22px,9vmin,72px);
-}
-.a-time {
-  font-family:'DIN Condensed',sans-serif; font-weight:700;
-  color:#fff; line-height:1; font-size:clamp(50px,18vmin,130px);
-}
-.a-hint {
-  color:rgba(255,255,255,.3); letter-spacing:.3em;
-  text-transform:uppercase; font-size:clamp(9px,2vmin,14px);
-  font-family:'Share Tech Mono',monospace;
-}
+@-webkit-keyframes ablink { 0%,100%{background:rgba(0,0,0,1)} 50%{background:rgba(210,45,0,.75)} }
+@keyframes ablink          { 0%,100%{background:rgba(0,0,0,1)} 50%{background:rgba(210,45,0,.75)} }
+.a-title { font-family:'DIN Condensed',sans-serif; font-weight:700;
+           color:#ff8000; letter-spacing:.5em; text-transform:uppercase;
+           font-size:clamp(22px,9vmin,72px); }
+.a-time  { font-family:'DIN Condensed',sans-serif; font-weight:700;
+           color:#fff; line-height:1; font-size:clamp(50px,18vmin,130px); }
+.a-hint  { color:rgba(255,255,255,.3); letter-spacing:.3em;
+           text-transform:uppercase; font-size:clamp(9px,2vmin,14px);
+           font-family:'Share Tech Mono',monospace; }
 
-/* ══════════════════════════════════════════════
-   WAKE LOCK TOGGLE
-══════════════════════════════════════════════ */
+/* WAKE LOCK TOGGLE — immer top-right der jeweiligen Screen */
 .wl-btn {
-  position: absolute;
-  top: clamp(52px, 14vh, 130px); right: 14px;
-  background: rgba(255,128,0,.12);
-  border: 1px solid rgba(255,128,0,.4);
-  color: rgba(255,128,0,.6);
-  font-family: 'Share Tech Mono', monospace;
-  font-size: clamp(8px, 2vmin, 13px);
-  letter-spacing: .15em; text-transform: uppercase;
-  border-radius: 3vmin;
-  padding: clamp(4px,1.2vmin,10px) clamp(8px,2.2vmin,16px);
-  cursor: pointer; z-index: 50;
-  -webkit-transition: background .3s, color .3s, border-color .3s;
-          transition: background .3s, color .3s, border-color .3s;
+  position:absolute;
+  top: calc(clamp(8px,2vmin,18px) + env(safe-area-inset-top, 0px));
+  right: calc(clamp(8px,2vmin,18px) + env(safe-area-inset-right, 0px));
+  background:rgba(255,128,0,.12); border:1px solid rgba(255,128,0,.4);
+  color:rgba(255,128,0,.6); font-family:'Share Tech Mono',monospace;
+  font-size:clamp(8px,2vmin,13px); letter-spacing:.15em; text-transform:uppercase;
+  border-radius:3vmin; padding:clamp(4px,1.2vmin,10px) clamp(8px,2.2vmin,16px);
+  cursor:pointer; z-index:50;
+  -webkit-transition:background .3s,color .3s,border-color .3s;
+          transition:background .3s,color .3s,border-color .3s;
 }
-.wl-btn.on {
-  background: rgba(255,128,0,.88);
-  border-color: #ff8000;
-  color: #000;
-}
+.wl-btn.on { background:rgba(255,128,0,.88); border-color:#ff8000; color:#000; }
 ```
 
   </style>
@@ -505,80 +511,127 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 <body>
 <div id="app">
 
-  <!-- UHR -->
+  <!-- ══════════════════════════════════════════════
+       UHR
+  ══════════════════════════════════════════════ -->
 
   <div class="screen active" id="uhr-screen">
-    <div class="uhr-content">
-      <div class="time-row">
-        <div class="time-main" id="timeMain">00<span class="colon">:</span>00</div>
-        <div class="time-sec"  id="timeSec">00</div>
-      </div>
-      <div class="date-block">
-        <span class="weekday"  id="weekday">Montag</span>
-        <span class="date-txt" id="dateTxt">01. Jan 2025</span>
-      </div>
-      <div class="progress-bar-wrap">
-        <div class="bar-marker"></div>
-        <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
-        <div class="bar-marker"></div>
-      </div>
+
+```
+<div class="sc-main">
+  <div class="uhr-content">
+    <div class="time-row">
+      <div class="time-main" id="timeMain">00<span class="colon">:</span>00</div>
+      <div class="time-sec"  id="timeSec">00</div>
     </div>
-    <button class="wl-btn btn-ui" id="uhrWlBtn">Anbleiben</button>
+    <div class="date-block">
+      <span class="weekday"  id="weekday">Montag</span>
+      <span class="date-txt" id="dateTxt">01. Jan 2025</span>
+    </div>
+  </div>
+</div>
+
+<!-- Anbleiben ausserhalb sc-main — kein Overlap mit Ziffern -->
+<button class="wl-btn btn-ui" id="uhrWlBtn">Anbleiben</button>
+
+<div class="sc-bar-zone">
+  <div class="uhr-bar-wrap">
+    <div class="bar-marker"></div>
+    <div class="sc-bar-track" style="-webkit-flex:1;flex:1;">
+      <div class="bar-fill" id="barFill"></div>
+    </div>
+    <div class="bar-marker"></div>
+  </div>
+</div>
+```
+
   </div>
 
-  <!-- COUNTDOWN -->
+  <!-- ══════════════════════════════════════════════
+       COUNTDOWN
+  ══════════════════════════════════════════════ -->
 
   <div class="screen" id="countdown-screen">
-    <div class="ring-wrap">
-      <svg viewBox="0 0 200 200">
-        <circle class="ring-bg" cx="100" cy="100" r="88" stroke-width="10"/>
-        <circle class="ring-fg" cx="100" cy="100" r="88" stroke-width="10"
-                id="cdRingFg" stroke-dasharray="552.9" stroke-dashoffset="0"/>
-      </svg>
-      <div class="ring-center">
-        <div class="ring-digits" id="cdDigits">00:00</div>
-        <div class="ring-sec"    id="cdSec">00</div>
-        <div class="ring-label">countdown</div>
-        <div class="ring-sub hidden" id="cdSub"></div>
-      </div>
-    </div>
-    <div class="side-panel btn-ui">
-      <div class="btn-row">
-        <button class="act-btn act-go"    id="cdGoBtn">Stellen</button>
-        <button class="act-btn act-reset" id="cdResetBtn">Reset</button>
-      </div>
-      <div class="info-msg hidden" id="cdDone">Zeit abgelaufen!</div>
+
+```
+<div class="sc-main">
+  <div class="xt-center">
+    <div class="xt-time-row">
+      <div class="xt-digits" id="cdDigits">00:00</div>
+      <div class="xt-secs"   id="cdSec">00</div>
     </div>
   </div>
+  <div class="xt-info-corner" id="cdInfoL"></div>
+  <!-- Landscape: Buttons bleiben absolut rechts in sc-main -->
+  <div class="xt-btns btn-ui xt-btns-ls">
+    <button class="act-btn act-go"    id="cdGoBtn">Stellen</button>
+    <button class="act-btn act-reset" id="cdResetBtn">Reset</button>
+    <div class="info-msg hidden"      id="cdDone">Zeit abgelaufen!</div>
+  </div>
+</div>
 
-  <!-- WECKER -->
+<div class="sc-bar-zone">
+  <div class="xt-info" id="cdInfoP"></div>
+  <div class="sc-bar-track">
+    <div class="xt-bar-fill" id="cdBarFill"></div>
+  </div>
+</div>
+
+<!-- Portrait: Buttons unter dem Balken -->
+<div class="sc-btn-zone btn-ui">
+  <button class="act-btn act-go"    id="cdGoBtnP">Stellen</button>
+  <button class="act-btn act-reset" id="cdResetBtnP">Reset</button>
+  <div class="info-msg hidden"      id="cdDoneP">Zeit abgelaufen!</div>
+</div>
+```
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       WECKER
+  ══════════════════════════════════════════════ -->
 
   <div class="screen" id="wecker-screen">
-    <div class="ring-wrap">
-      <svg viewBox="0 0 200 200">
-        <circle class="ring-bg" cx="100" cy="100" r="88" stroke-width="10"/>
-        <circle class="ring-fg" cx="100" cy="100" r="88" stroke-width="10"
-                id="wkRingFg" stroke-dasharray="552.9" stroke-dashoffset="0"/>
-      </svg>
-      <div class="ring-center">
-        <div class="ring-digits" id="wkDigits">--:--</div>
-        <div class="ring-sec"    id="wkSec">--</div>
-        <div class="ring-label">wecker</div>
-        <div class="ring-sublbl" id="wkLbl">weckzeit</div>
-        <div class="ring-sub"    id="wkSub">--:--</div>
-      </div>
-    </div>
-    <div class="side-panel btn-ui">
-      <div class="btn-row">
-        <button class="act-btn act-set"   id="wkSetBtn">Stellen</button>
-        <button class="act-btn act-reset" id="wkResetBtn">Reset</button>
-      </div>
-      <div class="info-msg hidden" id="wkInfo">–</div>
-      <button class="wl-btn btn-ui" id="wkWlBtn" style="position:relative;top:auto;right:auto;">Anbleiben</button>
+
+```
+<div class="sc-main">
+  <div class="xt-center">
+    <div class="xt-time-row">
+      <div class="xt-digits idle" id="wkDigits">--:--</div>
+      <div class="xt-secs"        id="wkSec">--</div>
     </div>
   </div>
+  <div class="xt-info-corner" id="wkInfoL"></div>
+  <!-- Landscape: Buttons bleiben absolut rechts in sc-main -->
+  <div class="xt-btns btn-ui xt-btns-ls">
+    <button class="act-btn act-set"   id="wkSetBtn">Stellen</button>
+    <button class="act-btn act-reset" id="wkResetBtn">Reset</button>
+    <button class="wl-btn btn-ui"     id="wkWlBtn"
+            style="position:relative;top:auto;right:auto;">Anbleiben</button>
+    <div class="info-msg hidden" id="wkMsg"></div>
+  </div>
+</div>
 
-  <!-- COUNTDOWN PICKER -->
+<div class="sc-bar-zone">
+  <div class="xt-info" id="wkInfoP"></div>
+  <div class="sc-bar-track">
+    <div class="xt-bar-fill" id="wkBarFill"></div>
+  </div>
+</div>
+
+<!-- Portrait: Buttons unter dem Balken -->
+<div class="sc-btn-zone btn-ui">
+  <button class="act-btn act-set"   id="wkSetBtnP">Stellen</button>
+  <button class="act-btn act-reset" id="wkResetBtnP">Reset</button>
+  <div class="info-msg hidden" id="wkMsgP"></div>
+</div>
+```
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       COUNTDOWN PICKER
+  ══════════════════════════════════════════════ -->
 
   <div class="picker-modal hidden" id="cdModal">
     <div class="picker-box">
@@ -610,7 +663,9 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
     </div>
   </div>
 
-  <!-- WECKER PICKER -->
+  <!-- ══════════════════════════════════════════════
+       WECKER PICKER
+  ══════════════════════════════════════════════ -->
 
   <div class="picker-modal hidden" id="wkModal">
     <div class="picker-box">
@@ -641,7 +696,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
     </div>
   </div>
 
-  <!-- ALARM -->
+  <!-- ALARM OVERLAY -->
 
   <div id="alarmOverlay" class="hidden">
     <div class="a-title">Achtung!</div>
@@ -668,69 +723,60 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 'use strict';
 var $ = function(id){ return document.getElementById(id); };
 var pad = function(n){ return String(n).padStart(2,'0'); };
-var CIRC = 2 * Math.PI * 88;
 var DAYS = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
 var MONS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 
-/* WAKE LOCK TOGGLE STATE */
-var uhrKeepOn = false;
-var wkKeepOn  = false;
-var cdWakeLock = false;  // true while countdown running + 5min after
-var cdWlOffT   = null;   // timer for 5-min post-countdown release
+var uhrKeepOn=false, wkKeepOn=false, cdWakeLock=false, cdWlOffT=null;
 
-/* ══════════════════════════════════════════
-   DRUM ENGINE
-══════════════════════════════════════════ */
-var IH = 48, REPS = 41, MID = 20;
+/* ══════════════════════════════════════════════
+   DRUM ENGINE (unchanged)
+══════════════════════════════════════════════ */
+var IH=48, REPS=41, MID=20;
 
-function createDrum(scrollId, outerId, hlId, count, initVal) {
-  var sc=$(scrollId), ou=$(outerId), hl=$(hlId);
-
+function createDrum(scrollId,outerId,hlId,count,initVal){
+  var sc=$(scrollId),ou=$(outerId),hl=$(hlId);
   sc.innerHTML='';
   var ts=document.createElement('div'); ts.className='drum-spacer'; sc.appendChild(ts);
-  for (var r=0;r<REPS;r++) {
-    for (var v=0;v<count;v++) {
+  for(var r=0;r<REPS;r++){
+    for(var v=0;v<count;v++){
       var el=document.createElement('div');
       el.className='drum-item'; el.textContent=pad(v); sc.appendChild(el);
     }
   }
   var bs=document.createElement('div'); bs.className='drum-spacer'; sc.appendChild(bs);
 
-  function applySize() {
+  function applySize(){
     var w=Math.round(IH*2.2);
     ou.style.width=w+'px'; ou.style.height=(IH*3)+'px';
     sc.style.width=w+'px'; sc.style.height=(IH*3)+'px';
     var items=sc.querySelectorAll('.drum-item,.drum-spacer');
-    for (var i=0;i<items.length;i++) {
+    for(var i=0;i<items.length;i++){
       items[i].style.height=IH+'px';
       items[i].style.width=w+'px';
       items[i].style.fontSize=Math.round(IH*0.78)+'px';
     }
     hl.style.top=IH+'px'; hl.style.height=IH+'px';
   }
-
   function snapTop(v,rep){ return (rep*count+v)*IH; }
   function getVal(){ return ((Math.round(sc.scrollTop/IH)%count)+count)%count; }
   function setVal(v,smooth){
-    var sv=((v%count)+count)%count, t=snapTop(sv,MID);
+    var sv=((v%count)+count)%count,t=snapTop(sv,MID);
     if(smooth){ try{sc.scrollTo({top:t,behavior:'smooth'});}catch(e){sc.scrollTop=t;} }
     else{ sc.scrollTop=t; }
   }
-
   var norm=null;
   sc.addEventListener('scroll',function(){
     clearTimeout(norm);
     norm=setTimeout(function(){
-      var v=getVal(), t=snapTop(v,MID);
+      var v=getVal(),t=snapTop(v,MID);
       if(Math.abs(sc.scrollTop-t)>IH*0.5) sc.scrollTop=t;
     },400);
   },false);
-
   applySize();
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){ sc.scrollTop=snapTop(initVal,MID); });
   });
-  return {getVal:getVal, setVal:setVal, applySize:applySize};
+  return {getVal:getVal,setVal:setVal,applySize:applySize};
 }
 
 var cdH=createDrum('cdHScroll','cdHOuter','cdHhl',25,0);
@@ -738,10 +784,7 @@ var cdM=createDrum('cdMScroll','cdMOuter','cdMhl',60,5);
 var wkH=createDrum('wkHScroll','wkHOuter','wkHhl',24,7);
 var wkM=createDrum('wkMScroll','wkMOuter','wkMhl',60,30);
 
-/* ══════════════════════════════════════════
-   RESIZE
-══════════════════════════════════════════ */
-function updateDrums() {
+function updateDrums(){
   var H=$('app').offsetHeight;
   IH=Math.max(38,Math.min(62,Math.round(H*0.08)));
   cdH.applySize(); cdM.applySize(); wkH.applySize(); wkM.applySize();
@@ -752,40 +795,33 @@ function updateDrums() {
     wkH.setVal(wkH.getVal(),false); wkM.setVal(wkM.getVal(),false);
   },60);
 }
+window.addEventListener('resize',updateDrums,false);
 
-window.addEventListener('resize', updateDrums, false);
-
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════════════
    WAKE LOCK
-   Acquires/releases screen wake lock.
-   Called whenever relevant state changes.
-══════════════════════════════════════════ */
-var wlSentinel = null;
-
+══════════════════════════════════════════════ */
+var wlSentinel=null;
 function wlAcquire(){
-  if(!navigator.wakeLock) return;
-  if(wlSentinel) return;
+  if(!navigator.wakeLock||wlSentinel) return;
   navigator.wakeLock.request('screen').then(function(s){
-    wlSentinel = s;
-    wlSentinel.addEventListener('release', function(){ wlSentinel = null; }, false);
+    wlSentinel=s;
+    wlSentinel.addEventListener('release',function(){ wlSentinel=null; },false);
   }).catch(function(){});
 }
 function wlRelease(){
-  if(wlSentinel){ wlSentinel.release().catch(function(){}); wlSentinel = null; }
+  if(wlSentinel){ wlSentinel.release().catch(function(){}); wlSentinel=null; }
 }
-// Re-acquire after tab becomes visible again (iOS/Android release on hide)
-document.addEventListener('visibilitychange', function(){
-  if(document.visibilityState === 'visible') wlUpdate();
-}, false);
-
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible') wlUpdate();
+},false);
 function wlUpdate(){
-  var need = uhrKeepOn || cdWakeLock || (wkKeepOn && wkActive);
+  var need=uhrKeepOn||cdWakeLock||(wkKeepOn&&wkActive);
   if(need) wlAcquire(); else wlRelease();
 }
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════════════
    AUTO-HIDE UI
-══════════════════════════════════════════ */
+══════════════════════════════════════════════ */
 var hideT;
 function showUI(){
   clearTimeout(hideT);
@@ -796,10 +832,10 @@ document.addEventListener('mousemove',showUI,false);
 document.addEventListener('click',showUI,false);
 showUI();
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════════════
    SWIPE NAVIGATION
-══════════════════════════════════════════ */
-var cur=0, sx=0, sy=0, inDrum=false;
+══════════════════════════════════════════════ */
+var cur=0,sx=0,sy=0,inDrum=false;
 $('app').addEventListener('touchstart',function(e){
   sx=e.touches[0].clientX; sy=e.touches[0].clientY;
   inDrum=!!(e.target.closest&&e.target.closest('.drum-scroller,.picker-box'));
@@ -808,7 +844,7 @@ $('app').addEventListener('touchstart',function(e){
 $('app').addEventListener('touchend',function(e){
   if(inDrum) return;
   if(!$('cdModal').classList.contains('hidden')||!$('wkModal').classList.contains('hidden')) return;
-  var dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+  var dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
   if(Math.abs(dx)>Math.abs(dy)*1.5&&Math.abs(dx)>50) goTo(dx<0?cur+1:cur-1);
 },false);
 
@@ -826,8 +862,10 @@ function goTo(i){
   }
   cur=i; showUI();
 }
-
-/* DOT CLICK NAVIGATION */
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight') goTo(cur+1);
+  else if(e.key==='ArrowLeft') goTo(cur-1);
+},false);
 (function(){
   var dotEls=document.querySelectorAll('.dot');
   for(var i=0;i<dotEls.length;i++){
@@ -836,13 +874,9 @@ function goTo(i){
   }
 })();
 
-/* RING HELPER */
-function setRing(id,f){ $(id).style.strokeDashoffset=CIRC*(1-Math.max(0,Math.min(1,f))); }
-setRing('cdRingFg',1); setRing('wkRingFg',1);
-
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════════════
    CLOCK
-══════════════════════════════════════════ */
+══════════════════════════════════════════════ */
 function tickClock(){
   var now=new Date();
   var p=((now.getSeconds()*1000+now.getMilliseconds())/60000)*100;
@@ -853,9 +887,12 @@ function tickClock(){
   $('barFill').style.width=p+'%';
 }
 
-/* ══════════════════════════════════════════
+function setCdInfo(txt){ $('cdInfoP').textContent=txt; $('cdInfoL').textContent=txt; }
+function setWkInfo(txt){ $('wkInfoP').textContent=txt; $('wkInfoL').textContent=txt; }
+
+/* ══════════════════════════════════════════════
    COUNTDOWN
-══════════════════════════════════════════ */
+══════════════════════════════════════════════ */
 var cdTotal=0,cdRemain=0,cdIv=null,cdState='idle';
 
 function cdDisplay(){
@@ -864,62 +901,75 @@ function cdDisplay(){
   $('cdSec').textContent=pad(s);
   if(cdRemain>0){
     var end=new Date(Date.now()+cdRemain*1000);
-    $('cdSub').textContent='→ '+pad(end.getHours())+':'+pad(end.getMinutes());
-    $('cdSub').classList.remove('hidden');
+    setCdInfo('→ '+pad(end.getHours())+':'+pad(end.getMinutes()));
   }
-  setRing('cdRingFg',cdTotal>0?cdRemain/cdTotal:1);
+  var frac=cdTotal>0?cdRemain/cdTotal:0;
+  $('cdBarFill').style.width=(frac*100).toFixed(2)+'%';
 }
+
 function cdTick(){
   if(cdRemain<=0){
-    clearInterval(cdIv);cdIv=null;cdState='idle';cdRemain=0;
-    cdDisplay();$('cdDone').classList.remove('hidden');
-    $('cdGoBtn').textContent='Stellen';$('cdSub').classList.add('hidden');
-    // Keep screen on for 5 more minutes after countdown ends
+    clearInterval(cdIv); cdIv=null; cdState='idle'; cdRemain=0;
+    $('cdBarFill').style.width='0%'; setCdInfo('');
+    $('cdDone').classList.remove('hidden');
+    $('cdGoBtn').textContent='Stellen';
     clearTimeout(cdWlOffT);
-    cdWlOffT = setTimeout(function(){ cdWakeLock=false; wlUpdate(); }, 5*60*1000);
+    cdWlOffT=setTimeout(function(){ cdWakeLock=false; wlUpdate(); },5*60*1000);
     return;
   }
-  cdRemain--;cdDisplay();
+  cdRemain--; cdDisplay();
 }
+
 function openCdModal(){
-  showUI();$('cdModal').classList.remove('hidden');
-  requestAnimationFrame(function(){ cdH.setVal(cdH.getVal(),false); cdM.setVal(cdM.getVal(),false); });
+  showUI(); $('cdModal').classList.remove('hidden');
+  requestAnimationFrame(function(){
+    cdH.setVal(cdH.getVal(),false); cdM.setVal(cdM.getVal(),false);
+  });
 }
 
 $('cdGoBtn').addEventListener('click',function(){
   showUI();
-  if(cdState==='running'){clearInterval(cdIv);cdIv=null;cdState='paused';$('cdGoBtn').textContent='Weiter';}
-  else if(cdState==='paused'){cdState='running';$('cdGoBtn').textContent='Pause';cdIv=setInterval(cdTick,1000);}
-  else{openCdModal();}
+  if(cdState==='running'){ clearInterval(cdIv); cdIv=null; cdState='paused'; $('cdGoBtn').textContent='Weiter'; $('cdGoBtnP').textContent='Weiter'; }
+  else if(cdState==='paused'){ cdState='running'; $('cdGoBtn').textContent='Pause'; $('cdGoBtnP').textContent='Pause'; cdIv=setInterval(cdTick,1000); }
+  else { openCdModal(); }
 },false);
-$('cdSub').addEventListener('click',openCdModal,false);
+$('cdGoBtnP').addEventListener('click',function(){ $('cdGoBtn').click(); },false);
+$('cdResetBtnP').addEventListener('click',function(){ $('cdResetBtn').click(); },false);
+
+$('cdInfoP').addEventListener('click',openCdModal,false);
+$('cdInfoL').addEventListener('click',openCdModal,false);
+
 $('cdOk').addEventListener('click',function(){
   setTimeout(function(){
     var h=cdH.getVal(),m=cdM.getVal();
     $('cdModal').classList.add('hidden');
     if(h===0&&m===0) return;
-    clearInterval(cdIv);cdIv=null;
-    cdTotal=h*3600+m*60;cdRemain=cdTotal;cdState='running';
-    $('cdDone').classList.add('hidden');$('cdGoBtn').textContent='Pause';
-    clearTimeout(cdWlOffT);cdWakeLock=true;wlUpdate();
-    cdDisplay();cdIv=setInterval(cdTick,1000);showUI();
+    clearInterval(cdIv); cdIv=null;
+    cdTotal=h*3600+m*60; cdRemain=cdTotal; cdState='running';
+    $('cdDone').classList.add('hidden'); $('cdGoBtn').textContent='Pause';
+    clearTimeout(cdWlOffT); cdWakeLock=true; wlUpdate();
+    $('cdBarFill').style.transition='none'; $('cdBarFill').style.width='100%';
+    requestAnimationFrame(function(){ $('cdBarFill').style.transition=''; cdDisplay(); });
+    cdIv=setInterval(cdTick,1000); showUI();
   },150);
 },false);
-$('cdCancel').addEventListener('click',function(){$('cdModal').classList.add('hidden');showUI();},false);
+
+$('cdCancel').addEventListener('click',function(){ $('cdModal').classList.add('hidden'); showUI(); },false);
 $('cdModal').addEventListener('click',function(e){
-  if(e.target===$('cdModal')){$('cdModal').classList.add('hidden');showUI();}
+  if(e.target===$('cdModal')){ $('cdModal').classList.add('hidden'); showUI(); }
 },false);
 $('cdResetBtn').addEventListener('click',function(){
-  clearInterval(cdIv);cdIv=null;cdState='idle';cdTotal=0;cdRemain=0;
-  clearTimeout(cdWlOffT);cdWakeLock=false;wlUpdate();
-  $('cdGoBtn').textContent='Stellen';$('cdDigits').textContent='00:00';$('cdSec').textContent='00';
-  $('cdDone').classList.add('hidden');$('cdSub').classList.add('hidden');
-  setRing('cdRingFg',1);showUI();
+  clearInterval(cdIv); cdIv=null; cdState='idle'; cdTotal=0; cdRemain=0;
+  clearTimeout(cdWlOffT); cdWakeLock=false; wlUpdate();
+  $('cdGoBtn').textContent='Stellen';
+  $('cdDigits').textContent='00:00'; $('cdSec').textContent='00';
+  $('cdDone').classList.add('hidden'); setCdInfo('');
+  $('cdBarFill').style.width='0%'; showUI();
 },false);
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════════════
    WECKER
-══════════════════════════════════════════ */
+══════════════════════════════════════════════ */
 var wkActive=false,wkHval=7,wkMval=30,wkTotalSec=0;
 var wkIv=null,wkRinging=false,wkACtx=null,wkSndIv=null;
 
@@ -929,35 +979,38 @@ function secUntilAlarm(h,m){
   if(alarm<=now) alarm.setDate(alarm.getDate()+1);
   return Math.max(0,Math.round((alarm-now)/1000));
 }
+
 function wkDisplay(){
   if(!wkActive){
-    $('wkDigits').textContent='--:--';$('wkDigits').classList.add('idle');
-    $('wkSec').textContent='--';setRing('wkRingFg',1);return;
+    $('wkDigits').textContent='--:--'; $('wkDigits').classList.add('idle');
+    $('wkSec').textContent='--'; $('wkBarFill').style.width='0%'; return;
   }
   $('wkDigits').classList.remove('idle');
   var rem=secUntilAlarm(wkHval,wkMval);
   $('wkDigits').textContent=pad(Math.floor(rem/3600))+':'+pad(Math.floor((rem%3600)/60));
   $('wkSec').textContent=pad(rem%60);
-  setRing('wkRingFg',wkTotalSec>0?rem/wkTotalSec:1);
+  var frac=wkTotalSec>0?rem/wkTotalSec:1;
+  $('wkBarFill').style.width=(frac*100).toFixed(2)+'%';
 }
+
 function wkBeep(){
   try{
     if(!wkACtx) wkACtx=new(window.AudioContext||window.webkitAudioContext)();
     if(wkACtx.state==='suspended') wkACtx.resume();
-    // Attention: 3 short sharp beeps + 1 long
     [{f:1047,d:0.00,l:0.11},{f:1047,d:0.16,l:0.11},
-     {f:1047,d:0.32,l:0.11},{f:784, d:0.50,l:0.40}].forEach(function(p){
+     {f:1047,d:0.32,l:0.11},{f:784,d:0.50,l:0.40}].forEach(function(p){
       var o=wkACtx.createOscillator(),g=wkACtx.createGain();
-      o.connect(g);g.connect(wkACtx.destination);
+      o.connect(g); g.connect(wkACtx.destination);
       o.frequency.value=p.f; o.type='square';
       var t=wkACtx.currentTime+p.d;
       g.gain.setValueAtTime(0,t);
       g.gain.linearRampToValueAtTime(0.7,t+0.02);
       g.gain.exponentialRampToValueAtTime(0.001,t+p.l);
-      o.start(t);o.stop(t+p.l+0.02);
+      o.start(t); o.stop(t+p.l+0.02);
     });
   }catch(e){}
 }
+
 function triggerAlarm(){
   if(wkRinging) return; wkRinging=true;
   $('alarmTime').textContent=pad(wkHval)+':'+pad(wkMval);
@@ -965,120 +1018,112 @@ function triggerAlarm(){
   wkBeep(); wkSndIv=setInterval(wkBeep,1200);
   try{if(navigator.vibrate)navigator.vibrate([500,200,500,200,500]);}catch(e){}
 }
+
 function stopAlarm(){
-  clearInterval(wkSndIv);wkSndIv=null;
+  clearInterval(wkSndIv); wkSndIv=null;
   try{if(wkACtx){wkACtx.close();wkACtx=null;}}catch(e){}
   try{if(navigator.vibrate)navigator.vibrate(0);}catch(e){}
   $('alarmOverlay').classList.add('hidden');
-  wkRinging=false;wkActive=false;
-  clearInterval(wkIv);wkIv=null;
-  $('wkSetBtn').textContent='Stellen';$('wkSetBtn').classList.remove('armed');
-  $('wkSub').textContent='--:--';$('wkDigits').textContent='--:--';$('wkDigits').classList.add('idle');$('wkSec').textContent='--';
-  setRing('wkRingFg',1);wlUpdate();showUI();
+  wkRinging=false; wkActive=false;
+  clearInterval(wkIv); wkIv=null;
+  $('wkSetBtn').textContent='Stellen'; $('wkSetBtn').classList.remove('armed');
+  $('wkSetBtnP').textContent='Stellen'; $('wkSetBtnP').classList.remove('armed');
+  setWkInfo('');
+  $('wkDigits').textContent='--:--'; $('wkDigits').classList.add('idle');
+  $('wkSec').textContent='--'; $('wkBarFill').style.width='0%';
+  wlUpdate(); showUI();
 }
+
 function wkTick(){
-  if(!wkActive||wkRinging) return; wkDisplay();
+  if(!wkActive||wkRinging) return;
+  wkDisplay();
   var now=new Date();
   if(now.getHours()===wkHval&&now.getMinutes()===wkMval&&now.getSeconds()===0) triggerAlarm();
 }
+
 function openWkModal(){
-  showUI();$('wkModal').classList.remove('hidden');
-  requestAnimationFrame(function(){ wkH.setVal(wkH.getVal(),false); wkM.setVal(wkM.getVal(),false); });
+  showUI(); $('wkModal').classList.remove('hidden');
+  requestAnimationFrame(function(){
+    wkH.setVal(wkH.getVal(),false); wkM.setVal(wkM.getVal(),false);
+  });
 }
-$('wkLbl').addEventListener('click',openWkModal,false);
-$('wkSub').addEventListener('click',openWkModal,false);
-$('wkSetBtn').addEventListener('click',function(){showUI();if(wkActive){stopAlarm();return;}openWkModal();},false);
+
+$('wkInfoP').addEventListener('click',openWkModal,false);
+$('wkInfoL').addEventListener('click',openWkModal,false);
+$('wkSetBtn').addEventListener('click',function(){ showUI(); if(wkActive){stopAlarm();return;} openWkModal(); },false);
+$('wkSetBtnP').addEventListener('click',function(){ $('wkSetBtn').click(); },false);
+$('wkResetBtnP').addEventListener('click',function(){ $('wkResetBtn').click(); },false);
+
 $('wkOk').addEventListener('click',function(){
   setTimeout(function(){
     var h=wkH.getVal(),m=wkM.getVal();
     $('wkModal').classList.add('hidden');
     var rem=secUntilAlarm(h,m);
-    if(rem<30){$('wkInfo').textContent='Mind. 1 Min. in der Zukunft!';$('wkInfo').classList.remove('hidden');return;}
-    if(wkActive){clearInterval(wkIv);wkIv=null;wkActive=false;}
-    wkHval=h;wkMval=m;wkTotalSec=rem;wkActive=true;
-    $('wkSetBtn').textContent='Aktiv ✓';$('wkSetBtn').classList.add('armed');
-    $('wkSub').textContent=pad(h)+':'+pad(m);
-    $('wkInfo').classList.add('hidden');
-    wlUpdate();
-    wkDisplay();clearInterval(wkIv);wkIv=setInterval(wkTick,1000);showUI();
+    if(rem<30){ $('wkMsg').textContent='Mind. 1 Min. in der Zukunft!'; $('wkMsg').classList.remove('hidden'); return; }
+    if(wkActive){ clearInterval(wkIv); wkIv=null; wkActive=false; }
+    wkHval=h; wkMval=m; wkTotalSec=rem; wkActive=true;
+    $('wkSetBtn').textContent='Aktiv ✓'; $('wkSetBtn').classList.add('armed');
+    $('wkSetBtnP').textContent='Aktiv ✓'; $('wkSetBtnP').classList.add('armed');
+    setWkInfo('Weckzeit '+pad(h)+':'+pad(m));
+    $('wkMsg').classList.add('hidden'); wlUpdate();
+    $('wkBarFill').style.transition='none'; $('wkBarFill').style.width='100%';
+    requestAnimationFrame(function(){ $('wkBarFill').style.transition=''; wkDisplay(); });
+    clearInterval(wkIv); wkIv=setInterval(wkTick,1000); showUI();
   },150);
 },false);
-$('wkCancel').addEventListener('click',function(){$('wkModal').classList.add('hidden');showUI();},false);
+
+$('wkCancel').addEventListener('click',function(){ $('wkModal').classList.add('hidden'); showUI(); },false);
 $('wkModal').addEventListener('click',function(e){
-  if(e.target===$('wkModal')){$('wkModal').classList.add('hidden');showUI();}
+  if(e.target===$('wkModal')){ $('wkModal').classList.add('hidden'); showUI(); }
 },false);
-$('wkResetBtn').addEventListener('click',function(){stopAlarm();$('wkInfo').classList.add('hidden');},false);
+$('wkResetBtn').addEventListener('click',function(){ stopAlarm(); $('wkMsg').classList.add('hidden'); },false);
 $('alarmOverlay').addEventListener('click',stopAlarm,false);
 $('alarmOverlay').addEventListener('touchstart',function(e){e.preventDefault();stopAlarm();},false);
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════════════
    WAKE LOCK TOGGLE BUTTONS
-══════════════════════════════════════════ */
-function initWlBtn(btnId, getState, setState){
-  var btn = $(btnId);
-  if(!btn) return;
+══════════════════════════════════════════════ */
+function initWlBtn(btnId,getState,setState){
+  var btn=$(btnId); if(!btn) return;
   function refresh(){
     if(getState()){ btn.classList.add('on'); btn.textContent='● Anbleiben'; }
     else           { btn.classList.remove('on'); btn.textContent='Anbleiben'; }
   }
-  btn.addEventListener('click', function(){
-    setState(!getState());
-    wlUpdate(); refresh(); showUI();
-  }, false);
+  btn.addEventListener('click',function(){ setState(!getState()); wlUpdate(); refresh(); showUI(); },false);
   refresh();
 }
-initWlBtn('uhrWlBtn',
-  function(){ return uhrKeepOn; },
-  function(v){ uhrKeepOn = v; }
-);
-initWlBtn('wkWlBtn',
-  function(){ return wkKeepOn; },
-  function(v){ wkKeepOn = v; }
-);
+initWlBtn('uhrWlBtn',function(){ return uhrKeepOn; },function(v){ uhrKeepOn=v; });
+initWlBtn('wkWlBtn', function(){ return wkKeepOn; }, function(v){ wkKeepOn=v; });
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════════════
    FULLSCREEN — Android only
-══════════════════════════════════════════ */
+══════════════════════════════════════════════ */
 (function(){
-  var btn = $('fsBtn');
-  var canFS = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
-
-  if (canFS && btn) {
-    btn.style.display = '-webkit-flex';
-    btn.style.display = 'flex';
-    var inFS = false;
-    btn.addEventListener('click', function(){
-      try {
-        var el = document.documentElement;
-        if (!inFS) {
-          var req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
-          if (req) { req.call(el); }
-        } else {
-          var ex = document.exitFullscreen || document.webkitExitFullscreen;
-          if (ex) { ex.call(document); }
-        }
-      } catch(e) {}
-      showUI();
-    }, false);
-
-    function onFSChange() {
-      inFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
-      if (inFS) {
-        btn.style.display = 'none';
-      } else {
-        btn.style.display = '-webkit-flex';
-        btn.style.display = 'flex';
-        btn.textContent = '⛶';
-      }
+  var btn=$('fsBtn');
+  var canFS=!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
+  if(canFS&&btn){
+    btn.style.display='-webkit-flex'; btn.style.display='flex';
+    var inFS=false;
+    btn.addEventListener('click',function(){
+      try{
+        var el=document.documentElement;
+        if(!inFS){ var req=el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen; if(req){req.call(el);} }
+        else{ var ex=document.exitFullscreen||document.webkitExitFullscreen; if(ex){ex.call(document);} }
+      }catch(e){} showUI();
+    },false);
+    function onFSChange(){
+      inFS=!!(document.fullscreenElement||document.webkitFullscreenElement);
+      if(inFS){ btn.style.display='none'; }
+      else{ btn.style.display='-webkit-flex'; btn.style.display='flex'; btn.textContent='⛶'; }
     }
-    document.addEventListener('fullscreenchange', onFSChange, false);
-    document.addEventListener('webkitfullscreenchange', onFSChange, false);
+    document.addEventListener('fullscreenchange',onFSChange,false);
+    document.addEventListener('webkitfullscreenchange',onFSChange,false);
   }
 })();
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════════════
    INIT
-══════════════════════════════════════════ */
+══════════════════════════════════════════════ */
 updateDrums();
 function loop(){ tickClock(); requestAnimationFrame(loop); }
 loop();
