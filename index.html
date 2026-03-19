@@ -58,14 +58,14 @@ height: calc(32vw + 14vmin);
 
 /* LANDSCAPE — überschreibt Portrait-Regeln */
 @media (orientation:landscape) {
-/* flex-end + padding-bottom: Inhalt im unteren Drittel, Leerraum nach oben */
+/* padding-bottom 2vh statt 4vh: Block rückt etwas höher → wirkt mittiger */
 .screen.active {
 -webkit-justify-content:flex-end; justify-content:flex-end;
-padding-bottom: clamp(16px, 4vh, 48px);
+padding-bottom: clamp(10px, 2vh, 28px);
 }
-/* Höhe skaliert mit 24vw-Basis */
+/* Höhe skaliert mit 25vw-Basis */
 .sc-main {
-height: calc(min(24vw, 52vh) * 1.4);
+height: calc(min(25vw, 52vh) * 1.4);
 -webkit-flex-shrink:0; flex-shrink:0;
 overflow:visible;
 }
@@ -186,7 +186,7 @@ iPhone LS 844×390:  min(202px, 203px) = 202px ✓
 iPad LS   1024×768: min(246px, 399px) = 246px ✓
 Desktop   1920×1080:min(461px, 562px) = 461px ✓
 4K        3840×2160:min(922px,1123px) = 900px (cap) ✓ */
-.time-main { font-size: clamp(44px, min(24vw, 52vh), 900px); }
+.time-main { font-size: clamp(44px, min(25vw, 52vh), 900px); }
 }
 .time-sec {
 font-family:‘DIN Condensed’,‘Arial Narrow’,sans-serif;
@@ -207,8 +207,7 @@ margin-top: -0.45em;
 white-space:nowrap; -webkit-flex-wrap:nowrap; flex-wrap:nowrap;
 }
 @media (orientation:landscape) {
-/* -0.12: sanfter Abstand Ziffern→Datum */
-.date-block { margin-top: calc(min(24vw, 52vh) * -0.12); }
+.date-block { margin-top: calc(min(25vw, 52vh) * -0.12); }
 }
 .weekday  { color:rgba(255,255,255,.38); letter-spacing:.4em;
 text-transform:uppercase; font-size:clamp(11px,3.6vw,44px); }
@@ -221,7 +220,7 @@ Desktop 1920×1080: 94px → ≈ 1450px ≈ Ziffernbreite ✓ */
 @media (orientation:landscape) {
 .weekday, .date-txt {
 font-size: clamp(14px, min(4.9vw, 9.5vh), 200px);
-letter-spacing: 0.1em;
+letter-spacing: -0.02em;
 }
 }
 
@@ -286,7 +285,7 @@ font-size: clamp(44px, min(32vw, 44vh), 600px);
 }
 @media (orientation:landscape) {
 /* 24vw — konsistent mit time-main */
-.xt-digits { font-size: clamp(44px, min(24vw, 52vh), 900px); }
+.xt-digits { font-size: clamp(44px, min(25vw, 52vh), 900px); }
 }
 .xt-digits.idle {
 font-family:‘Share Tech Mono’,monospace !important;
