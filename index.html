@@ -48,10 +48,10 @@ display:-webkit-flex; display:flex;
 -webkit-justify-content:center; justify-content:center;
 }
 .sc-main {
-/* ── GEÄNDERT: 46vw → 38vw (passend zur neuen font-size 34vw) ── */
+/* ── GEÄNDERT: 38vw → 32vw (passend zur neuen font-size 32vw) ── */
 position:relative; overflow:visible;
 -webkit-flex-shrink:0; flex-shrink:0;
-height: calc(38vw + 14vmin);
+height: calc(32vw + 14vmin);
 }
 
 /* LANDSCAPE — überschreibt Portrait-Regeln */
@@ -160,28 +160,28 @@ color:#fff; white-space:nowrap;
 /* ── GEÄNDERT: 38vw → 34vw, max 900px → 600px ──
 34vw verhindert horizontalen Overflow auf Tablet/Desktop-Portrait.
 Auf iPhone (390px): 34vw=133px ≈ gleich wie zuvor.             */
-font-size: clamp(44px, 34vw, 600px);
+/* Portrait: min(32vw, 44vh)
+iPhone (390×844): min(125px, 372px)=125px ✓
+iPad   (768×1024): min(246px,451px)=246px ✓ */
+font-size: clamp(44px, min(32vw, 44vh), 600px);
 }
 @media (orientation:landscape) {
-/* ── GEÄNDERT: 75vmin → min(72vmin, 60vh), max 900px → 800px ──
-In Landscape gilt: vmin = vh (kürzere Seite = Höhe).
-min(72vmin, 60vh) = 60vh — begrenzt Ziffern auf 60% der Höhe.
-iPhone Landscape (390px hoch): 60vh = 234px  (war: 292px).
-Tablet Landscape (800px hoch): 60vh = 480px  (war: 600px ✗).
-Desktop 1080px hoch:           60vh = 648px  (war: 810px ✗).  */
-.time-main { font-size: clamp(44px, min(72vmin, 60vh), 800px); }
+/* ── GEÄNDERT: px-Cap bei 320px ──
+In Landscape gilt vmin=vh. Ohne px-Cap: iPad 65×7.5px=488px → Schrift breiter als Screen.
+Mit Cap: iPhone(vmin=375px)→244px ✓  iPad→320px(cap) ✓  Desktop→320px(cap) ✓ */
+.time-main { font-size: clamp(44px, 65vmin, 320px); }
 }
 .time-sec {
 font-family:‘DIN Condensed’,‘Arial Narrow’,sans-serif;
 font-weight:700; color:rgba(255,255,255,.52);
 line-height:1.0; white-space:nowrap;
-/* ── GEÄNDERT: 15vw → 13.5vw (proportional zu 34vw: 13.5/34 ≈ 15/38) */
-font-size: clamp(18px, 13.5vw, 280px);
+/* proportional zu 32vw: 12.5/32 ≈ 39% */
+font-size: clamp(18px, min(12.5vw, 17vh), 280px);
 padding-left: clamp(2px,min(1.8vw,3vh),18px);
 }
 @media (orientation:landscape) {
-/* ── GEÄNDERT: 29vmin → min(28vmin, 23vh) (proportional zu time-main) */
-.time-sec { font-size: clamp(18px, min(28vmin, 23vh), 280px); }
+/* proportional: 125px/320px ≈ 39% von time-main */
+.time-sec { font-size: clamp(18px, 25vmin, 125px); }
 }
 .date-block {
 display:-webkit-flex; display:flex;
@@ -252,16 +252,12 @@ font-family:‘DIN Condensed’,‘Arial Narrow’,sans-serif;
 font-weight:700; color:#fff;
 line-height:1.0;
 letter-spacing:-0.02em; white-space:nowrap;
-/* ── GEÄNDERT: 46vw → 34vw, max 900px → 600px ──
-Gleiche Logik wie time-main: 34vw passt auf allen Portrait-Breiten. */
-font-size: clamp(44px, 34vw, 600px);
+/* Portrait: gleiche Logik wie time-main */
+font-size: clamp(44px, min(32vw, 44vh), 600px);
 }
 @media (orientation:landscape) {
-/* ── GEÄNDERT: 70vmin → min(65vmin, 55vh), max 900px → 800px ──
-55vh-Cap: Ziffern belegen max. 55% der Höhe → Bar+Buttons haben Platz.
-iPhone Landscape (390px): 55vh = 214px  (war: 273px).
-Tablet Landscape (800px): 55vh = 440px  (war: 560px ✗).         */
-.xt-digits { font-size: clamp(44px, min(65vmin, 55vh), 800px); }
+/* px-Cap 300px: iPhone→225px(60vmin) ✓  iPad→300px(cap) ✓  Desktop→300px(cap) ✓ */
+.xt-digits { font-size: clamp(44px, 60vmin, 300px); }
 }
 .xt-digits.idle {
 font-family:‘Share Tech Mono’,monospace !important;
@@ -274,13 +270,13 @@ font-family:‘DIN Condensed’,‘Arial Narrow’,sans-serif;
 font-weight:700; color:rgba(255,255,255,.52);
 line-height:1.0;
 letter-spacing:.1em; white-space:nowrap;
-/* ── GEÄNDERT: 18vw → 13.5vw (proportional zu 34vw: 13.5/34 ≈ 18/46) */
-font-size: clamp(18px, 13.5vw, 280px);
+/* proportional zu 32vw: 12.5/32 ≈ 39% */
+font-size: clamp(18px, min(12.5vw, 17vh), 280px);
 padding-left: clamp(2px,min(1.8vw,3vh),18px);
 }
 @media (orientation:landscape) {
-/* ── GEÄNDERT: 31vmin → min(29vmin, 24vh) (proportional zu xt-digits) */
-.xt-secs { font-size: clamp(18px, min(29vmin, 24vh), 280px); }
+/* proportional: 118px/300px ≈ 39% von xt-digits */
+.xt-secs { font-size: clamp(18px, 23vmin, 118px); }
 }
 
 /* xt-info sitzt jetzt in sc-bar-zone, über dem Balken */
