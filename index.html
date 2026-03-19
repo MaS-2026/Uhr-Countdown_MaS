@@ -212,9 +212,14 @@ white-space:nowrap; -webkit-flex-wrap:nowrap; flex-wrap:nowrap;
 text-transform:uppercase; font-size:clamp(11px,3.6vw,44px); }
 .date-txt { color:rgba(255,255,255,.5);  letter-spacing:.2em;
 font-size:clamp(11px,3.6vw,44px); }
-/* Landscape: Datum-Schrift proportional zur Zifferngröße — kein starrer 44px-Cap */
+/* Landscape: Datum-Schrift füllt die Breite der Ziffernzeile
+“DONNERSTAG 19. Mär 2026” = 23 Zeichen × ~0.6em (Share Tech Mono)
+Ziffern “11:57” bei 246px = ~690px breit → Datum braucht ~50px für gleiche Breite
+iPad LS:    min(4.9×10.24, 9.5×7.68) = min(50px, 73px) = 50px ✓
+Desktop LS: min(4.9×19.2,  9.5×10.8) = min(94px, 103px)= 94px ✓
+iPhone LS:  min(4.9×8.44,  9.5×3.9)  = min(41px, 37px) = 37px ✓ */
 @media (orientation:landscape) {
-.weekday, .date-txt { font-size: clamp(11px, min(2vw, 3.8vh), 200px); }
+.weekday, .date-txt { font-size: clamp(14px, min(4.9vw, 9.5vh), 200px); }
 }
 
 /* Uhr-Balken mit seitlichen Markern */
