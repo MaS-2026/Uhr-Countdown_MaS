@@ -56,17 +56,15 @@ height: calc(32vw + 14vmin);
 
 /* LANDSCAPE — überschreibt Portrait-Regeln */
 @media (orientation:landscape) {
-/* Gesamter Block (sc-main + sc-bar-zone) sitzt am unteren Rand —
-Leerraum sammelt sich oben, wie auf iPhone */
+/* center: Leerraum gleichmäßig oben und unten */
 .screen.active {
--webkit-justify-content:flex-end; justify-content:flex-end;
+-webkit-justify-content:center; justify-content:center;
 }
-/* sc-main braucht explizite Höhe — uhr-content/xt-center sind position:absolute
-und würden sc-main sonst auf 0 kollabieren lassen.
-min(28vw,52vh) = Zifferhöhe + 8vmin für Datum-Zeile */
+/* 1.4× Font-size: Platz für Ziffern (1.0) + sanftes Datum darunter (0.4) */
 .sc-main {
-height: calc(min(28vw, 52vh) + 8vmin);
+height: calc(min(22vw, 52vh) * 1.4);
 -webkit-flex-shrink:0; flex-shrink:0;
+overflow:visible;
 }
 }
 
@@ -114,24 +112,32 @@ font-family:sans-serif;
 position:absolute; left:50%;
 -webkit-transform:translateX(-50%); transform:translateX(-50%);
 display:-webkit-flex; display:flex;
-gap:3vmin; z-index:99; pointer-events:auto; overflow:visible;
+gap:clamp(8px,2.5vmin,20px); z-index:200; pointer-events:auto; overflow:visible;
 }
 @media (orientation:portrait) {
-#dots { bottom: calc(clamp(10px,3vmin,24px) + env(safe-area-inset-bottom, 0px)); top:auto; }
+#dots { bottom: calc(clamp(12px,3.5vmin,28px) + env(safe-area-inset-bottom, 0px)); top:auto; }
 }
 @media (orientation:landscape) {
-#dots { top: calc(clamp(6px,1.8vmin,14px) + env(safe-area-inset-top, 0px)); bottom:auto; }
+/* Mittig oben — genug Abstand damit Dots nicht am Browser-Rand kleben */
+#dots { top: calc(clamp(10px,2.5vmin,20px) + env(safe-area-inset-top, 0px)); bottom:auto; }
 }
 .dot {
-width:clamp(10px,2.2vmin,18px); height:clamp(10px,2.2vmin,18px);
-border-radius:50%; background:rgba(255,255,255,.2); cursor:pointer;
-padding:clamp(6px,1.8vmin,14px); box-sizing:content-box;
-background-clip:content-box;
--webkit-transition:all .3s; transition:all .3s;
+width:  clamp(8px, 1.5vmin, 12px);
+height: clamp(8px, 1.5vmin, 12px);
+border-radius: 50%;
+/* Gefüllt — immer sichtbar auf schwarzem Hintergrund */
+background: rgba(255,255,255,.45);
+cursor: pointer;
+/* Großzügiges Click-Target ohne box-sizing-Tricks */
+margin: clamp(8px,2vmin,16px);
+-webkit-transition: background .3s, box-shadow .3s;
+transition: background .3s, box-shadow .3s;
+/* Kein flex-shrink damit Dots nie kollabieren */
+-webkit-flex-shrink:0; flex-shrink:0;
 }
 .dot.active {
-background:#ff8000; background-clip:content-box;
-box-shadow:0 0 8px #ff8000, 0 0 16px rgba(255,128,0,.5);
+background: #ff8000;
+box-shadow: 0 0 8px #ff8000, 0 0 16px rgba(255,128,0,.5);
 }
 
 /* ══════════════════════════════════════════════════
@@ -172,14 +178,13 @@ iPad   (768×1024): min(246px,451px)=246px ✓ */
 font-size: clamp(44px, min(32vw, 44vh), 600px);
 }
 @media (orientation:landscape) {
-/* min(28vw, 52vh) — selbstregulierend auf jedem Gerät:
-vw-Arm: hh:mm (5 Zeichen) passt horizontal  → 28vw × 5 × 0.45 ≈ 63vw ✓
-vh-Arm: Ziffern wachsen nie über 52% der Höhe hinaus
-iPhone LS 844×390:  min(236px, 203px) = 203px ✓
-iPad LS   1024×768: min(287px, 399px) = 287px ✓
-Desktop   1920×1080:min(538px, 562px) = 538px ✓
-4K        3840×2160:min(1075px,1123px)= 1075px (cap bei 900px) ✓ */
-.time-main { font-size: clamp(44px, min(28vw, 52vh), 900px); }
+/* 22vw: hh:mm (5 Zeichen × 0.45 × 22vw) ≈ 49.5vw + Sekunden ~8.5vw = ~58vw → passt überall
+52vh: Ziffern nie höher als 52% des Screens
+iPhone LS 844×390:  min(186px, 203px) = 186px ✓
+iPad LS   1024×768: min(225px, 399px) = 225px ✓
+Desktop   1920×1080:min(422px, 562px) = 422px ✓
+4K        3840×2160:min(845px,1123px) = 845px ✓ */
+.time-main { font-size: clamp(44px, min(22vw, 52vh), 900px); }
 }
 .time-sec {
 font-family:‘DIN Condensed’,‘Arial Narrow’,sans-serif;
@@ -190,8 +195,8 @@ font-size: clamp(18px, min(12.5vw, 17vh), 280px);
 padding-left: clamp(2px,min(1.8vw,3vh),18px);
 }
 @media (orientation:landscape) {
-/* proportional 39% von time-main: min(11vw, 20vh) */
-.time-sec { font-size: clamp(18px, min(11vw, 20vh), 350px); }
+/* 39% von time-main: 8.5vw, 20vh */
+.time-sec { font-size: clamp(18px, min(8.5vw, 20vh), 350px); }
 }
 .date-block {
 display:-webkit-flex; display:flex;
@@ -200,7 +205,8 @@ margin-top: -0.45em;
 white-space:nowrap; -webkit-flex-wrap:nowrap; flex-wrap:nowrap;
 }
 @media (orientation:landscape) {
-.date-block { margin-top: -14vmin; }
+/* -0.15 statt -0.27: Datum liegt knapp unter Ziffern, kein tiefer Overlap */
+.date-block { margin-top: calc(min(22vw, 52vh) * -0.15); }
 }
 .weekday  { color:rgba(255,255,255,.38); letter-spacing:.4em;
 text-transform:uppercase; font-size:clamp(11px,3.6vw,44px); }
@@ -254,7 +260,8 @@ display:-webkit-flex; display:flex;
 max-width:96vw; overflow:visible;
 }
 @media (orientation:landscape) {
-.xt-time-row { margin-bottom: -10vmin; }
+/* War für flex-end-Layout gedacht — mit justify-content:center nicht mehr nötig */
+.xt-time-row { margin-bottom: 0; }
 }
 
 .xt-digits {
@@ -266,12 +273,10 @@ letter-spacing:-0.02em; white-space:nowrap;
 font-size: clamp(44px, min(32vw, 44vh), 600px);
 }
 @media (orientation:landscape) {
-/* min(26vw, 50vh) — etwas kleiner als time-main wegen Landscape-Buttons rechts:
-iPhone LS 844×390:  min(219px, 195px) = 195px ✓
-iPad LS   1024×768: min(266px, 384px) = 266px ✓
-Desktop   1920×1080:min(499px, 540px) = 499px ✓
-4K        3840×2160:min(998px, 1080px)= 998px (cap bei 900px) ✓ */
-.xt-digits { font-size: clamp(44px, min(26vw, 50vh), 900px); }
+/* Gleiche Logik wie time-main, identische vw/vh-Arme:
+hh:mm + Sekunden passt horizontal, Buttons-Zone rechts hat genug Platz
+iPhone LS: min(186px,203px)=186px ✓  iPad: min(225px,399px)=225px ✓ */
+.xt-digits { font-size: clamp(44px, min(22vw, 52vh), 900px); }
 }
 .xt-digits.idle {
 font-family:‘Share Tech Mono’,monospace !important;
@@ -289,8 +294,8 @@ font-size: clamp(18px, min(12.5vw, 17vh), 280px);
 padding-left: clamp(2px,min(1.8vw,3vh),18px);
 }
 @media (orientation:landscape) {
-/* proportional 39% von xt-digits: min(10vw, 19vh) */
-.xt-secs { font-size: clamp(18px, min(10vw, 19vh), 350px); }
+/* 39% von xt-digits: min(8.5vw, 20vh) */
+.xt-secs { font-size: clamp(18px, min(8.5vw, 20vh), 350px); }
 }
 
 /* xt-info sitzt jetzt in sc-bar-zone, über dem Balken */
@@ -660,7 +665,7 @@ transition:background .3s,color .3s,border-color .3s;
 
   <div class="picker-modal hidden" id="wkModal">
     <div class="picker-box">
-      <div class="picker-title">Weckzeit einstellen</div>
+      <div class="picker-title">Alarm einstellen</div>
       <div class="drums-row">
         <div class="drum-wrap">
           <div class="drum-outer" id="wkHOuter">
@@ -701,7 +706,7 @@ transition:background .3s,color .3s,border-color .3s;
 
   <!-- DOTS -->
 
-  <div id="dots" class="btn-ui">
+  <div id="dots">
     <div class="dot active"></div>
     <div class="dot"></div>
     <div class="dot"></div>
@@ -1055,7 +1060,7 @@ $('wkOk').addEventListener('click',function(){
     wkHval=h; wkMval=m; wkTotalSec=rem; wkActive=true;
     $('wkSetBtn').textContent='Aktiv ✓'; $('wkSetBtn').classList.add('armed');
     $('wkSetBtnP').textContent='Aktiv ✓'; $('wkSetBtnP').classList.add('armed');
-    setWkInfo('Weckzeit '+pad(h)+':'+pad(m));
+    setWkInfo('Alarm '+pad(h)+':'+pad(m));
     $('wkMsg').classList.add('hidden'); wlUpdate();
     $('wkBarFill').style.transition='none'; $('wkBarFill').style.width='100%';
     requestAnimationFrame(function(){ $('wkBarFill').style.transition=''; wkDisplay(); });
