@@ -61,10 +61,10 @@ height: calc(32vw + 14vmin);
 
 /* LANDSCAPE — überschreibt Portrait-Regeln */
 @media (orientation:landscape) {
-/* padding-bottom 2vh statt 4vh: Block rückt etwas höher → wirkt mittiger */
+/* center + margin-top-Offset: stabiler als flex-end auf allen iPad-Größen
+margin-top 0 = exakt mittig, negativ = leicht nach unten, positiv = nach oben */
 .screen.active {
--webkit-justify-content:flex-end; justify-content:flex-end;
-padding-bottom: clamp(10px, 2vh, 28px);
+-webkit-justify-content:center; justify-content:center;
 }
 /* Höhe skaliert mit 25vw-Basis */
 .sc-main {
@@ -327,11 +327,17 @@ margin-bottom: clamp(4px, 1vmin, 8px);
 @media (orientation:landscape) { .xt-info { display:none; } }
 
 .xt-info-corner {
-display:none; position:absolute; top:13%; right:3vmin;
+display:none;
+/* Relativ zum .screen (position:absolute), nicht zu sc-main —
+damit keine Überlappung mit Ziffern egal welche sc-main-Höhe */
+position:absolute;
+top: calc(clamp(8px, 2vmin, 16px) + env(safe-area-inset-top, 0px));
+right: calc(clamp(8px, 2vmin, 16px) + env(safe-area-inset-right, 0px));
 font-family:‘DIN Condensed’,sans-serif; font-weight:700;
 color:rgba(255,128,0,.85); letter-spacing:.3em;
-font-size: clamp(12px,min(4.5vw,7vh),54px);
+font-size: clamp(12px, min(3vw, 5vh), 48px);
 white-space:nowrap; text-align:right; cursor:pointer;
+z-index:20;
 }
 @media (orientation:landscape) { .xt-info-corner { display:block; } }
 
@@ -577,13 +583,15 @@ transition:background .3s,color .3s,border-color .3s;
       <div class="xt-secs"   id="cdSec">00</div>
     </div>
   </div>
-  <div class="xt-info-corner" id="cdInfoL"></div>
   <div class="xt-btns btn-ui xt-btns-ls">
     <button class="act-btn act-go"    id="cdGoBtn">Stellen</button>
     <button class="act-btn act-reset" id="cdResetBtn">Reset</button>
     <div class="info-msg hidden"      id="cdDone">Zeit abgelaufen!</div>
   </div>
 </div>
+
+<!-- xt-info-corner direkt im screen — nicht in sc-main -->
+<div class="xt-info-corner" id="cdInfoL"></div>
 
 <div class="sc-bar-zone">
   <div class="xt-info" id="cdInfoP"></div>
@@ -615,7 +623,6 @@ transition:background .3s,color .3s,border-color .3s;
       <div class="xt-secs"        id="wkSec">--</div>
     </div>
   </div>
-  <div class="xt-info-corner" id="wkInfoL"></div>
   <div class="xt-btns btn-ui xt-btns-ls">
     <button class="act-btn act-set"   id="wkSetBtn">Stellen</button>
     <button class="act-btn act-reset" id="wkResetBtn">Reset</button>
@@ -624,6 +631,9 @@ transition:background .3s,color .3s,border-color .3s;
     <div class="info-msg hidden" id="wkMsg"></div>
   </div>
 </div>
+
+<!-- xt-info-corner direkt im screen — nicht in sc-main -->
+<div class="xt-info-corner" id="wkInfoL"></div>
 
 <div class="sc-bar-zone">
   <div class="xt-info" id="wkInfoP"></div>
