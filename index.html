@@ -167,69 +167,70 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 .time-row {
   display:-webkit-flex; display:flex;
   -webkit-align-items:baseline; align-items:baseline;
-  max-width:96vw; overflow:visible;
+  overflow:visible;
+}
+/* uhr-col: Spalte die time-main + date-block umschließt
+   date-block bekommt automatisch dieselbe Breite wie time-main */
+.uhr-col {
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-align-items:flex-start; align-items:flex-start;
+  -webkit-flex-shrink:0; flex-shrink:0;
 }
 .time-main {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
   font-weight:700; letter-spacing:-0.02em;
   line-height:1.0;
   color:#fff; white-space:nowrap;
-  /* ── GEÄNDERT: 38vw → 34vw, max 900px → 600px ──
-     34vw verhindert horizontalen Overflow auf Tablet/Desktop-Portrait.
-     Auf iPhone (390px): 34vw=133px ≈ gleich wie zuvor.             */
-  /* Portrait: min(32vw, 44vh)
-     iPhone (390×844): min(125px, 372px)=125px ✓
-     iPad   (768×1024): min(246px,451px)=246px ✓ */
   font-size: clamp(44px, min(32vw, 44vh), 600px);
 }
 @media (orientation:landscape) {
-  /* 24vw: etwas größer als 22vw — mehr Fläche auf iPad/Desktop genutzt
-     iPhone LS 844×390:  min(202px, 203px) = 202px ✓
-     iPad LS   1024×768: min(246px, 399px) = 246px ✓
-     Desktop   1920×1080:min(461px, 562px) = 461px ✓
-     4K        3840×2160:min(922px,1123px) = 900px (cap) ✓ */
   .time-main { font-size: clamp(44px, min(25vw, 52vh), 900px); }
 }
 .time-sec {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
   font-weight:700; color:rgba(255,255,255,.52);
   line-height:1.0; white-space:nowrap;
-  /* proportional zu 32vw: 12.5/32 ≈ 39% */
   font-size: clamp(18px, min(12.5vw, 17vh), 280px);
   padding-left: clamp(2px,min(1.8vw,3vh),18px);
+  /* Sekunden hängen an der Baseline von time-main */
+  -webkit-align-self:flex-end; align-self:flex-end;
+  margin-bottom: 0.05em;
 }
 @media (orientation:landscape) {
-  /* Größer (9vw statt 6.7vw) + mehr Abstand vom hh:mm-Block */
   .time-sec {
     font-size: clamp(18px, min(9vw, 18vh), 350px);
     padding-left: clamp(6px, min(2.5vw, 4vh), 32px);
   }
 }
+/* date-block: volle Breite von uhr-col = volle Breite von time-main */
 .date-block {
-  display:block;
-  margin-top: -0.45em;
-  white-space:nowrap;
+  width:100%;
   overflow:hidden;
-  max-width: min(83vw, 108vh);
+  margin-top: 0.08em;
 }
 @media (orientation:landscape) {
-  .date-block {
-    margin-top: calc(min(25vw, 52vh) * -0.12);
-    max-width: 62vw;
-  }
+  .date-block { margin-top: 0.06em; }
 }
 .date-sep { display:none; }
 .weekday  { display:none; }
-.date-txt  { display:none; }
+.date-txt { display:none; }
+/* date-full: font-size = time-main × 0.24
+   Monospace 16 Zeichen "Fr. 20. Mär 2026" füllt exakt hh:mm-Breite
+   Portrait:  0.24 × 32vw = 7.68vw → clamp mit vh-Bremse
+   Landscape: 0.24 × 25vw = 6vw */
 .date-full {
+  display:block;
   color:rgba(255,255,255,.45);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   text-transform:uppercase;
-  font-size: clamp(11px, 3.8vw, 44px);
+  white-space:nowrap;
+  overflow:hidden;
+  font-size: clamp(11px, min(7.5vw, 10vh), 200px);
 }
 @media (orientation:landscape) {
   .date-full {
-    font-size: clamp(12px, min(7.7vw, 14vh), 300px);
+    font-size: clamp(12px, min(6vw, 12.5vh), 300px);
   }
 }
 
@@ -544,11 +545,13 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
     <div class="sc-main">
       <div class="uhr-content">
         <div class="time-row">
-          <div class="time-main" id="timeMain">00<span class="colon">:</span>00</div>
-          <div class="time-sec"  id="timeSec">00</div>
-        </div>
-        <div class="date-block">
-          <span class="date-full" id="dateFull">Fr 20. Mär 2026</span>
+          <div class="uhr-col">
+            <div class="time-main" id="timeMain">00<span class="colon">:</span>00</div>
+            <div class="date-block">
+              <span class="date-full" id="dateFull">Fr. 20. Mär 2026</span>
+            </div>
+          </div>
+          <div class="time-sec" id="timeSec">00</div>
         </div>
       </div>
     </div>
@@ -896,7 +899,7 @@ function tickClock(){
   var p=((now.getSeconds()*1000+now.getMilliseconds())/60000)*100;
   $('timeMain').innerHTML=pad(now.getHours())+'<span class="colon">:</span>'+pad(now.getMinutes());
   $('timeSec').textContent=pad(now.getSeconds());
-  $('dateFull').textContent=DAYS[now.getDay()]+' '+pad(now.getDate())+'. '+MONS[now.getMonth()]+' '+now.getFullYear();
+  $('dateFull').textContent=DAYS[now.getDay()]+'. '+pad(now.getDate())+'. '+MONS[now.getMonth()]+' '+now.getFullYear();
   $('barFill').style.width=p+'%';
 }
 
