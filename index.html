@@ -206,52 +206,30 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   }
 }
 .date-block {
-  display:-webkit-flex; display:flex;
-  gap: 0;
-  -webkit-align-items:baseline; align-items:baseline;
+  display:block;
   margin-top: -0.45em;
-  white-space:nowrap; -webkit-flex-wrap:nowrap; flex-wrap:nowrap;
-  /* Harter Stopper: max-width = hh:mm-Breite
-     Portrait: 4 Ziffern+Doppelpunkt × ~0.52 × 32vw ≈ 83vw */
+  white-space:nowrap;
+  overflow:hidden;
   max-width: min(83vw, 108vh);
-  overflow: hidden;
 }
 @media (orientation:landscape) {
   .date-block {
     margin-top: calc(min(25vw, 52vh) * -0.12);
-    /* hh:mm bei 25vw: 4 Ziffern × 0.48 × 25vw + Doppelpunkt ≈ 50vw */
-    max-width: min(50vw, 100vh);
+    max-width: 62vw;
   }
 }
-
-.date-sep { font-size: clamp(11px, 3.8vw, 44px); color: transparent; }
-@media (orientation:landscape) {
-  .date-sep { font-size: clamp(12px, min(7.7vw, 14vh), 300px); }
-}
-/* Portrait: Wochentag + Datum füllen die Breite von hh:mm
-   "Do" = 2 Zeichen + "19. Mär 2026" = 12 Zeichen → 14 total
-   font-size so dass 14 Zeichen × 0.6em = 32vw (Ziffernbreite)
-   → font-size ≈ 32vw / (14 × 0.6) = 32vw / 8.4 ≈ 3.8vw */
-.weekday {
-  color:rgba(255,255,255,.38);
+.date-sep { display:none; }
+.weekday  { display:none; }
+.date-txt  { display:none; }
+.date-full {
+  color:rgba(255,255,255,.45);
   letter-spacing: 0.05em;
   text-transform:uppercase;
   font-size: clamp(11px, 3.8vw, 44px);
 }
-.date-txt {
-  color:rgba(255,255,255,.5);
-  letter-spacing: 0.05em;
-  font-size: clamp(11px, 3.8vw, 44px);
-}
-
-/* Landscape: "Do 19. Mär 2026" = 14 Zeichen unter hh:mm (5 Zeichen × 25vw-Basis)
-   Ziffernbreite ≈ 5 × 0.52 × 25vw = 65vw
-   font-size = 65vw / (14 × 0.6) ≈ 65vw / 8.4 ≈ 7.7vw
-   vh-Bremse: 14vh */
 @media (orientation:landscape) {
-  .weekday, .date-txt {
+  .date-full {
     font-size: clamp(12px, min(7.7vw, 14vh), 300px);
-    letter-spacing: 0.05em;
   }
 }
 
@@ -570,7 +548,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
           <div class="time-sec"  id="timeSec">00</div>
         </div>
         <div class="date-block">
-          <span class="weekday"  id="weekday">Fr</span><span class="date-txt" id="dateTxt"> 20. Mär 2026</span>
+          <span class="date-full" id="dateFull">Fr 20. Mär 2026</span>
         </div>
       </div>
     </div>
@@ -918,8 +896,7 @@ function tickClock(){
   var p=((now.getSeconds()*1000+now.getMilliseconds())/60000)*100;
   $('timeMain').innerHTML=pad(now.getHours())+'<span class="colon">:</span>'+pad(now.getMinutes());
   $('timeSec').textContent=pad(now.getSeconds());
-  $('weekday').textContent=DAYS[now.getDay()];
-  $('dateTxt').textContent=' '+pad(now.getDate())+'. '+MONS[now.getMonth()]+' '+now.getFullYear();
+  $('dateFull').textContent=DAYS[now.getDay()]+' '+pad(now.getDate())+'. '+MONS[now.getMonth()]+' '+now.getFullYear();
   $('barFill').style.width=p+'%';
 }
 
