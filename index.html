@@ -24,11 +24,9 @@
       /* Sicherheitsnetz: kein Text außerhalb #app sichtbar */
       color: #000;
     }
-    /* Stray-Text direkt in #app (z.B. Backticks aus altem GitHub-Stand) unsichtbar */
-    #app > *:not(.screen):not(.picker-modal):not(#alarmOverlay):not(#fsBtn):not(#dots) {
-      color: transparent !important;
-      font-size: 0 !important;
-    }
+    /* Stray-Text direkt in #app unsichtbar: alle echten Elemente
+       haben explizite color-Werte, nur Text-Nodes erben #000 */
+    #app { color: #000 !important; }
 
 /* ══════════════════════════════════════════════════
 #app — einziger fixed Root
