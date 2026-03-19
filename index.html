@@ -56,13 +56,17 @@ height: calc(32vw + 14vmin);
 
 /* LANDSCAPE — überschreibt Portrait-Regeln */
 @media (orientation:landscape) {
+/* Gesamter Block (sc-main + sc-bar-zone) sitzt am unteren Rand —
+Leerraum sammelt sich oben, wie auf iPhone */
 .screen.active {
--webkit-justify-content:flex-start; justify-content:flex-start;
+-webkit-justify-content:flex-end; justify-content:flex-end;
 }
+/* sc-main braucht explizite Höhe — uhr-content/xt-center sind position:absolute
+und würden sc-main sonst auf 0 kollabieren lassen.
+min(28vw,52vh) = Zifferhöhe + 8vmin für Datum-Zeile */
 .sc-main {
-height: auto;
--webkit-flex:1; flex:1;
-min-height:0;
+height: calc(min(28vw, 52vh) + 8vmin);
+-webkit-flex-shrink:0; flex-shrink:0;
 }
 }
 
@@ -142,8 +146,10 @@ display:-webkit-flex; display:flex;
 padding: 0 2vmin;
 }
 @media (orientation:landscape) {
+/* sc-main ist jetzt auto-height → justify-content spielt keine Rolle mehr,
+aber center ist semantisch korrekt */
 .uhr-content {
--webkit-justify-content:flex-end; justify-content:flex-end;
+-webkit-justify-content:center; justify-content:center;
 padding-bottom: 0;
 }
 }
@@ -237,7 +243,7 @@ padding: 0 clamp(4px,1vmin,10px);
 }
 @media (orientation:landscape) {
 .xt-center {
--webkit-justify-content:flex-end; justify-content:flex-end;
+-webkit-justify-content:center; justify-content:center;
 padding-bottom: 0;
 }
 }
