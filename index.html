@@ -275,6 +275,18 @@ body.ui-hidden .btn-ui {
   -webkit-align-items:center; align-items:center;
   gap: 1.5vmin;
   padding-top: clamp(3px, 0.6vmin, 8px);
+  position:relative;
+}
+/* Cover WebKit scroll-indicator chevrons that appear below the bar on iOS */
+.bar-row::after {
+  content:'';
+  position:absolute;
+  left:0; right:0;
+  top:100%;
+  height: clamp(30px, 8vmin, 60px);
+  background:#000;
+  z-index:50;
+  pointer-events:none;
 }
 .sc-bar-track {
   -webkit-flex:1; flex:1;
