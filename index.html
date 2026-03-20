@@ -137,13 +137,12 @@ body.ui-hidden .btn-ui {
   text-align-last:right;
 }
 @media (orientation:landscape) {
-  /* Alle info-text in Landscape aus dem Flow nehmen — identische Zentrierung aller Screens */
   .info-text {
     display:none !important;
   }
 }
 
-/* Landscape-only Info-Elemente — außerhalb content-core, kein Einfluss auf Zentrierung */
+/* Landscape-only Info-Elemente */
 .landscape-info {
   display:none;
 }
@@ -163,9 +162,7 @@ body.ui-hidden .btn-ui {
 }
 
 /* ══════════════════════════════════════════════════
-   LANDSCAPE DATE BLOCK — nur Uhr-Screen
-   Rechts, vertikal mittig, typografisch gewichtet
-   Kompakt genug für iPad (4:3)
+   LANDSCAPE DATE BLOCK
    ══════════════════════════════════════════════════ */
 #dateLandscape {
   display:none;
@@ -256,15 +253,8 @@ body.ui-hidden .btn-ui {
   color:rgba(255,255,255,.28);
 }
 
-.colon {
-  -webkit-animation:blink 1s step-end infinite;
-  animation:blink 1s step-end infinite;
-}
-@-webkit-keyframes blink { 0%,100%{opacity:1} 50%{opacity:.1} }
-@keyframes blink          { 0%,100%{opacity:1} 50%{opacity:.1} }
-
 /* ══════════════════════════════════════════════════
-   BAR-ROW — direkt unter der Uhrzeit
+   BAR-ROW
    ══════════════════════════════════════════════════ */
 .bar-row {
   display:-webkit-flex; display:flex;
@@ -273,7 +263,6 @@ body.ui-hidden .btn-ui {
   padding-top: clamp(3px, 0.6vmin, 20px);
   position:relative;
 }
-/* Cover WebKit scroll-indicator chevrons that appear below the bar on iOS */
 .bar-row::after {
   content:'';
   position:absolute;
@@ -546,7 +535,7 @@ body.ui-hidden .btn-ui {
     <div class="content-core">
       <span class="info-text" id="dateFull">Fr. 20. Mär 2026</span>
       <div class="time-row">
-        <div class="time-main" id="timeMain">00<span class="colon">:</span>00</div>
+        <div class="time-main" id="timeMain">00:00</div>
         <div class="time-sec" id="timeSec">00</div>
       </div>
       <div class="bar-row">
@@ -557,7 +546,7 @@ body.ui-hidden .btn-ui {
     </div>
 
 ```
-<!-- Landscape Datum-Block: rechts, vertikal mittig -->
+<!-- Landscape Datum-Block -->
 <div id="dateLandscape">
   <span class="dl-day" id="dlDay">Freitag</span>
   <span class="dl-date" id="dlDate">20</span>
@@ -578,7 +567,7 @@ body.ui-hidden .btn-ui {
     <div class="content-core">
       <span class="info-text accent" id="cdInfo"></span>
       <div class="time-row">
-        <div class="time-main" id="cdDigits">00<span class="colon">:</span>00</div>
+        <div class="time-main" id="cdDigits">00:00</div>
         <div class="time-sec" id="cdSec">00</div>
       </div>
       <div class="bar-row">
@@ -601,8 +590,8 @@ body.ui-hidden .btn-ui {
     <div class="content-core">
       <span class="info-text accent" id="wkInfo"></span>
       <div class="time-row">
-        <div class="time-main idle" id="wkDigits">--:--</div>
-        <div class="time-sec" id="wkSec">--</div>
+        <div class="time-main idle" id="wkDigits">00:00</div>
+        <div class="time-sec" id="wkSec">00</div>
       </div>
       <div class="bar-row">
         <div class="bar-marker"></div>
@@ -682,7 +671,6 @@ body.ui-hidden .btn-ui {
 
 var $ = function(id){ return document.getElementById(id); };
 var pad = function(n){ return String(n).padStart(2,'0'); };
-/* Sync portrait info-text with landscape-info element */
 function setCdInfoHtml(html){ $('cdInfo').innerHTML = html; $('cdInfoLand').innerHTML = html; }
 function setCdInfoText(txt){ $('cdInfo').textContent = txt; $('cdInfoLand').textContent = txt; }
 function setWkInfoHtml(html){ $('wkInfo').innerHTML = html; $('wkInfoLand').innerHTML = html; }
@@ -849,7 +837,7 @@ document.addEventListener('keydown', function(e){
 function tickClock(){
   var now = new Date();
   var p = ((now.getSeconds()*1000 + now.getMilliseconds()) / 60000) * 100;
-  $('timeMain').innerHTML = pad(now.getHours()) + '<span class="colon">:</span>' + pad(now.getMinutes());
+  $('timeMain').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes());
   $('timeSec').textContent = pad(now.getSeconds());
   /* Portrait-Datum (einzeilig) */
   $('dateFull').textContent = DAYS[now.getDay()] + '. ' + pad(now.getDate()) + '. ' + MONS[now.getMonth()] + ' ' + now.getFullYear();
@@ -964,9 +952,9 @@ function secUntilAlarm(h, m){
 }
 function wkDisplay(){
   if(!wkActive){
-    $('wkDigits').textContent = '--:--';
+    $('wkDigits').textContent = '00:00';
     $('wkDigits').classList.add('idle');
-    $('wkSec').textContent = '--';
+    $('wkSec').textContent = '00';
     $('wkBarFill').style.width = '0%';
     return;
   }
@@ -1008,8 +996,8 @@ function stopAlarm(){
   clearInterval(wkIv); wkIv = null;
   $('wkSetBtn').textContent = 'Stellen'; $('wkSetBtn').classList.remove('armed');
   setWkInfoText('');
-  $('wkDigits').textContent = '--:--'; $('wkDigits').classList.add('idle');
-  $('wkSec').textContent = '--'; $('wkBarFill').style.width = '0%';
+  $('wkDigits').textContent = '00:00'; $('wkDigits').classList.add('idle');
+  $('wkSec').textContent = '00'; $('wkBarFill').style.width = '0%';
   wlUpdate(); showUI();
 }
 function wkTick(){
