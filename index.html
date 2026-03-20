@@ -60,7 +60,7 @@
   }
   /* Uhr-Screen: mehr Platz rechts für den Datumsblock */
   #uhr-screen.screen.active {
-    padding-right: calc(26vw + env(safe-area-inset-right, 0px));
+    padding-right: calc(30vw + env(safe-area-inset-right, 0px));
   }
 }
 
@@ -234,11 +234,11 @@ body.ui-hidden .btn-ui {
 }
 @media (orientation:landscape) {
   .time-main {
-    font-size: clamp(44px, min(44vw, 70vh), 900px);
+    font-size: clamp(44px, min(36vw, 70vh), 900px);
   }
   .time-sec {
-    font-size: clamp(18px, min(22vw, 35vh), 400px);
-    padding-left: clamp(4px, min(2vw, 3vh), 24px);
+    font-size: clamp(18px, min(18vw, 35vh), 400px);
+    padding-left: clamp(4px, min(1.5vw, 3vh), 24px);
   }
 }
 
@@ -341,13 +341,16 @@ body.ui-hidden .btn-ui {
   #dots {
     bottom: calc(clamp(10px, 2vmin, 18px) + env(safe-area-inset-bottom, 0px));
     left:50%;
+    top:auto; right:auto;
     -webkit-transform:translateX(-50%); transform:translateX(-50%);
+    -webkit-flex-direction:row; flex-direction:row;
   }
 }
 @media (orientation:landscape) {
   #dots {
     left: calc(clamp(8px, 2vmin, 16px) + env(safe-area-inset-left, 0px));
     top:50%;
+    bottom:auto; right:auto;
     -webkit-transform:translateY(-50%); transform:translateY(-50%);
     -webkit-flex-direction:column; flex-direction:column;
   }
