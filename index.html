@@ -275,7 +275,6 @@ body.ui-hidden .btn-ui {
   -webkit-align-items:center; align-items:center;
   gap: 1.5vmin;
   padding-top: clamp(3px, 0.6vmin, 8px);
-  overflow:visible;
 }
 .sc-bar-track {
   -webkit-flex:1; flex:1;
@@ -283,16 +282,8 @@ body.ui-hidden .btn-ui {
   background: rgba(255,255,255,.07);
   border-radius: 6px;
   position: relative;
-  overflow: hidden;
-  -webkit-touch-callout:none;
-  -webkit-user-select:none; user-select:none;
-  -webkit-overflow-scrolling:auto;
-  scrollbar-width:none;
-}
-.sc-bar-track::-webkit-scrollbar { display:none; }
-.bar-fill, .bar-fill-reverse {
-  -webkit-touch-callout:none;
-  pointer-events:none;
+  -webkit-clip-path: inset(0 round 6px);
+  clip-path: inset(0 round 6px);
 }
 .bar-marker {
   width:2px; height: clamp(12px, 5vmin, 32px);
@@ -301,19 +292,17 @@ body.ui-hidden .btn-ui {
 }
 .bar-fill {
   position:absolute; top:0; left:0; bottom:0; width:0%;
-  max-width:100%;
   background:#ff8000;
   box-shadow:0 0 10px #ff8000, 0 0 28px rgba(255,128,0,.7), 0 0 50px rgba(255,128,0,.3);
   border-radius:6px;
-  overflow:hidden;
+  pointer-events:none;
 }
 .bar-fill-reverse {
   position:absolute; top:0; right:0; bottom:0; width:0%;
-  max-width:100%;
   background:#ff8000;
   box-shadow:0 0 10px #ff8000, 0 0 28px rgba(255,128,0,.6), 0 0 50px rgba(255,128,0,.25);
   border-radius:6px;
-  overflow:hidden;
+  pointer-events:none;
 }
 
 /* ══════════════════════════════════════════════════
