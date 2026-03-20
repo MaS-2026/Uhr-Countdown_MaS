@@ -139,19 +139,24 @@ body.ui-hidden .btn-ui {
   .info-text {
     display:none !important;
   }
-  /* Zielzeit / Alarmzeit: oben rechts, absolut positioniert, aus dem Flow */
-  #cdInfo, #wkInfo {
-    display:block !important;
+}
+
+/* Landscape-only Info-Elemente — außerhalb content-core, kein Einfluss auf Zentrierung */
+.landscape-info {
+  display:none;
+}
+@media (orientation:landscape) {
+  .landscape-info {
+    display:block;
     position:absolute;
     right: calc(clamp(18px, 4vmin, 44px) + env(safe-area-inset-right, 0px));
     top: calc(clamp(12px, 3vmin, 28px) + env(safe-area-inset-top, 0px));
-    left:auto; bottom:auto;
-    -webkit-transform:none; transform:none;
-    padding-bottom:0;
-    min-height:auto;
     text-align:right;
+    font-family:'DIN Condensed',sans-serif; font-weight:700;
+    color:rgba(255,128,0,.85);
     font-size: clamp(12px, min(3vw, 5vh), 28px);
     z-index:5;
+    pointer-events:none;
   }
 }
 
@@ -579,6 +584,7 @@ body.ui-hidden .btn-ui {
         <div class="bar-marker"></div>
       </div>
     </div>
+    <span class="landscape-info" id="cdInfoLand"></span>
     <div class="screen-btns btn-ui">
       <button class="act-btn act-go" id="cdGoBtn">Stellen</button>
       <button class="act-btn act-reset" id="cdResetBtn">Reset</button>
@@ -601,6 +607,7 @@ body.ui-hidden .btn-ui {
         <div class="bar-marker"></div>
       </div>
     </div>
+    <span class="landscape-info" id="wkInfoLand"></span>
     <div class="screen-btns btn-ui">
       <button class="act-btn act-set" id="wkSetBtn">Stellen</button>
       <button class="act-btn act-reset" id="wkResetBtn">Reset</button>
@@ -672,6 +679,11 @@ body.ui-hidden .btn-ui {
 
 var $ = function(id){ return document.getElementById(id); };
 var pad = function(n){ return String(n).padStart(2,'0'); };
+/* Sync portrait info-text with landscape-info element */
+function setCdInfoHtml(html){ $('cdInfo').innerHTML = html; $('cdInfoLand').innerHTML = html; }
+function setCdInfoText(txt){ $('cdInfo').textContent = txt; $('cdInfoLand').textContent = txt; }
+function setWkInfoHtml(html){ $('wkInfo').innerHTML = html; $('wkInfoLand').innerHTML = html; }
+function setWkInfoText(txt){ $('wkInfo').textContent = txt; $('wkInfoLand').textContent = txt; }
 var DAYS = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 var MONS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 var DAYS_FULL = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
@@ -857,14 +869,14 @@ function cdDisplay(){
   $('cdSec').textContent = pad(s);
   if(cdRemain > 0){
     var end = new Date(Date.now() + cdRemain*1000);
-    $('cdInfo').innerHTML = '→&thinsp;' + pad(end.getHours()) + ':' + pad(end.getMinutes());
+    setCdInfoHtml('→&thinsp;' + pad(end.getHours()) + ':' + pad(end.getMinutes()));
   }
 }
 function cdTick(){
   if(cdRemain <= 0){
     clearInterval(cdIv); cdIv = null; cdState = 'idle'; cdRemain = 0;
     $('cdBarFill').style.width = '0%';
-    $('cdInfo').textContent = '';
+    setCdInfoText('');
     $('cdDone').classList.remove('hidden');
     $('cdGoBtn').textContent = 'Stellen';
     clearTimeout(cdWlOffT);
@@ -905,7 +917,7 @@ $('cdResetBtn').addEventListener('click', function(){
   $('cdDigits').textContent = '00:00';
   $('cdSec').textContent = '00';
   $('cdDone').classList.add('hidden');
-  $('cdInfo').textContent = '';
+  setCdInfoText('');
   $('cdBarFill').style.width = '0%';
   showUI();
 }, false);
@@ -992,7 +1004,7 @@ function stopAlarm(){
   wkRinging = false; wkActive = false;
   clearInterval(wkIv); wkIv = null;
   $('wkSetBtn').textContent = 'Stellen'; $('wkSetBtn').classList.remove('armed');
-  $('wkInfo').textContent = '';
+  setWkInfoText('');
   $('wkDigits').textContent = '--:--'; $('wkDigits').classList.add('idle');
   $('wkSec').textContent = '--'; $('wkBarFill').style.width = '0%';
   wlUpdate(); showUI();
@@ -1037,7 +1049,7 @@ $('wkOk').addEventListener('click', function(){
     if(wkActive){ clearInterval(wkIv); wkIv=null; wkActive=false; }
     wkHval = h; wkMval = m; wkTotalSec = rem; wkActive = true;
     $('wkSetBtn').textContent = 'Aktiv ✓'; $('wkSetBtn').classList.add('armed');
-    $('wkInfo').innerHTML = 'Alarm<br>' + pad(h) + ':' + pad(m);
+    setWkInfoHtml('Alarm<br>' + pad(h) + ':' + pad(m));
     $('wkMsg').classList.add('hidden');
     wlUpdate();
     $('wkBarFill').style.width = '100%';
