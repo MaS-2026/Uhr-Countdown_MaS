@@ -57,9 +57,9 @@
 @media (orientation:landscape) {
   .screen.active {
     padding: env(safe-area-inset-top, 0px)
-             calc(clamp(44px,10vmin,80px) + env(safe-area-inset-right, 0px))
+             calc(clamp(16px,4vmin,40px) + env(safe-area-inset-right, 0px))
              env(safe-area-inset-bottom, 0px)
-             calc(clamp(28px,6vmin,48px) + env(safe-area-inset-left, 0px));
+             calc(clamp(16px,4vmin,40px) + env(safe-area-inset-left, 0px));
   }
 }
 
@@ -117,9 +117,9 @@ body.ui-hidden .btn-ui {
   display:block;
   color:rgba(255,255,255,.40);
   text-transform:uppercase;
-  font-size: clamp(22px, 11vw, 80px);
-  padding-bottom: clamp(30px, 9vmin, 72px);
-  min-height: clamp(30px, 13vw, 92px);
+  font-size: clamp(22px, 11vw, 200px);
+  padding-bottom: clamp(30px, 9vmin, 180px);
+  min-height: clamp(30px, 13vw, 200px);
   text-align: justify;
   -moz-text-align-last: justify;
   -webkit-text-align-last: justify;
@@ -154,7 +154,7 @@ body.ui-hidden .btn-ui {
     text-align:right;
     font-family:'DIN Condensed',sans-serif; font-weight:700;
     color:rgba(255,128,0,.85);
-    font-size: clamp(12px, min(3vw, 5vh), 28px);
+    font-size: clamp(12px, min(3vw, 5vh), 80px);
     z-index:5;
     pointer-events:none;
   }
@@ -179,7 +179,7 @@ body.ui-hidden .btn-ui {
     -webkit-transform:translateY(-50%); transform:translateY(-50%);
     text-align:right;
     z-index:5;
-    gap: clamp(2px, 0.5vh, 5px);
+    gap: clamp(2px, 0.5vh, 12px);
   }
 }
 .dl-day {
@@ -188,16 +188,16 @@ body.ui-hidden .btn-ui {
   color:rgba(255,255,255,.28);
   letter-spacing:.30em;
   text-transform:uppercase;
-  font-size: clamp(10px, min(1.8vw, 3.5vh), 20px);
+  font-size: clamp(10px, min(1.8vw, 3.5vh), 50px);
   line-height:1;
-  margin-bottom: clamp(4px, 1vh, 10px);
+  margin-bottom: clamp(4px, 1vh, 24px);
 }
 .dl-date {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
   font-weight:700;
   color:rgba(255,255,255,.45);
   line-height:0.85;
-  font-size: clamp(40px, min(7vw, 18vh), 120px);
+  font-size: clamp(40px, min(7vw, 18vh), 300px);
 }
 .dl-month {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
@@ -206,7 +206,7 @@ body.ui-hidden .btn-ui {
   text-transform:uppercase;
   letter-spacing:.18em;
   line-height:1;
-  font-size: clamp(13px, min(2.5vw, 5.5vh), 32px);
+  font-size: clamp(13px, min(2.5vw, 5.5vh), 80px);
 }
 .dl-year {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
@@ -214,7 +214,7 @@ body.ui-hidden .btn-ui {
   color:rgba(255,255,255,.18);
   letter-spacing:.18em;
   line-height:1;
-  font-size: clamp(13px, min(2.5vw, 5.5vh), 32px);
+  font-size: clamp(13px, min(2.5vw, 5.5vh), 80px);
 }
 
 /* ══════════════════════════════════════════════════
@@ -228,22 +228,22 @@ body.ui-hidden .btn-ui {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
   font-weight:700; letter-spacing:-0.02em;
   line-height:0.92; color:#fff; white-space:nowrap;
-  font-size: clamp(44px, min(48vw, 36vh), 600px);
+  font-size: clamp(44px, min(48vw, 36vh), 2000px);
 }
 .time-sec {
   font-family:'DIN Condensed','Arial Narrow',sans-serif;
   font-weight:700; color:rgba(255,255,255,.52);
   line-height:0.92; white-space:nowrap;
-  font-size: clamp(18px, min(24vw, 18vh), 280px);
-  padding-left: clamp(2px, min(1.5vw, 2vh), 16px);
+  font-size: clamp(18px, min(24vw, 18vh), 1000px);
+  padding-left: clamp(2px, min(1.5vw, 2vh), 40px);
 }
 @media (orientation:landscape) {
   .time-main {
-    font-size: clamp(44px, min(36vw, 56vh), 900px);
+    font-size: clamp(44px, min(36vw, 56vh), 2000px);
   }
   .time-sec {
-    font-size: clamp(18px, min(18vw, 28vh), 400px);
-    padding-left: clamp(4px, min(1.5vw, 3vh), 24px);
+    font-size: clamp(18px, min(18vw, 28vh), 1000px);
+    padding-left: clamp(4px, min(1.5vw, 3vh), 60px);
   }
 }
 
@@ -266,7 +266,7 @@ body.ui-hidden .btn-ui {
   display:-webkit-flex; display:flex;
   -webkit-align-items:center; align-items:center;
   gap: 1.5vmin;
-  padding-top: clamp(3px, 0.6vmin, 8px);
+  padding-top: clamp(3px, 0.6vmin, 20px);
   position:relative;
 }
 /* Cover WebKit scroll-indicator chevrons that appear below the bar on iOS */
@@ -275,14 +275,14 @@ body.ui-hidden .btn-ui {
   position:absolute;
   left:0; right:0;
   top:100%;
-  height: clamp(30px, 8vmin, 60px);
+  height: clamp(30px, 8vmin, 120px);
   background:#000;
   z-index:50;
   pointer-events:none;
 }
 .sc-bar-track {
   -webkit-flex:1; flex:1;
-  height: clamp(14px, 4.2vmin, 30px);
+  height: clamp(14px, 4.2vmin, 60px);
   background: rgba(255,255,255,.07);
   border-radius: 6px;
   position: relative;
@@ -290,7 +290,7 @@ body.ui-hidden .btn-ui {
   clip-path: inset(0 round 6px);
 }
 .bar-marker {
-  width:2px; height: clamp(12px, 5vmin, 32px);
+  width:2px; height: clamp(12px, 5vmin, 60px);
   background:rgba(255,255,255,.32); border-radius:1px;
   -webkit-flex-shrink:0; flex-shrink:0;
 }
@@ -356,7 +356,6 @@ body.ui-hidden .btn-ui {
   -webkit-flex-direction:row; flex-direction:row;
   -webkit-align-items:center; align-items:center;
   gap:clamp(8px, 2.5vmin, 20px);
-  /* Default: bottom center — overridden by orientation queries */
   bottom: calc(clamp(10px, 2vmin, 18px) + env(safe-area-inset-bottom, 0px));
   left:50%;
   -webkit-transform:translateX(-50%); transform:translateX(-50%);
@@ -396,7 +395,7 @@ body.ui-hidden .btn-ui {
 }
 
 /* ══════════════════════════════════════════════════
-   FULLSCREEN (unverändert)
+   FULLSCREEN
    ══════════════════════════════════════════════════ */
 #fsBtn {
   display:none; position:absolute; bottom:14px; left:14px;
@@ -1090,7 +1089,7 @@ initWlBtn('uhrWlBtn', function(){ return uhrKeepOn; }, function(v){ uhrKeepOn=v;
 initWlBtn('wkWlBtn',  function(){ return wkKeepOn;  }, function(v){ wkKeepOn=v;  });
 
 /* ══════════════════════════════════════════════════
-   FULLSCREEN (unverändert)
+   FULLSCREEN
    ══════════════════════════════════════════════════ */
 (function(){
   var btn = $('fsBtn');
