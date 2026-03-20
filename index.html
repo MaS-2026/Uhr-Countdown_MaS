@@ -118,6 +118,7 @@ body.ui-hidden .btn-ui {
   color:rgba(255,255,255,.40);
   text-transform:uppercase;
   font-size: clamp(22px, 11vw, 200px);
+  line-height: 1.0;
   padding-bottom: clamp(30px, 9vmin, 180px);
   min-height: clamp(30px, 13vw, 200px);
   text-align: justify;
@@ -1048,7 +1049,7 @@ $('wkOk').addEventListener('click', function(){
     if(wkActive){ clearInterval(wkIv); wkIv=null; wkActive=false; }
     wkHval = h; wkMval = m; wkTotalSec = rem; wkActive = true;
     $('wkSetBtn').textContent = 'Aktiv ✓'; $('wkSetBtn').classList.add('armed');
-    setWkInfoHtml('Alarm<br>' + pad(h) + ':' + pad(m));
+    setWkInfoHtml('→&thinsp;' + pad(h) + ':' + pad(m));
     $('wkMsg').classList.add('hidden');
     wlUpdate();
     $('wkBarFill').style.width = '100%';
