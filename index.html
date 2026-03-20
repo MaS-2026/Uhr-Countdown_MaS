@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="de">
 <head>
   <meta charset="UTF-8">
@@ -8,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Uhr">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#000000">
-  <link rel="manifest" href='data:application/manifest+json,{"name":"Uhr","short_name":"Uhr","display":"standalone","background_color":"#000000","theme_color":"#000000","orientation":"any","start_url":".","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'50\' fill=\'%23000\'/%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'42\' fill=\'none\' stroke=\'%23ff8000\' stroke-width=\'6\'/%3E%3C/svg%3E","sizes":"any","type":"image/svg+xml"}]}'>
+  <link rel="manifest" href='data:application/manifest+json,{"name":"Uhr","short_name":"Uhr","display":"standalone","background_color":"#000000","theme_color":"#000000","orientation":"any","start_url":".","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns='\''http://www.w3.org/2000/svg'\'' viewBox='\''0 0 100 100'\''%3E%3Ccircle cx='\''50'\'' cy='\''50'\'' r='\''50'\'' fill='\''%23000'\''/%3E%3Ccircle cx='\''50'\'' cy='\''50'\'' r='\''42'\'' fill='\''none'\'' stroke='\''%23ff8000'\'' stroke-width='\''6'\''/%3E%3C/svg%3E","sizes":"any","type":"image/svg+xml"}]}'>
   <title>Uhr</title>
   <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed:wght@700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
@@ -20,16 +21,12 @@
     html, body {
       width:100%; height:100%; overflow:hidden; background:#000;
       -webkit-user-select:none; user-select:none;
-      /* Sicherheitsnetz: kein Text außerhalb #app sichtbar */
-      color: #000;
     }
-    /* Stray-Text direkt in #app unsichtbar: alle echten Elemente
-       haben explizite color-Werte, nur Text-Nodes erben #000 */
-    #app { color: #000 !important; }
 
+```
 /* ══════════════════════════════════════════════════
-   #app — einziger fixed Root
-══════════════════════════════════════════════════ */
+   ROOT
+   ══════════════════════════════════════════════════ */
 #app {
   position:fixed; top:0; left:0; right:0; bottom:0;
   overflow:hidden; background:#000; color:#fff;
@@ -38,70 +35,338 @@
 }
 
 /* ══════════════════════════════════════════════════
-   SCREENS
-══════════════════════════════════════════════════ */
+   SCREEN — zentriert content-core
+   ══════════════════════════════════════════════════ */
 .screen {
   position:absolute; top:0; left:0; right:0; bottom:0;
   display:none; background:#000;
 }
-
-/* PORTRAIT */
 .screen.active {
   display:-webkit-flex; display:flex;
   -webkit-flex-direction:column; flex-direction:column;
+  -webkit-align-items:center; align-items:center;
   -webkit-justify-content:center; justify-content:center;
+  padding: env(safe-area-inset-top, 0px)
+           clamp(6px,1.5vmin,14px)
+           env(safe-area-inset-bottom, 0px)
+           clamp(6px,1.5vmin,14px);
 }
-.sc-main {
-  /* ── GEÄNDERT: 38vw → 32vw (passend zur neuen font-size 32vw) ── */
-  position:relative; overflow:visible;
-  -webkit-flex-shrink:0; flex-shrink:0;
-  height: calc(32vw + 14vmin);
-}
-
-/* LANDSCAPE — überschreibt Portrait-Regeln */
 @media (orientation:landscape) {
-  /* center + margin-top-Offset: stabiler als flex-end auf allen iPad-Größen
-     margin-top 0 = exakt mittig, negativ = leicht nach unten, positiv = nach oben */
   .screen.active {
-    -webkit-justify-content:center; justify-content:center;
-  }
-  /* Höhe skaliert mit 25vw-Basis */
-  .sc-main {
-    height: calc(min(25vw, 52vh) * 1.4);
-    -webkit-flex-shrink:0; flex-shrink:0;
-    overflow:visible;
+    padding: env(safe-area-inset-top, 0px)
+             calc(clamp(44px,10vmin,80px) + env(safe-area-inset-right, 0px))
+             env(safe-area-inset-bottom, 0px)
+             calc(clamp(28px,6vmin,48px) + env(safe-area-inset-left, 0px));
   }
 }
 
-.sc-bar-zone {
-  -webkit-flex-shrink:0; flex-shrink:0;
-  display:-webkit-flex; display:flex;
+/* ══════════════════════════════════════════════════
+   CONTENT-CORE — die kompakte zentrierte Einheit
+   Info + Zeit + Balken direkt zusammen
+   ══════════════════════════════════════════════════ */
+.content-core {
+  display:-webkit-inline-flex; display:inline-flex;
   -webkit-flex-direction:column; flex-direction:column;
   -webkit-align-items:stretch; align-items:stretch;
-  padding: 0 clamp(8px,1.5vmin,14px)
-           calc(clamp(8px,2vmin,16px) + env(safe-area-inset-bottom, 0px));
+  max-width: 96vw;
+}
+
+/* ══════════════════════════════════════════════════
+   BUTTONS — absolut, stören Zentrierung nicht
+   ══════════════════════════════════════════════════ */
+.screen-btns {
+  position:absolute;
+  bottom: calc(clamp(30px, 6vmin, 50px) + env(safe-area-inset-bottom, 0px));
+  left:50%;
+  -webkit-transform:translateX(-50%); transform:translateX(-50%);
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:row; flex-direction:row;
+  -webkit-align-items:center; align-items:center;
+  -webkit-justify-content:center; justify-content:center;
+  gap: 2.5vmin;
+  z-index:10;
 }
 @media (orientation:landscape) {
-  #countdown-screen .sc-bar-zone,
-  #wecker-screen   .sc-bar-zone {
-    padding-bottom: calc(clamp(18px, 4.5vmin, 36px) + env(safe-area-inset-bottom, 0px));
+  .screen-btns {
+    bottom: calc(clamp(6px,1.5vmin,14px) + env(safe-area-inset-bottom, 0px));
+    right: calc(clamp(8px,2vmin,16px) + env(safe-area-inset-right, 0px));
+    left:auto;
+    -webkit-transform:none; transform:none;
+    gap: 1.5vmin;
   }
 }
 
-/* Gemeinsamer Balken-Track */
+/* ══════════════════════════════════════════════════
+   AUTO-HIDE
+   ══════════════════════════════════════════════════ */
+.btn-ui {
+  -webkit-transition:opacity .8s; transition:opacity .8s;
+}
+body.ui-hidden .btn-ui {
+  opacity:0 !important; pointer-events:none !important;
+}
+
+/* ══════════════════════════════════════════════════
+   INFO-TEXT (Datum / Zielzeit / Alarm)
+   Über der Uhrzeit, volle Breite der time-row
+   ══════════════════════════════════════════════════ */
+.info-text {
+  display:block;
+  color:rgba(255,255,255,.40);
+  text-transform:uppercase;
+  font-size: clamp(22px, 11vw, 80px);
+  padding-bottom: clamp(30px, 9vmin, 72px);
+  min-height: clamp(30px, 13vw, 92px);
+  text-align: justify;
+  -moz-text-align-last: justify;
+  -webkit-text-align-last: justify;
+  text-align-last: justify;
+}
+.info-text.accent {
+  font-family:'DIN Condensed',sans-serif; font-weight:700;
+  color:rgba(255,128,0,.85);
+  cursor:pointer;
+}
+@media (orientation:landscape) {
+  .info-text {
+    font-size: clamp(11px, min(3vw, 4.5vh), 28px);
+    padding-bottom: clamp(2px, 0.8vmin, 8px);
+    min-height: clamp(14px, min(3.5vw, 5vh), 34px);
+  }
+  /* Datum im Uhr-Screen in Landscape ausblenden — wird als eigener Block rechts angezeigt */
+  #uhr-screen .info-text {
+    display:none !important;
+  }
+  /* Zielzeit / Alarmzeit in Landscape: rechts am Rand, vertikal mittig */
+  #cdInfo, #wkInfo {
+    position:absolute;
+    right: calc(clamp(18px, 4vmin, 44px) + env(safe-area-inset-right, 0px));
+    top:50%;
+    -webkit-transform:translateY(-50%); transform:translateY(-50%);
+    left:auto; bottom:auto;
+    padding-bottom:0;
+    min-height:auto;
+    text-align:right;
+    font-size: clamp(16px, min(5vw, 8vh), 50px);
+    z-index:5;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   LANDSCAPE DATE BLOCK — nur Uhr-Screen
+   Rechts, vertikal mittig, typografisch gewichtet
+   ══════════════════════════════════════════════════ */
+#dateLandscape {
+  display:none;
+}
+@media (orientation:landscape) {
+  #dateLandscape {
+    display:-webkit-flex; display:flex;
+    -webkit-flex-direction:column; flex-direction:column;
+    -webkit-align-items:flex-end; align-items:flex-end;
+    position:absolute;
+    right: calc(clamp(18px, 4vmin, 44px) + env(safe-area-inset-right, 0px));
+    top:50%;
+    -webkit-transform:translateY(-50%); transform:translateY(-50%);
+    text-align:right;
+    z-index:5;
+    gap: clamp(2px, 0.6vh, 6px);
+  }
+}
+.dl-day {
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700;
+  color:rgba(255,255,255,.28);
+  letter-spacing:.38em;
+  text-transform:uppercase;
+  font-size: clamp(14px, min(3.5vw, 5.5vh), 30px);
+  line-height:1;
+  margin-bottom: clamp(6px, 1.8vh, 16px);
+}
+.dl-date {
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700;
+  color:rgba(255,255,255,.45);
+  line-height:0.85;
+  font-size: clamp(58px, min(16vw, 28vh), 180px);
+}
+.dl-month {
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700;
+  color:rgba(255,128,0,.6);
+  text-transform:uppercase;
+  letter-spacing:.28em;
+  line-height:1;
+  font-size: clamp(20px, min(5.5vw, 9vh), 54px);
+}
+.dl-year {
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700;
+  color:rgba(255,255,255,.18);
+  letter-spacing:.28em;
+  line-height:1;
+  font-size: clamp(20px, min(5.5vw, 9vh), 54px);
+}
+
+/* ══════════════════════════════════════════════════
+   TIME-ROW
+   ══════════════════════════════════════════════════ */
+.time-row {
+  display:-webkit-flex; display:flex;
+  -webkit-align-items:baseline; align-items:baseline;
+}
+.time-main {
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700; letter-spacing:-0.02em;
+  line-height:0.92; color:#fff; white-space:nowrap;
+  font-size: clamp(44px, min(48vw, 36vh), 600px);
+}
+.time-sec {
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700; color:rgba(255,255,255,.52);
+  line-height:0.92; white-space:nowrap;
+  font-size: clamp(18px, min(24vw, 18vh), 280px);
+  padding-left: clamp(2px, min(1.5vw, 2vh), 16px);
+}
+@media (orientation:landscape) {
+  .time-main {
+    font-size: clamp(44px, min(44vw, 70vh), 900px);
+  }
+  .time-sec {
+    font-size: clamp(18px, min(22vw, 35vh), 400px);
+    padding-left: clamp(4px, min(2vw, 3vh), 24px);
+  }
+}
+
+/* Idle-State (Wecker) — nur Farbe ändern, Layout bleibt identisch */
+.time-main.idle {
+  color:rgba(255,255,255,.28);
+}
+
+.colon {
+  -webkit-animation:blink 1s step-end infinite;
+  animation:blink 1s step-end infinite;
+}
+@-webkit-keyframes blink { 0%,100%{opacity:1} 50%{opacity:.1} }
+@keyframes blink          { 0%,100%{opacity:1} 50%{opacity:.1} }
+
+/* ══════════════════════════════════════════════════
+   BAR-ROW — direkt unter der Uhrzeit
+   ══════════════════════════════════════════════════ */
+.bar-row {
+  display:-webkit-flex; display:flex;
+  -webkit-align-items:center; align-items:center;
+  gap: 1.5vmin;
+  padding-top: clamp(3px, 0.6vmin, 8px);
+}
 .sc-bar-track {
+  -webkit-flex:1; flex:1;
   height: clamp(14px, 4.2vmin, 30px);
   background: rgba(255,255,255,.07);
   border-radius: 6px;
   position: relative;
   overflow: hidden;
 }
+.bar-marker {
+  width:2px; height: clamp(12px, 5vmin, 32px);
+  background:rgba(255,255,255,.32); border-radius:1px;
+  -webkit-flex-shrink:0; flex-shrink:0;
+}
+.bar-fill {
+  position:absolute; top:0; left:0; bottom:0; width:0%;
+  background:#ff8000;
+  box-shadow:0 0 10px #ff8000, 0 0 28px rgba(255,128,0,.7), 0 0 50px rgba(255,128,0,.3);
+  border-radius:6px;
+}
+.bar-fill-reverse {
+  position:absolute; top:0; right:0; bottom:0; width:0%;
+  background:#ff8000;
+  box-shadow:0 0 10px #ff8000, 0 0 28px rgba(255,128,0,.6), 0 0 50px rgba(255,128,0,.25);
+  border-radius:6px;
+}
 
-/* AUTO-HIDE */
-.btn-ui { -webkit-transition:opacity .8s; transition:opacity .8s; }
-body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
+/* ══════════════════════════════════════════════════
+   BUTTONS
+   ══════════════════════════════════════════════════ */
+.act-btn {
+  font-family:'Share Tech Mono',monospace;
+  letter-spacing:.15em; text-transform:uppercase;
+  border-radius:4vmin; cursor:pointer; border:none; text-align:center;
+  font-size:clamp(9px, 2vmin, 14px);
+  padding:clamp(5px, 1.4vmin, 11px) clamp(10px, 2.8vmin, 22px);
+  white-space:nowrap;
+}
+.act-go    { background:#ff8000; color:#000; box-shadow:0 0 14px rgba(255,128,0,.5); }
+.act-reset { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.2); color:#fff; }
+.act-set   { background:rgba(255,128,0,.14); border:1px solid rgba(255,128,0,.5); color:#ff8000; }
+.act-set.armed { background:#ff8000; color:#000; }
 
-/* FULLSCREEN BTN */
+.wl-toggle {
+  background:rgba(255,128,0,.12); border:1px solid rgba(255,128,0,.4);
+  color:rgba(255,128,0,.6);
+  -webkit-transition:background .3s, color .3s, border-color .3s;
+  transition:background .3s, color .3s, border-color .3s;
+}
+.wl-toggle.on {
+  background:rgba(255,128,0,.88); border-color:#ff8000; color:#000;
+}
+
+.info-msg {
+  color:#ff8000; letter-spacing:.15em; text-transform:uppercase;
+  text-align:center; font-size:clamp(7px, 1.8vmin, 13px);
+  font-family:'Share Tech Mono',monospace;
+  -webkit-animation:pulse 1s ease-in-out infinite alternate;
+  animation:pulse 1s ease-in-out infinite alternate;
+}
+.info-msg.hidden { display:none; }
+@-webkit-keyframes pulse { from{opacity:.2} to{opacity:1} }
+@keyframes pulse          { from{opacity:.2} to{opacity:1} }
+
+/* ══════════════════════════════════════════════════
+   DOTS
+   ══════════════════════════════════════════════════ */
+#dots {
+  position:absolute;
+  z-index:200; pointer-events:auto;
+  display:-webkit-flex; display:flex;
+  -webkit-flex-direction:row; flex-direction:row;
+  -webkit-align-items:center; align-items:center;
+  gap:clamp(8px, 2.5vmin, 20px);
+}
+@media (orientation:portrait) {
+  #dots {
+    bottom: calc(clamp(10px, 2vmin, 18px) + env(safe-area-inset-bottom, 0px));
+    left:50%;
+    -webkit-transform:translateX(-50%); transform:translateX(-50%);
+  }
+}
+@media (orientation:landscape) {
+  #dots {
+    left: calc(clamp(8px, 2vmin, 16px) + env(safe-area-inset-left, 0px));
+    top:50%;
+    -webkit-transform:translateY(-50%); transform:translateY(-50%);
+    -webkit-flex-direction:column; flex-direction:column;
+  }
+}
+.dot {
+  width:clamp(8px, 1.5vmin, 12px); height:clamp(8px, 1.5vmin, 12px);
+  border-radius:50%; background:rgba(255,255,255,.45); cursor:pointer;
+  -webkit-flex-shrink:0; flex-shrink:0;
+  -webkit-transition:background .3s, box-shadow .3s;
+  transition:background .3s, box-shadow .3s;
+}
+.dot-hitarea {
+  padding:clamp(6px, 1.5vmin, 14px);
+  cursor:pointer;
+}
+.dot.active {
+  background:#ff8000;
+  box-shadow:0 0 8px #ff8000, 0 0 16px rgba(255,128,0,.5);
+}
+
+/* ══════════════════════════════════════════════════
+   FULLSCREEN (unverändert)
+   ══════════════════════════════════════════════════ */
 #fsBtn {
   display:none; position:absolute; bottom:14px; left:14px;
   width:44px; height:44px; background:rgba(255,128,0,.18);
@@ -112,297 +377,9 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   font-family:sans-serif;
 }
 
-/* DOTS */
-#dots {
-  position:absolute; left:50%;
-  -webkit-transform:translateX(-50%); transform:translateX(-50%);
-  display:-webkit-flex; display:flex;
-  gap:clamp(8px,2.5vmin,20px); z-index:200; pointer-events:auto; overflow:visible;
-}
-@media (orientation:portrait) {
-  #dots { bottom: calc(clamp(12px,3.5vmin,28px) + env(safe-area-inset-bottom, 0px)); top:auto; }
-}
-@media (orientation:landscape) {
-  /* Mittig oben — genug Abstand damit Dots nicht am Browser-Rand kleben */
-  #dots { top: calc(clamp(10px,2.5vmin,20px) + env(safe-area-inset-top, 0px)); bottom:auto; }
-}
-.dot {
-  width:  clamp(8px, 1.5vmin, 12px);
-  height: clamp(8px, 1.5vmin, 12px);
-  border-radius: 50%;
-  /* Gefüllt — immer sichtbar auf schwarzem Hintergrund */
-  background: rgba(255,255,255,.45);
-  cursor: pointer;
-  /* Großzügiges Click-Target ohne box-sizing-Tricks */
-  margin: clamp(8px,2vmin,16px);
-  -webkit-transition: background .3s, box-shadow .3s;
-          transition: background .3s, box-shadow .3s;
-  /* Kein flex-shrink damit Dots nie kollabieren */
-  -webkit-flex-shrink:0; flex-shrink:0;
-}
-.dot.active {
-  background: #ff8000;
-  box-shadow: 0 0 8px #ff8000, 0 0 16px rgba(255,128,0,.5);
-}
-
-/* ══════════════════════════════════════════════════
-   UHR — Content absolut in sc-main, zentriert
-══════════════════════════════════════════════════ */
-.uhr-content {
-  position:absolute; top:0; left:0; right:0; bottom:0;
-  display:-webkit-flex; display:flex;
-  -webkit-flex-direction:column; flex-direction:column;
-  -webkit-align-items:center; align-items:center;
-  -webkit-justify-content:center; justify-content:center;
-  padding: 0 2vmin;
-}
-@media (orientation:landscape) {
-  /* sc-main ist jetzt auto-height → justify-content spielt keine Rolle mehr,
-     aber center ist semantisch korrekt */
-  .uhr-content {
-    -webkit-justify-content:center; justify-content:center;
-    padding-bottom: 0;
-  }
-}
-.time-row {
-  display:-webkit-flex; display:flex;
-  -webkit-align-items:baseline; align-items:baseline;
-  overflow:visible;
-}
-/* uhr-col: Spalte die time-main + date-block umschließt
-   date-block bekommt automatisch dieselbe Breite wie time-main */
-.uhr-col {
-  display:-webkit-flex; display:flex;
-  -webkit-flex-direction:column; flex-direction:column;
-  -webkit-align-items:flex-start; align-items:flex-start;
-  -webkit-flex-shrink:0; flex-shrink:0;
-}
-.time-main {
-  font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; letter-spacing:-0.02em;
-  line-height:1.0;
-  color:#fff; white-space:nowrap;
-  font-size: clamp(44px, min(32vw, 44vh), 600px);
-}
-@media (orientation:landscape) {
-  .time-main { font-size: clamp(44px, min(25vw, 52vh), 900px); }
-}
-.time-sec {
-  font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; color:rgba(255,255,255,.52);
-  line-height:1.0; white-space:nowrap;
-  font-size: clamp(18px, min(14vw, 19vh), 280px);
-  padding-left: clamp(2px,min(1.8vw,3vh),18px);
-}
-@media (orientation:landscape) {
-  .time-sec {
-    font-size: clamp(18px, min(10vw, 20vh), 350px);
-    padding-left: clamp(6px, min(2.5vw, 4vh), 32px);
-  }
-}
-/* date-block: volle Breite von uhr-col = volle Breite von time-main */
-.date-block {
-  width:100%;
-  overflow:hidden;
-  margin-top: 0.08em;
-}
-@media (orientation:landscape) {
-  .date-block { margin-top: 0.06em; }
-}
-.date-sep { display:none; }
-.weekday  { display:none; }
-.date-txt { display:none; }
-/* date-full: font-size = time-main × 0.24
-   Monospace 16 Zeichen "Fr. 20. Mär 2026" füllt exakt hh:mm-Breite
-   Portrait:  0.24 × 32vw = 7.68vw → clamp mit vh-Bremse
-   Landscape: 0.24 × 25vw = 6vw */
-.date-full {
-  display:block;
-  color:rgba(255,255,255,.45);
-  letter-spacing: 0.02em;
-  text-transform:uppercase;
-  white-space:nowrap;
-  overflow:hidden;
-  font-size: clamp(11px, min(7.5vw, 10vh), 200px);
-}
-@media (orientation:landscape) {
-  .date-full {
-    font-size: clamp(12px, min(6vw, 12.5vh), 300px);
-  }
-}
-
-/* Uhr-Balken mit seitlichen Markern */
-.uhr-bar-wrap {
-  display:-webkit-flex; display:flex;
-  -webkit-align-items:center; align-items:center;
-  gap:1.5vmin; width:100%;
-}
-.bar-marker { width:2px; height:5vmin; min-height:12px;
-              background:rgba(255,255,255,.32); border-radius:1px;
-              -webkit-flex-shrink:0; flex-shrink:0; }
-/* Balken-Fill Uhr: läuft von links */
-.bar-fill {
-  position:absolute; top:0; left:0; bottom:0; width:0%;
-  background:#ff8000;
-  box-shadow:0 0 10px #ff8000,0 0 28px rgba(255,128,0,.7),0 0 50px rgba(255,128,0,.3);
-  border-radius:6px;
-}
-
-.colon { -webkit-animation:blink 1s step-end infinite; animation:blink 1s step-end infinite; }
-@-webkit-keyframes blink { 0%,100%{opacity:1} 50%{opacity:.1} }
-@keyframes blink          { 0%,100%{opacity:1} 50%{opacity:.1} }
-
-/* ══════════════════════════════════════════════════
-   COUNTDOWN & WECKER
-══════════════════════════════════════════════════ */
-
-.xt-center {
-  position:absolute; top:0; left:0; right:0; bottom:0;
-  overflow:visible;
-  display:-webkit-flex; display:flex;
-  -webkit-flex-direction:column; flex-direction:column;
-  -webkit-align-items:center; align-items:center;
-  -webkit-justify-content:center; justify-content:center;
-  padding: 0 clamp(4px,1vmin,10px);
-}
-@media (orientation:landscape) {
-  .xt-center {
-    -webkit-justify-content:center; justify-content:center;
-    padding-bottom: 0;
-  }
-}
-
-.xt-time-row {
-  display:-webkit-flex; display:flex;
-  -webkit-align-items:baseline; align-items:baseline;
-  max-width:96vw; overflow:visible;
-}
-@media (orientation:landscape) {
-  /* War für flex-end-Layout gedacht — mit justify-content:center nicht mehr nötig */
-  .xt-time-row { margin-bottom: 0; }
-}
-
-.xt-digits {
-  font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; color:#fff;
-  line-height:1.0;
-  letter-spacing:-0.02em; white-space:nowrap;
-  /* Portrait: gleiche Logik wie time-main */
-  font-size: clamp(44px, min(32vw, 44vh), 600px);
-}
-@media (orientation:landscape) {
-  /* 24vw — konsistent mit time-main */
-  .xt-digits { font-size: clamp(44px, min(25vw, 52vh), 900px); }
-}
-.xt-digits.idle {
-  font-family:'Share Tech Mono',monospace !important;
-  color:rgba(255,255,255,.28);
-  font-size: clamp(18px, min(14vw, 22vh), 180px) !important;
-}
-
-.xt-secs {
-  font-family:'DIN Condensed','Arial Narrow',sans-serif;
-  font-weight:700; color:rgba(255,255,255,.52);
-  line-height:1.0;
-  letter-spacing:.1em; white-space:nowrap;
-  /* proportional zu 32vw: 12.5/32 ≈ 39% */
-  font-size: clamp(18px, min(12.5vw, 17vh), 280px);
-  padding-left: clamp(2px,min(1.8vw,3vh),18px);
-}
-@media (orientation:landscape) {
-  /* 28% von xt-digits: min(6.7vw, 14vh) */
-  .xt-secs { font-size: clamp(18px, min(6.7vw, 14vh), 350px); }
-}
-
-/* xt-info sitzt jetzt in sc-bar-zone, über dem Balken */
-.xt-info {
-  font-family:'DIN Condensed',sans-serif; font-weight:700;
-  color:rgba(255,128,0,.85); letter-spacing:.3em;
-  font-size: clamp(11px, min(4vw, 5.5vh), 44px);
-  white-space:nowrap; cursor:pointer;
-  text-align:center;
-  display:block;
-  margin-bottom: clamp(4px, 1vmin, 8px);
-}
-@media (orientation:landscape) { .xt-info { display:none; } }
-
-.xt-info-corner {
-  display:none;
-  /* Relativ zum .screen (position:absolute), nicht zu sc-main —
-     damit keine Überlappung mit Ziffern egal welche sc-main-Höhe */
-  position:absolute;
-  top: calc(clamp(8px, 2vmin, 16px) + env(safe-area-inset-top, 0px));
-  right: calc(clamp(8px, 2vmin, 16px) + env(safe-area-inset-right, 0px));
-  font-family:'DIN Condensed',sans-serif; font-weight:700;
-  color:rgba(255,128,0,.85); letter-spacing:.3em;
-  font-size: clamp(12px, min(3vw, 5vh), 48px);
-  white-space:nowrap; text-align:right; cursor:pointer;
-  z-index:20;
-}
-@media (orientation:landscape) { .xt-info-corner { display:block; } }
-
-/* Portrait-Buttons: unter dem Balken, zentriert */
-.sc-btn-zone {
-  -webkit-flex-shrink:0; flex-shrink:0;
-  display:-webkit-flex; display:flex;
-  -webkit-flex-direction:row; flex-direction:row;
-  -webkit-align-items:center; align-items:center;
-  -webkit-justify-content:center; justify-content:center;
-  gap:2.5vmin;
-  padding: clamp(8px,2vmin,16px) 0
-           calc(clamp(4px,1vmin,8px) + env(safe-area-inset-bottom, 0px));
-}
-@media (orientation:landscape) { .sc-btn-zone { display:none !important; } }
-
-/* Landscape-Buttons */
-.xt-btns-ls { display:none; }
-@media (orientation:landscape) {
-  .xt-btns-ls {
-    display:-webkit-flex; display:flex;
-    position:absolute;
-    right: calc(3vmin + env(safe-area-inset-right, 0px));
-    top:50%;
-    -webkit-transform:translateY(-50%); transform:translateY(-50%);
-    -webkit-flex-direction:column; flex-direction:column;
-    -webkit-align-items:stretch; align-items:stretch;
-    gap:2vmin; z-index:10;
-  }
-}
-
-.act-btn {
-  font-family:'Share Tech Mono',monospace;
-  letter-spacing:.15em; text-transform:uppercase;
-  border-radius:4vmin; cursor:pointer; border:none; text-align:center;
-  font-size:clamp(9px,2vmin,14px);
-  padding:clamp(5px,1.4vmin,11px) clamp(10px,2.8vmin,22px);
-}
-.act-go    { background:#ff8000; color:#000; box-shadow:0 0 14px rgba(255,128,0,.5); }
-.act-reset { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.2); color:#fff; }
-.act-set   { background:rgba(255,128,0,.14); border:1px solid rgba(255,128,0,.5); color:#ff8000; }
-.act-set.armed { background:#ff8000; color:#000; }
-
-.info-msg {
-  color:#ff8000; letter-spacing:.15em; text-transform:uppercase;
-  text-align:center; font-size:clamp(7px,1.8vmin,13px);
-  font-family:'Share Tech Mono',monospace;
-  -webkit-animation:pulse 1s ease-in-out infinite alternate;
-          animation:pulse 1s ease-in-out infinite alternate;
-}
-.info-msg.hidden { display:none; }
-@-webkit-keyframes pulse { from{opacity:.2} to{opacity:1} }
-@keyframes pulse          { from{opacity:.2} to{opacity:1} }
-
-/* Balken-Fill CD/WK: läuft von rechts */
-.xt-bar-fill {
-  position:absolute; top:0; right:0; bottom:0; width:0%;
-  background:#ff8000;
-  box-shadow:0 0 10px #ff8000,0 0 28px rgba(255,128,0,.6),0 0 50px rgba(255,128,0,.25);
-  -webkit-transition:width .6s linear; transition:width .6s linear;
-}
-
 /* ══════════════════════════════════════════════════
    PICKER MODAL
-══════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════ */
 .picker-modal {
   position:absolute; top:0; left:0; right:0; bottom:0; z-index:200;
   display:-webkit-flex; display:flex;
@@ -420,18 +397,21 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   border-radius:4vmin; padding:4vmin 6vmin;
 }
 .picker-title {
-  color:rgba(255,255,255,.28); letter-spacing:.4em;
-  text-transform:uppercase; font-size:clamp(8px,1.8vmin,12px);
-  font-family:'Share Tech Mono',monospace;
+  color:rgba(255,255,255,.40); letter-spacing:.35em;
+  text-transform:uppercase; font-size:clamp(12px, 3.5vmin, 22px);
+  font-family:'DIN Condensed','Arial Narrow',sans-serif;
+  font-weight:700;
 }
 .drums-row {
   display:-webkit-flex; display:flex;
-  -webkit-align-items:center; align-items:center; gap:3vmin;
+  -webkit-align-items:center; align-items:center;
+  gap:3vmin;
 }
 .drum-wrap {
   display:-webkit-flex; display:flex;
   -webkit-flex-direction:column; flex-direction:column;
-  -webkit-align-items:center; align-items:center; gap:1.5vmin;
+  -webkit-align-items:center; align-items:center;
+  gap:1.5vmin;
 }
 .drum-lbl {
   color:rgba(255,255,255,.22); letter-spacing:.3em;
@@ -440,8 +420,8 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 }
 .drum-sep {
   font-family:'DIN Condensed',sans-serif; font-weight:700;
-  color:rgba(255,128,0,.6);
-  -webkit-align-self:center; align-self:center; margin-bottom:4vmin;
+  color:rgba(255,128,0,.6); -webkit-align-self:center; align-self:center;
+  margin-bottom:4vmin;
 }
 .drum-outer { position:relative; overflow:hidden; border-radius:2vmin; }
 .drum-hl {
@@ -451,8 +431,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   background:rgba(255,128,0,.09);
 }
 .drum-fade {
-  position:absolute; top:0; left:0; right:0; bottom:0;
-  z-index:3; pointer-events:none;
+  position:absolute; top:0; left:0; right:0; bottom:0; z-index:3; pointer-events:none;
   background:-webkit-linear-gradient(top,rgb(13,13,13) 0%,rgba(13,13,13,0) 30%,rgba(13,13,13,0) 70%,rgb(13,13,13) 100%);
   background:linear-gradient(to bottom,rgb(13,13,13) 0%,rgba(13,13,13,0) 30%,rgba(13,13,13,0) 70%,rgb(13,13,13) 100%);
 }
@@ -491,7 +470,7 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
 
 /* ══════════════════════════════════════════════════
    ALARM OVERLAY
-══════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════ */
 #alarmOverlay {
   position:absolute; top:0; left:0; right:0; bottom:0; z-index:300;
   display:-webkit-flex; display:flex;
@@ -500,219 +479,146 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
   -webkit-justify-content:center; justify-content:center;
   gap:4vmin; cursor:pointer; touch-action:manipulation;
   background:#000;
-  -webkit-animation:ablink .55s ease-in-out infinite; animation:ablink .55s ease-in-out infinite;
+  -webkit-animation:ablink .55s ease-in-out infinite;
+  animation:ablink .55s ease-in-out infinite;
 }
 #alarmOverlay.hidden { display:none !important; }
 @-webkit-keyframes ablink { 0%,100%{background:rgba(0,0,0,1)} 50%{background:rgba(210,45,0,.75)} }
 @keyframes ablink          { 0%,100%{background:rgba(0,0,0,1)} 50%{background:rgba(210,45,0,.75)} }
-.a-title { font-family:'DIN Condensed',sans-serif; font-weight:700;
-           color:#ff8000; letter-spacing:.5em; text-transform:uppercase;
-           font-size:clamp(22px,9vmin,72px); }
-.a-time  { font-family:'DIN Condensed',sans-serif; font-weight:700;
-           color:#fff; line-height:1; font-size:clamp(50px,18vmin,130px); }
-.a-hint  { color:rgba(255,255,255,.3); letter-spacing:.3em;
-           text-transform:uppercase; font-size:clamp(9px,2vmin,14px);
-           font-family:'Share Tech Mono',monospace; }
-
-/* WAKE LOCK TOGGLE */
-.wl-btn {
-  position:absolute;
-  top: calc(clamp(8px,2vmin,18px) + env(safe-area-inset-top, 0px));
-  right: calc(clamp(8px,2vmin,18px) + env(safe-area-inset-right, 0px));
-  background:rgba(255,128,0,.12); border:1px solid rgba(255,128,0,.4);
-  color:rgba(255,128,0,.6); font-family:'Share Tech Mono',monospace;
-  font-size:clamp(8px,2vmin,13px); letter-spacing:.15em; text-transform:uppercase;
-  border-radius:3vmin; padding:clamp(4px,1.2vmin,10px) clamp(8px,2.2vmin,16px);
-  cursor:pointer; z-index:50;
-  -webkit-transition:background .3s,color .3s,border-color .3s;
-          transition:background .3s,color .3s,border-color .3s;
+.a-title {
+  font-family:'DIN Condensed',sans-serif; font-weight:700;
+  color:#ff8000; letter-spacing:.5em; text-transform:uppercase;
+  font-size:clamp(22px, 9vmin, 72px);
 }
-.wl-btn.on { background:rgba(255,128,0,.88); border-color:#ff8000; color:#000; }
+.a-time {
+  font-family:'DIN Condensed',sans-serif; font-weight:700;
+  color:#fff; line-height:1; font-size:clamp(50px, 18vmin, 130px);
+}
+.a-hint {
+  color:rgba(255,255,255,.3); letter-spacing:.3em;
+  text-transform:uppercase; font-size:clamp(9px, 2vmin, 14px);
+  font-family:'Share Tech Mono',monospace;
+}
+```
+
   </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- ══════════════════════════════════════════════
-       UHR
-  ══════════════════════════════════════════════ -->
+  <!-- ══════════ UHR ══════════ -->
 
   <div class="screen active" id="uhr-screen">
-
-    <div class="sc-main">
-      <div class="uhr-content">
-        <div class="time-row">
-          <div class="uhr-col">
-            <div class="time-main" id="timeMain">00<span class="colon">:</span>00</div>
-            <div class="date-block">
-              <span class="date-full" id="dateFull">Fr. 20. Mär 2026</span>
-            </div>
-          </div>
-          <div class="time-sec" id="timeSec">00</div>
-        </div>
+    <div class="content-core">
+      <span class="info-text" id="dateFull">Fr. 20. Mär 2026</span>
+      <div class="time-row">
+        <div class="time-main" id="timeMain">00<span class="colon">:</span>00</div>
+        <div class="time-sec" id="timeSec">00</div>
       </div>
-    </div>
-
-    <button class="wl-btn btn-ui" id="uhrWlBtn">Anbleiben</button>
-
-    <div class="sc-bar-zone">
-      <div class="uhr-bar-wrap">
+      <div class="bar-row">
         <div class="bar-marker"></div>
-        <div class="sc-bar-track" style="-webkit-flex:1;flex:1;">
-          <div class="bar-fill" id="barFill"></div>
-        </div>
+        <div class="sc-bar-track"><div class="bar-fill" id="barFill"></div></div>
         <div class="bar-marker"></div>
       </div>
     </div>
+
+```
+<!-- Landscape Datum-Block: rechts, vertikal mittig -->
+<div id="dateLandscape">
+  <span class="dl-day" id="dlDay">Freitag</span>
+  <span class="dl-date" id="dlDate">20</span>
+  <span class="dl-month" id="dlMonth">März</span>
+  <span class="dl-year" id="dlYear">2026</span>
+</div>
+
+<div class="screen-btns btn-ui">
+  <button class="act-btn wl-toggle" id="uhrWlBtn">Anbleiben</button>
+</div>
+```
 
   </div>
 
-  <!-- ══════════════════════════════════════════════
-       COUNTDOWN
-  ══════════════════════════════════════════════ -->
+  <!-- ══════════ COUNTDOWN ══════════ -->
 
   <div class="screen" id="countdown-screen">
-
-    <div class="sc-main">
-      <div class="xt-center">
-        <div class="xt-time-row">
-          <div class="xt-digits" id="cdDigits">00:00</div>
-          <div class="xt-secs"   id="cdSec">00</div>
-        </div>
+    <div class="content-core">
+      <span class="info-text accent" id="cdInfo"></span>
+      <div class="time-row">
+        <div class="time-main" id="cdDigits">00<span class="colon">:</span>00</div>
+        <div class="time-sec" id="cdSec">00</div>
       </div>
-      <div class="xt-btns btn-ui xt-btns-ls">
-        <button class="act-btn act-go"    id="cdGoBtn">Stellen</button>
-        <button class="act-btn act-reset" id="cdResetBtn">Reset</button>
-        <div class="info-msg hidden"      id="cdDone">Zeit abgelaufen!</div>
+      <div class="bar-row">
+        <div class="bar-marker"></div>
+        <div class="sc-bar-track"><div class="bar-fill-reverse" id="cdBarFill"></div></div>
+        <div class="bar-marker"></div>
       </div>
     </div>
-
-    <!-- xt-info-corner direkt im screen — nicht in sc-main -->
-    <div class="xt-info-corner" id="cdInfoL"></div>
-
-    <div class="sc-bar-zone">
-      <div class="xt-info" id="cdInfoP"></div>
-      <div class="sc-bar-track">
-        <div class="xt-bar-fill" id="cdBarFill"></div>
-      </div>
+    <div class="screen-btns btn-ui">
+      <button class="act-btn act-go" id="cdGoBtn">Stellen</button>
+      <button class="act-btn act-reset" id="cdResetBtn">Reset</button>
+      <div class="info-msg hidden" id="cdDone">Zeit abgelaufen!</div>
     </div>
-
-    <div class="sc-btn-zone btn-ui">
-      <button class="act-btn act-go"    id="cdGoBtnP">Stellen</button>
-      <button class="act-btn act-reset" id="cdResetBtnP">Reset</button>
-      <div class="info-msg hidden"      id="cdDoneP">Zeit abgelaufen!</div>
-    </div>
-
   </div>
 
-  <!-- ══════════════════════════════════════════════
-       WECKER
-  ══════════════════════════════════════════════ -->
+  <!-- ══════════ WECKER ══════════ -->
 
   <div class="screen" id="wecker-screen">
-
-    <div class="sc-main">
-      <div class="xt-center">
-        <div class="xt-time-row">
-          <div class="xt-digits idle" id="wkDigits">--:--</div>
-          <div class="xt-secs"        id="wkSec">--</div>
-        </div>
+    <div class="content-core">
+      <span class="info-text accent" id="wkInfo"></span>
+      <div class="time-row">
+        <div class="time-main idle" id="wkDigits">--:--</div>
+        <div class="time-sec" id="wkSec">--</div>
       </div>
-      <div class="xt-btns btn-ui xt-btns-ls">
-        <button class="act-btn act-set"   id="wkSetBtn">Stellen</button>
-        <button class="act-btn act-reset" id="wkResetBtn">Reset</button>
-        <button class="wl-btn btn-ui"     id="wkWlBtn"
-                style="position:relative;top:auto;right:auto;">Anbleiben</button>
-        <div class="info-msg hidden" id="wkMsg"></div>
+      <div class="bar-row">
+        <div class="bar-marker"></div>
+        <div class="sc-bar-track"><div class="bar-fill-reverse" id="wkBarFill"></div></div>
+        <div class="bar-marker"></div>
       </div>
     </div>
-
-    <!-- xt-info-corner direkt im screen — nicht in sc-main -->
-    <div class="xt-info-corner" id="wkInfoL"></div>
-
-    <div class="sc-bar-zone">
-      <div class="xt-info" id="wkInfoP"></div>
-      <div class="sc-bar-track">
-        <div class="xt-bar-fill" id="wkBarFill"></div>
-      </div>
+    <div class="screen-btns btn-ui">
+      <button class="act-btn act-set" id="wkSetBtn">Stellen</button>
+      <button class="act-btn act-reset" id="wkResetBtn">Reset</button>
+      <button class="act-btn wl-toggle" id="wkWlBtn">Anbleiben</button>
+      <div class="info-msg hidden" id="wkMsg"></div>
     </div>
-
-    <div class="sc-btn-zone btn-ui">
-      <button class="act-btn act-set"   id="wkSetBtnP">Stellen</button>
-      <button class="act-btn act-reset" id="wkResetBtnP">Reset</button>
-      <div class="info-msg hidden" id="wkMsgP"></div>
-    </div>
-
   </div>
 
-  <!-- ══════════════════════════════════════════════
-       COUNTDOWN PICKER
-  ══════════════════════════════════════════════ -->
+  <!-- ══════════ COUNTDOWN PICKER ══════════ -->
 
   <div class="picker-modal hidden" id="cdModal">
     <div class="picker-box">
       <div class="picker-title">Countdown einstellen</div>
       <div class="drums-row">
-        <div class="drum-wrap">
-          <div class="drum-outer" id="cdHOuter">
-            <div class="drum-hl" id="cdHhl"></div>
-            <div class="drum-fade"></div>
-            <div class="drum-scroller" id="cdHScroll"></div>
-          </div>
-          <div class="drum-lbl">Stunden</div>
-        </div>
+        <div class="drum-wrap"><div class="drum-outer" id="cdHOuter"><div class="drum-hl" id="cdHhl"></div><div class="drum-fade"></div><div class="drum-scroller" id="cdHScroll"></div></div><div class="drum-lbl">Stunden</div></div>
         <div class="drum-sep" id="cdSep1">h</div>
-        <div class="drum-wrap">
-          <div class="drum-outer" id="cdMOuter">
-            <div class="drum-hl" id="cdMhl"></div>
-            <div class="drum-fade"></div>
-            <div class="drum-scroller" id="cdMScroll"></div>
-          </div>
-          <div class="drum-lbl">Minuten</div>
-        </div>
+        <div class="drum-wrap"><div class="drum-outer" id="cdMOuter"><div class="drum-hl" id="cdMhl"></div><div class="drum-fade"></div><div class="drum-scroller" id="cdMScroll"></div></div><div class="drum-lbl">Minuten</div></div>
         <div class="drum-sep" id="cdSep2">m</div>
       </div>
       <div style="display:-webkit-flex;display:flex;gap:3vmin">
-        <button class="picker-ok"     id="cdOk">Start</button>
+        <button class="picker-ok" id="cdOk">Start</button>
         <button class="picker-cancel" id="cdCancel">Abbrechen</button>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════
-       WECKER PICKER
-  ══════════════════════════════════════════════ -->
+  <!-- ══════════ WECKER PICKER ══════════ -->
 
   <div class="picker-modal hidden" id="wkModal">
     <div class="picker-box">
       <div class="picker-title">Alarm einstellen</div>
       <div class="drums-row">
-        <div class="drum-wrap">
-          <div class="drum-outer" id="wkHOuter">
-            <div class="drum-hl" id="wkHhl"></div>
-            <div class="drum-fade"></div>
-            <div class="drum-scroller" id="wkHScroll"></div>
-          </div>
-          <div class="drum-lbl">Stunde</div>
-        </div>
+        <div class="drum-wrap"><div class="drum-outer" id="wkHOuter"><div class="drum-hl" id="wkHhl"></div><div class="drum-fade"></div><div class="drum-scroller" id="wkHScroll"></div></div><div class="drum-lbl">Stunde</div></div>
         <div class="drum-sep" id="wkSep">:</div>
-        <div class="drum-wrap">
-          <div class="drum-outer" id="wkMOuter">
-            <div class="drum-hl" id="wkMhl"></div>
-            <div class="drum-fade"></div>
-            <div class="drum-scroller" id="wkMScroll"></div>
-          </div>
-          <div class="drum-lbl">Minute</div>
-        </div>
+        <div class="drum-wrap"><div class="drum-outer" id="wkMOuter"><div class="drum-hl" id="wkMhl"></div><div class="drum-fade"></div><div class="drum-scroller" id="wkMScroll"></div></div><div class="drum-lbl">Minute</div></div>
       </div>
       <div style="display:-webkit-flex;display:flex;gap:3vmin">
-        <button class="picker-ok"     id="wkOk">OK</button>
+        <button class="picker-ok" id="wkOk">OK</button>
         <button class="picker-cancel" id="wkCancel">Abbrechen</button>
       </div>
     </div>
   </div>
 
-  <!-- ALARM OVERLAY -->
+  <!-- ══════════ ALARM OVERLAY ══════════ -->
 
   <div id="alarmOverlay" class="hidden">
     <div class="a-title">Achtung!</div>
@@ -720,425 +626,486 @@ body.ui-hidden .btn-ui { opacity:0 !important; pointer-events:none !important; }
     <div class="a-hint">Tippen zum Stoppen</div>
   </div>
 
-  <!-- FULLSCREEN (Android only) -->
-  <button id="fsBtn" title="Vollbild">⛶</button>
+  <!-- ══════════ FULLSCREEN ══════════ -->
 
-  <!-- DOTS -->
-  <div id="dots">
-    <div class="dot active"></div>
-    <div class="dot"></div>
-    <div class="dot"></div>
+<button id="fsBtn" title="Vollbild">⛶</button>
+
+  <!-- ══════════ DOTS ══════════ -->
+
+  <div id="dots" class="btn-ui">
+    <div class="dot-hitarea"><div class="dot active"></div></div>
+    <div class="dot-hitarea"><div class="dot"></div></div>
+    <div class="dot-hitarea"><div class="dot"></div></div>
   </div>
 
-</div><!-- /#app -->
+</div>
 
 <script>
 (function(){
 'use strict';
+
 var $ = function(id){ return document.getElementById(id); };
 var pad = function(n){ return String(n).padStart(2,'0'); };
 var DAYS = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 var MONS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+var DAYS_FULL = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+var MONS_FULL = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+var uhrKeepOn = false, wkKeepOn = false, cdWakeLock = false, cdWlOffT = null;
 
-var uhrKeepOn=false, wkKeepOn=false, cdWakeLock=false, cdWlOffT=null;
+/* ══════════════════════════════════════════════════
+   DRUM PICKER ENGINE
+   ══════════════════════════════════════════════════ */
+var IH = 48, REPS = 41, MID = 20;
 
-/* ══════════════════════════════════════════════
-   DRUM ENGINE (unchanged)
-══════════════════════════════════════════════ */
-var IH=48, REPS=41, MID=20;
-
-function createDrum(scrollId,outerId,hlId,count,initVal){
-  var sc=$(scrollId),ou=$(outerId),hl=$(hlId);
-  sc.innerHTML='';
-  var ts=document.createElement('div'); ts.className='drum-spacer'; sc.appendChild(ts);
-  for(var r=0;r<REPS;r++){
-    for(var v=0;v<count;v++){
-      var el=document.createElement('div');
-      el.className='drum-item'; el.textContent=pad(v); sc.appendChild(el);
+function createDrum(scrollId, outerId, hlId, count, initVal){
+  var sc = $(scrollId), ou = $(outerId), hl = $(hlId);
+  sc.innerHTML = '';
+  var ts = document.createElement('div'); ts.className = 'drum-spacer'; sc.appendChild(ts);
+  for(var r=0; r<REPS; r++){
+    for(var v=0; v<count; v++){
+      var el = document.createElement('div');
+      el.className = 'drum-item';
+      el.textContent = pad(v);
+      sc.appendChild(el);
     }
   }
-  var bs=document.createElement('div'); bs.className='drum-spacer'; sc.appendChild(bs);
-
+  var bs = document.createElement('div'); bs.className = 'drum-spacer'; sc.appendChild(bs);
   function applySize(){
-    var w=Math.round(IH*2.2);
-    ou.style.width=w+'px'; ou.style.height=(IH*3)+'px';
-    sc.style.width=w+'px'; sc.style.height=(IH*3)+'px';
-    var items=sc.querySelectorAll('.drum-item,.drum-spacer');
-    for(var i=0;i<items.length;i++){
-      items[i].style.height=IH+'px';
-      items[i].style.width=w+'px';
-      items[i].style.fontSize=Math.round(IH*0.78)+'px';
+    var w = Math.round(IH * 2.2);
+    ou.style.width = w+'px'; ou.style.height = (IH*3)+'px';
+    sc.style.width = w+'px'; sc.style.height = (IH*3)+'px';
+    var items = sc.querySelectorAll('.drum-item,.drum-spacer');
+    for(var i=0; i<items.length; i++){
+      items[i].style.height = IH+'px';
+      items[i].style.width = w+'px';
+      items[i].style.fontSize = Math.round(IH*0.78)+'px';
     }
-    hl.style.top=IH+'px'; hl.style.height=IH+'px';
+    hl.style.top = IH+'px'; hl.style.height = IH+'px';
   }
-  function snapTop(v,rep){ return (rep*count+v)*IH; }
+  function snapTop(v, rep){ return (rep*count+v)*IH; }
   function getVal(){ return ((Math.round(sc.scrollTop/IH)%count)+count)%count; }
-  function setVal(v,smooth){
-    var sv=((v%count)+count)%count,t=snapTop(sv,MID);
-    if(smooth){ try{sc.scrollTo({top:t,behavior:'smooth'});}catch(e){sc.scrollTop=t;} }
-    else{ sc.scrollTop=t; }
+  function setVal(v, smooth){
+    var sv = ((v%count)+count)%count, t = snapTop(sv, MID);
+    if(smooth){ try{ sc.scrollTo({top:t, behavior:'smooth'}); }catch(e){ sc.scrollTop=t; } }
+    else{ sc.scrollTop = t; }
   }
-  var norm=null;
-  sc.addEventListener('scroll',function(){
+  var norm = null;
+  sc.addEventListener('scroll', function(){
     clearTimeout(norm);
-    norm=setTimeout(function(){
-      var v=getVal(),t=snapTop(v,MID);
+    norm = setTimeout(function(){
+      var v=getVal(), t=snapTop(v,MID);
       if(Math.abs(sc.scrollTop-t)>IH*0.5) sc.scrollTop=t;
-    },400);
-  },false);
+    }, 400);
+  }, false);
   applySize();
-  requestAnimationFrame(function(){
-    requestAnimationFrame(function(){ sc.scrollTop=snapTop(initVal,MID); });
-  });
-  return {getVal:getVal,setVal:setVal,applySize:applySize};
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ sc.scrollTop = snapTop(initVal, MID); }); });
+  return { getVal:getVal, setVal:setVal, applySize:applySize };
 }
 
-var cdH=createDrum('cdHScroll','cdHOuter','cdHhl',25,0);
-var cdM=createDrum('cdMScroll','cdMOuter','cdMhl',60,5);
-var wkH=createDrum('wkHScroll','wkHOuter','wkHhl',24,7);
-var wkM=createDrum('wkMScroll','wkMOuter','wkMhl',60,30);
+var cdH = createDrum('cdHScroll','cdHOuter','cdHhl', 25, 0);
+var cdM = createDrum('cdMScroll','cdMOuter','cdMhl', 60, 5);
+var wkH = createDrum('wkHScroll','wkHOuter','wkHhl', 24, 7);
+var wkM = createDrum('wkMScroll','wkMOuter','wkMhl', 60, 30);
 
 function updateDrums(){
-  var H=$('app').offsetHeight;
-  IH=Math.max(38,Math.min(62,Math.round(H*0.08)));
+  var H = $('app').offsetHeight;
+  IH = Math.max(38, Math.min(62, Math.round(H*0.08)));
   cdH.applySize(); cdM.applySize(); wkH.applySize(); wkM.applySize();
-  var sf=Math.round(IH*0.68);
-  [$('cdSep1'),$('cdSep2'),$('wkSep')].forEach(function(e){if(e)e.style.fontSize=sf+'px';});
+  var sf = Math.round(IH*0.68);
+  [$('cdSep1'),$('cdSep2'),$('wkSep')].forEach(function(e){ if(e) e.style.fontSize=sf+'px'; });
   setTimeout(function(){
     cdH.setVal(cdH.getVal(),false); cdM.setVal(cdM.getVal(),false);
     wkH.setVal(wkH.getVal(),false); wkM.setVal(wkM.getVal(),false);
-  },60);
+  }, 60);
 }
-window.addEventListener('resize',updateDrums,false);
+window.addEventListener('resize', updateDrums, false);
 
-/* ══════════════════════════════════════════════
+/* ══════════════════════════════════════════════════
    WAKE LOCK
-══════════════════════════════════════════════ */
-var wlSentinel=null;
+   ══════════════════════════════════════════════════ */
+var wlSentinel = null;
 function wlAcquire(){
-  if(!navigator.wakeLock||wlSentinel) return;
+  if(!navigator.wakeLock || wlSentinel) return;
   navigator.wakeLock.request('screen').then(function(s){
-    wlSentinel=s;
-    wlSentinel.addEventListener('release',function(){ wlSentinel=null; },false);
+    wlSentinel = s;
+    wlSentinel.addEventListener('release', function(){ wlSentinel=null; }, false);
   }).catch(function(){});
 }
 function wlRelease(){
   if(wlSentinel){ wlSentinel.release().catch(function(){}); wlSentinel=null; }
 }
-document.addEventListener('visibilitychange',function(){
+document.addEventListener('visibilitychange', function(){
   if(document.visibilityState==='visible') wlUpdate();
-},false);
+}, false);
 function wlUpdate(){
-  var need=uhrKeepOn||cdWakeLock||(wkKeepOn&&wkActive);
+  var need = uhrKeepOn || cdWakeLock || (wkKeepOn && wkActive);
   if(need) wlAcquire(); else wlRelease();
 }
 
-/* ══════════════════════════════════════════════
-   AUTO-HIDE UI
-══════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════
+   AUTO-HIDE
+   ══════════════════════════════════════════════════ */
 var hideT;
 function showUI(){
   clearTimeout(hideT);
   document.body.classList.remove('ui-hidden');
-  hideT=setTimeout(function(){ document.body.classList.add('ui-hidden'); },4000);
+  hideT = setTimeout(function(){ document.body.classList.add('ui-hidden'); }, 4000);
 }
-document.addEventListener('mousemove',showUI,false);
-document.addEventListener('click',showUI,false);
+document.addEventListener('mousemove', showUI, false);
+document.addEventListener('click', showUI, false);
 showUI();
 
-/* ══════════════════════════════════════════════
-   SWIPE NAVIGATION
-══════════════════════════════════════════════ */
-var cur=0,sx=0,sy=0,inDrum=false;
-$('app').addEventListener('touchstart',function(e){
-  sx=e.touches[0].clientX; sy=e.touches[0].clientY;
-  inDrum=!!(e.target.closest&&e.target.closest('.drum-scroller,.picker-box'));
+/* ══════════════════════════════════════════════════
+   NAVIGATION
+   ══════════════════════════════════════════════════ */
+var cur = 0, sx = 0, sy = 0, inDrum = false;
+$('app').addEventListener('touchstart', function(e){
+  sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+  inDrum = !!(e.target.closest && e.target.closest('.drum-scroller,.picker-box'));
   showUI();
-},false);
-$('app').addEventListener('touchend',function(e){
+}, false);
+$('app').addEventListener('touchend', function(e){
   if(inDrum) return;
-  if(!$('cdModal').classList.contains('hidden')||!$('wkModal').classList.contains('hidden')) return;
-  var dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
-  if(Math.abs(dx)>Math.abs(dy)*1.5&&Math.abs(dx)>50) goTo(dx<0?cur+1:cur-1);
-},false);
+  if(!$('cdModal').classList.contains('hidden') || !$('wkModal').classList.contains('hidden')) return;
+  var dx = e.changedTouches[0].clientX - sx;
+  var dy = e.changedTouches[0].clientY - sy;
+  if(Math.abs(dx) > Math.abs(dy)*1.5 && Math.abs(dx) > 50) goTo(dx<0 ? cur+1 : cur-1);
+}, false);
 
 function goTo(i){
-  i=((i%3)+3)%3;
-  var ids=['uhr-screen','countdown-screen','wecker-screen'];
-  for(var k=0;k<3;k++){
+  i = ((i%3)+3)%3;
+  var ids = ['uhr-screen','countdown-screen','wecker-screen'];
+  for(var k=0; k<3; k++){
     if(k===i) $(ids[k]).classList.add('active');
-    else      $(ids[k]).classList.remove('active');
+    else $(ids[k]).classList.remove('active');
   }
-  var dots=document.querySelectorAll('.dot');
-  for(var d=0;d<dots.length;d++){
+  var dots = document.querySelectorAll('.dot');
+  for(var d=0; d<dots.length; d++){
     if(d===i) dots[d].classList.add('active');
-    else      dots[d].classList.remove('active');
+    else dots[d].classList.remove('active');
   }
-  cur=i; showUI();
+  cur = i; showUI();
 }
-document.addEventListener('keydown',function(e){
+document.addEventListener('keydown', function(e){
   if(e.key==='ArrowRight') goTo(cur+1);
   else if(e.key==='ArrowLeft') goTo(cur-1);
-},false);
+}, false);
+
 (function(){
-  var dotEls=document.querySelectorAll('.dot');
-  for(var i=0;i<dotEls.length;i++){
-    (function(idx){ dotEls[idx].addEventListener('click',function(e){
-      e.stopPropagation(); goTo(idx); },false); })(i);
+  var hitareas = document.querySelectorAll('.dot-hitarea');
+  for(var i=0; i<hitareas.length; i++){
+    (function(idx){
+      hitareas[idx].addEventListener('click', function(e){
+        e.stopPropagation(); goTo(idx);
+      }, false);
+    })(i);
   }
 })();
 
-/* ══════════════════════════════════════════════
+/* ══════════════════════════════════════════════════
    CLOCK
-══════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════ */
 function tickClock(){
-  var now=new Date();
-  var p=((now.getSeconds()*1000+now.getMilliseconds())/60000)*100;
-  $('timeMain').innerHTML=pad(now.getHours())+'<span class="colon">:</span>'+pad(now.getMinutes());
-  $('timeSec').textContent=pad(now.getSeconds());
-  $('dateFull').textContent=DAYS[now.getDay()]+'. '+pad(now.getDate())+'. '+MONS[now.getMonth()]+' '+now.getFullYear();
-  $('barFill').style.width=p+'%';
+  var now = new Date();
+  var p = ((now.getSeconds()*1000 + now.getMilliseconds()) / 60000) * 100;
+  $('timeMain').innerHTML = pad(now.getHours()) + '<span class="colon">:</span>' + pad(now.getMinutes());
+  $('timeSec').textContent = pad(now.getSeconds());
+  /* Portrait-Datum (einzeilig) */
+  $('dateFull').textContent = DAYS[now.getDay()] + '. ' + pad(now.getDate()) + '. ' + MONS[now.getMonth()] + ' ' + now.getFullYear();
+  /* Landscape-Datum (Blockformat) */
+  $('dlDay').textContent = DAYS_FULL[now.getDay()];
+  $('dlDate').textContent = now.getDate();
+  $('dlMonth').textContent = MONS_FULL[now.getMonth()];
+  $('dlYear').textContent = now.getFullYear();
+  $('barFill').style.width = p + '%';
 }
 
-function setCdInfo(txt){ $('cdInfoP').textContent=txt; $('cdInfoL').textContent=txt; }
-function setWkInfo(txt){ $('wkInfoP').textContent=txt; $('wkInfoL').textContent=txt; }
-
-/* ══════════════════════════════════════════════
+/* ══════════════════════════════════════════════════
    COUNTDOWN
-══════════════════════════════════════════════ */
-var cdTotal=0,cdRemain=0,cdIv=null,cdState='idle';
+   ══════════════════════════════════════════════════ */
+var cdTotal=0, cdRemain=0, cdIv=null, cdState='idle', cdEndTime=0;
 
 function cdDisplay(){
-  var h=Math.floor(cdRemain/3600),m=Math.floor((cdRemain%3600)/60),s=cdRemain%60;
-  $('cdDigits').textContent=pad(h)+':'+pad(m);
-  $('cdSec').textContent=pad(s);
-  if(cdRemain>0){
-    var end=new Date(Date.now()+cdRemain*1000);
-    setCdInfo('→ '+pad(end.getHours())+':'+pad(end.getMinutes()));
+  var h = Math.floor(cdRemain/3600), m = Math.floor((cdRemain%3600)/60), s = cdRemain%60;
+  $('cdDigits').textContent = pad(h) + ':' + pad(m);
+  $('cdSec').textContent = pad(s);
+  if(cdRemain > 0){
+    var end = new Date(Date.now() + cdRemain*1000);
+    $('cdInfo').textContent = '→ ' + pad(end.getHours()) + ':' + pad(end.getMinutes());
   }
-  var frac=cdTotal>0?cdRemain/cdTotal:0;
-  $('cdBarFill').style.width=(frac*100).toFixed(2)+'%';
 }
-
 function cdTick(){
-  if(cdRemain<=0){
-    clearInterval(cdIv); cdIv=null; cdState='idle'; cdRemain=0;
-    $('cdBarFill').style.width='0%'; setCdInfo('');
+  if(cdRemain <= 0){
+    clearInterval(cdIv); cdIv = null; cdState = 'idle'; cdRemain = 0;
+    $('cdBarFill').style.width = '0%';
+    $('cdInfo').textContent = '';
     $('cdDone').classList.remove('hidden');
-    $('cdGoBtn').textContent='Stellen';
+    $('cdGoBtn').textContent = 'Stellen';
     clearTimeout(cdWlOffT);
-    cdWlOffT=setTimeout(function(){ cdWakeLock=false; wlUpdate(); },5*60*1000);
+    cdWlOffT = setTimeout(function(){ cdWakeLock=false; wlUpdate(); }, 5*60*1000);
     return;
   }
   cdRemain--; cdDisplay();
 }
-
 function openCdModal(){
-  showUI(); $('cdModal').classList.remove('hidden');
+  showUI();
+  $('cdModal').classList.remove('hidden');
   requestAnimationFrame(function(){
-    cdH.setVal(cdH.getVal(),false); cdM.setVal(cdM.getVal(),false);
+    cdH.setVal(cdH.getVal(), false);
+    cdM.setVal(cdM.getVal(), false);
   });
 }
 
-$('cdGoBtn').addEventListener('click',function(){
+$('cdGoBtn').addEventListener('click', function(){
   showUI();
-  if(cdState==='running'){ clearInterval(cdIv); cdIv=null; cdState='paused'; $('cdGoBtn').textContent='Weiter'; $('cdGoBtnP').textContent='Weiter'; }
-  else if(cdState==='paused'){ cdState='running'; $('cdGoBtn').textContent='Pause'; $('cdGoBtnP').textContent='Pause'; cdIv=setInterval(cdTick,1000); }
-  else { openCdModal(); }
-},false);
-$('cdGoBtnP').addEventListener('click',function(){ $('cdGoBtn').click(); },false);
-$('cdResetBtnP').addEventListener('click',function(){ $('cdResetBtn').click(); },false);
+  if(cdState === 'running'){
+    clearInterval(cdIv); cdIv = null; cdState = 'paused';
+    $('cdGoBtn').textContent = 'Weiter';
+  } else if(cdState === 'paused'){
+    cdState = 'running';
+    $('cdGoBtn').textContent = 'Pause';
+    cdEndTime = Date.now() + cdRemain*1000;
+    cdIv = setInterval(cdTick, 1000);
+  } else {
+    openCdModal();
+  }
+}, false);
 
-$('cdInfoP').addEventListener('click',openCdModal,false);
-$('cdInfoL').addEventListener('click',openCdModal,false);
+$('cdResetBtn').addEventListener('click', function(){
+  clearInterval(cdIv); cdIv = null;
+  cdState = 'idle'; cdTotal = 0; cdRemain = 0; cdEndTime = 0;
+  clearTimeout(cdWlOffT); cdWakeLock = false; wlUpdate();
+  $('cdGoBtn').textContent = 'Stellen';
+  $('cdDigits').textContent = '00:00';
+  $('cdSec').textContent = '00';
+  $('cdDone').classList.add('hidden');
+  $('cdInfo').textContent = '';
+  $('cdBarFill').style.width = '0%';
+  showUI();
+}, false);
 
-$('cdOk').addEventListener('click',function(){
+$('cdInfo').addEventListener('click', openCdModal, false);
+
+$('cdOk').addEventListener('click', function(){
   setTimeout(function(){
-    var h=cdH.getVal(),m=cdM.getVal();
+    var h = cdH.getVal(), m = cdM.getVal();
     $('cdModal').classList.add('hidden');
-    if(h===0&&m===0) return;
-    clearInterval(cdIv); cdIv=null;
-    cdTotal=h*3600+m*60; cdRemain=cdTotal; cdState='running';
-    $('cdDone').classList.add('hidden'); $('cdGoBtn').textContent='Pause';
-    clearTimeout(cdWlOffT); cdWakeLock=true; wlUpdate();
-    $('cdBarFill').style.transition='none'; $('cdBarFill').style.width='100%';
-    requestAnimationFrame(function(){ $('cdBarFill').style.transition=''; cdDisplay(); });
-    cdIv=setInterval(cdTick,1000); showUI();
-  },150);
-},false);
+    if(h===0 && m===0) return;
+    clearInterval(cdIv); cdIv = null;
+    cdTotal = h*3600 + m*60; cdRemain = cdTotal;
+    cdState = 'running'; cdEndTime = Date.now() + cdTotal*1000;
+    $('cdDone').classList.add('hidden');
+    $('cdGoBtn').textContent = 'Pause';
+    clearTimeout(cdWlOffT); cdWakeLock = true; wlUpdate();
+    $('cdBarFill').style.width = '100%';
+    cdIv = setInterval(cdTick, 1000);
+    showUI();
+  }, 150);
+}, false);
 
-$('cdCancel').addEventListener('click',function(){ $('cdModal').classList.add('hidden'); showUI(); },false);
-$('cdModal').addEventListener('click',function(e){
-  if(e.target===$('cdModal')){ $('cdModal').classList.add('hidden'); showUI(); }
-},false);
-$('cdResetBtn').addEventListener('click',function(){
-  clearInterval(cdIv); cdIv=null; cdState='idle'; cdTotal=0; cdRemain=0;
-  clearTimeout(cdWlOffT); cdWakeLock=false; wlUpdate();
-  $('cdGoBtn').textContent='Stellen';
-  $('cdDigits').textContent='00:00'; $('cdSec').textContent='00';
-  $('cdDone').classList.add('hidden'); setCdInfo('');
-  $('cdBarFill').style.width='0%'; showUI();
-},false);
+$('cdCancel').addEventListener('click', function(){
+  $('cdModal').classList.add('hidden'); showUI();
+}, false);
+$('cdModal').addEventListener('click', function(e){
+  if(e.target === $('cdModal')){ $('cdModal').classList.add('hidden'); showUI(); }
+}, false);
 
-/* ══════════════════════════════════════════════
+/* ══════════════════════════════════════════════════
    WECKER
-══════════════════════════════════════════════ */
-var wkActive=false,wkHval=7,wkMval=30,wkTotalSec=0;
-var wkIv=null,wkRinging=false,wkACtx=null,wkSndIv=null;
+   ══════════════════════════════════════════════════ */
+var wkActive=false, wkHval=7, wkMval=30, wkTotalSec=0, wkIv=null, wkRinging=false, wkACtx=null, wkSndIv=null;
 
-function secUntilAlarm(h,m){
-  var now=new Date(),alarm=new Date(now);
-  alarm.setHours(h,m,0,0);
-  if(alarm<=now) alarm.setDate(alarm.getDate()+1);
-  return Math.max(0,Math.round((alarm-now)/1000));
+function secUntilAlarm(h, m){
+  var now = new Date(), alarm = new Date(now);
+  alarm.setHours(h, m, 0, 0);
+  if(alarm <= now) alarm.setDate(alarm.getDate()+1);
+  return Math.max(0, Math.round((alarm-now)/1000));
 }
-
 function wkDisplay(){
   if(!wkActive){
-    $('wkDigits').textContent='--:--'; $('wkDigits').classList.add('idle');
-    $('wkSec').textContent='--'; $('wkBarFill').style.width='0%'; return;
+    $('wkDigits').textContent = '--:--';
+    $('wkDigits').classList.add('idle');
+    $('wkSec').textContent = '--';
+    $('wkBarFill').style.width = '0%';
+    return;
   }
   $('wkDigits').classList.remove('idle');
-  var rem=secUntilAlarm(wkHval,wkMval);
-  $('wkDigits').textContent=pad(Math.floor(rem/3600))+':'+pad(Math.floor((rem%3600)/60));
-  $('wkSec').textContent=pad(rem%60);
-  var frac=wkTotalSec>0?rem/wkTotalSec:1;
-  $('wkBarFill').style.width=(frac*100).toFixed(2)+'%';
+  var rem = secUntilAlarm(wkHval, wkMval);
+  $('wkDigits').textContent = pad(Math.floor(rem/3600)) + ':' + pad(Math.floor((rem%3600)/60));
+  $('wkSec').textContent = pad(rem%60);
 }
-
 function wkBeep(){
   try{
-    if(!wkACtx) wkACtx=new(window.AudioContext||window.webkitAudioContext)();
+    if(!wkACtx) wkACtx = new (window.AudioContext || window.webkitAudioContext)();
     if(wkACtx.state==='suspended') wkACtx.resume();
-    [{f:1047,d:0.00,l:0.11},{f:1047,d:0.16,l:0.11},
-     {f:1047,d:0.32,l:0.11},{f:784,d:0.50,l:0.40}].forEach(function(p){
-      var o=wkACtx.createOscillator(),g=wkACtx.createGain();
+    [{f:1047,d:0.00,l:0.11},{f:1047,d:0.16,l:0.11},{f:1047,d:0.32,l:0.11},{f:784,d:0.50,l:0.40}].forEach(function(p){
+      var o = wkACtx.createOscillator(), g = wkACtx.createGain();
       o.connect(g); g.connect(wkACtx.destination);
-      o.frequency.value=p.f; o.type='square';
-      var t=wkACtx.currentTime+p.d;
-      g.gain.setValueAtTime(0,t);
-      g.gain.linearRampToValueAtTime(0.7,t+0.02);
-      g.gain.exponentialRampToValueAtTime(0.001,t+p.l);
+      o.frequency.value = p.f; o.type = 'square';
+      var t = wkACtx.currentTime + p.d;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.7, t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, t+p.l);
       o.start(t); o.stop(t+p.l+0.02);
     });
-  }catch(e){}
+  } catch(e){}
 }
-
 function triggerAlarm(){
-  if(wkRinging) return; wkRinging=true;
-  $('alarmTime').textContent=pad(wkHval)+':'+pad(wkMval);
+  if(wkRinging) return;
+  wkRinging = true;
+  $('alarmTime').textContent = pad(wkHval) + ':' + pad(wkMval);
   $('alarmOverlay').classList.remove('hidden');
-  wkBeep(); wkSndIv=setInterval(wkBeep,1200);
-  try{if(navigator.vibrate)navigator.vibrate([500,200,500,200,500]);}catch(e){}
+  wkBeep(); wkSndIv = setInterval(wkBeep, 1200);
+  try{ if(navigator.vibrate) navigator.vibrate([500,200,500,200,500]); }catch(e){}
 }
-
 function stopAlarm(){
-  clearInterval(wkSndIv); wkSndIv=null;
-  try{if(wkACtx){wkACtx.close();wkACtx=null;}}catch(e){}
-  try{if(navigator.vibrate)navigator.vibrate(0);}catch(e){}
+  clearInterval(wkSndIv); wkSndIv = null;
+  try{ if(wkACtx){ wkACtx.close(); wkACtx=null; } }catch(e){}
+  try{ if(navigator.vibrate) navigator.vibrate(0); }catch(e){}
   $('alarmOverlay').classList.add('hidden');
-  wkRinging=false; wkActive=false;
-  clearInterval(wkIv); wkIv=null;
-  $('wkSetBtn').textContent='Stellen'; $('wkSetBtn').classList.remove('armed');
-  $('wkSetBtnP').textContent='Stellen'; $('wkSetBtnP').classList.remove('armed');
-  setWkInfo('');
-  $('wkDigits').textContent='--:--'; $('wkDigits').classList.add('idle');
-  $('wkSec').textContent='--'; $('wkBarFill').style.width='0%';
+  wkRinging = false; wkActive = false;
+  clearInterval(wkIv); wkIv = null;
+  $('wkSetBtn').textContent = 'Stellen'; $('wkSetBtn').classList.remove('armed');
+  $('wkInfo').textContent = '';
+  $('wkDigits').textContent = '--:--'; $('wkDigits').classList.add('idle');
+  $('wkSec').textContent = '--'; $('wkBarFill').style.width = '0%';
   wlUpdate(); showUI();
 }
-
 function wkTick(){
-  if(!wkActive||wkRinging) return;
+  if(!wkActive || wkRinging) return;
   wkDisplay();
-  var now=new Date();
-  if(now.getHours()===wkHval&&now.getMinutes()===wkMval&&now.getSeconds()===0) triggerAlarm();
+  var now = new Date();
+  if(now.getHours()===wkHval && now.getMinutes()===wkMval && now.getSeconds()===0) triggerAlarm();
 }
-
 function openWkModal(){
-  showUI(); $('wkModal').classList.remove('hidden');
+  showUI();
+  $('wkModal').classList.remove('hidden');
   requestAnimationFrame(function(){
-    wkH.setVal(wkH.getVal(),false); wkM.setVal(wkM.getVal(),false);
+    wkH.setVal(wkH.getVal(), false);
+    wkM.setVal(wkM.getVal(), false);
   });
 }
 
-$('wkInfoP').addEventListener('click',openWkModal,false);
-$('wkInfoL').addEventListener('click',openWkModal,false);
-$('wkSetBtn').addEventListener('click',function(){ showUI(); if(wkActive){stopAlarm();return;} openWkModal(); },false);
-$('wkSetBtnP').addEventListener('click',function(){ $('wkSetBtn').click(); },false);
-$('wkResetBtnP').addEventListener('click',function(){ $('wkResetBtn').click(); },false);
+$('wkInfo').addEventListener('click', openWkModal, false);
 
-$('wkOk').addEventListener('click',function(){
+$('wkSetBtn').addEventListener('click', function(){
+  showUI();
+  if(wkActive){ stopAlarm(); return; }
+  openWkModal();
+}, false);
+
+$('wkResetBtn').addEventListener('click', function(){
+  stopAlarm(); $('wkMsg').classList.add('hidden');
+}, false);
+
+$('wkOk').addEventListener('click', function(){
   setTimeout(function(){
-    var h=wkH.getVal(),m=wkM.getVal();
+    var h = wkH.getVal(), m = wkM.getVal();
     $('wkModal').classList.add('hidden');
-    var rem=secUntilAlarm(h,m);
-    if(rem<30){ $('wkMsg').textContent='Mind. 1 Min. in der Zukunft!'; $('wkMsg').classList.remove('hidden'); return; }
+    var rem = secUntilAlarm(h, m);
+    if(rem < 30){
+      $('wkMsg').textContent = 'Mind. 1 Min. in der Zukunft!';
+      $('wkMsg').classList.remove('hidden');
+      return;
+    }
     if(wkActive){ clearInterval(wkIv); wkIv=null; wkActive=false; }
-    wkHval=h; wkMval=m; wkTotalSec=rem; wkActive=true;
-    $('wkSetBtn').textContent='Aktiv ✓'; $('wkSetBtn').classList.add('armed');
-    $('wkSetBtnP').textContent='Aktiv ✓'; $('wkSetBtnP').classList.add('armed');
-    setWkInfo('Alarm '+pad(h)+':'+pad(m));
-    $('wkMsg').classList.add('hidden'); wlUpdate();
-    $('wkBarFill').style.transition='none'; $('wkBarFill').style.width='100%';
-    requestAnimationFrame(function(){ $('wkBarFill').style.transition=''; wkDisplay(); });
-    clearInterval(wkIv); wkIv=setInterval(wkTick,1000); showUI();
-  },150);
-},false);
+    wkHval = h; wkMval = m; wkTotalSec = rem; wkActive = true;
+    $('wkSetBtn').textContent = 'Aktiv ✓'; $('wkSetBtn').classList.add('armed');
+    $('wkInfo').textContent = 'Alarm ' + pad(h) + ':' + pad(m);
+    $('wkMsg').classList.add('hidden');
+    wlUpdate();
+    $('wkBarFill').style.width = '100%';
+    requestAnimationFrame(function(){ wkDisplay(); });
+    clearInterval(wkIv); wkIv = setInterval(wkTick, 1000);
+    showUI();
+  }, 150);
+}, false);
 
-$('wkCancel').addEventListener('click',function(){ $('wkModal').classList.add('hidden'); showUI(); },false);
-$('wkModal').addEventListener('click',function(e){
-  if(e.target===$('wkModal')){ $('wkModal').classList.add('hidden'); showUI(); }
-},false);
-$('wkResetBtn').addEventListener('click',function(){ stopAlarm(); $('wkMsg').classList.add('hidden'); },false);
-$('alarmOverlay').addEventListener('click',stopAlarm,false);
-$('alarmOverlay').addEventListener('touchstart',function(e){e.preventDefault();stopAlarm();},false);
+$('wkCancel').addEventListener('click', function(){
+  $('wkModal').classList.add('hidden'); showUI();
+}, false);
+$('wkModal').addEventListener('click', function(e){
+  if(e.target === $('wkModal')){ $('wkModal').classList.add('hidden'); showUI(); }
+}, false);
 
-/* ══════════════════════════════════════════════
-   WAKE LOCK TOGGLE BUTTONS
-══════════════════════════════════════════════ */
-function initWlBtn(btnId,getState,setState){
-  var btn=$(btnId); if(!btn) return;
+$('alarmOverlay').addEventListener('click', stopAlarm, false);
+$('alarmOverlay').addEventListener('touchstart', function(e){
+  e.preventDefault(); stopAlarm();
+}, false);
+
+/* ══════════════════════════════════════════════════
+   WAKE LOCK BUTTONS
+   ══════════════════════════════════════════════════ */
+function initWlBtn(btnId, getState, setState){
+  var btn = $(btnId); if(!btn) return;
   function refresh(){
-    if(getState()){ btn.classList.add('on'); btn.textContent='● Anbleiben'; }
-    else           { btn.classList.remove('on'); btn.textContent='Anbleiben'; }
+    if(getState()){ btn.classList.add('on'); btn.textContent = '● Anbleiben'; }
+    else { btn.classList.remove('on'); btn.textContent = 'Anbleiben'; }
   }
-  btn.addEventListener('click',function(){ setState(!getState()); wlUpdate(); refresh(); showUI(); },false);
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    setState(!getState()); wlUpdate(); refresh(); showUI();
+  }, false);
   refresh();
 }
-initWlBtn('uhrWlBtn',function(){ return uhrKeepOn; },function(v){ uhrKeepOn=v; });
-initWlBtn('wkWlBtn', function(){ return wkKeepOn; }, function(v){ wkKeepOn=v; });
+initWlBtn('uhrWlBtn', function(){ return uhrKeepOn; }, function(v){ uhrKeepOn=v; });
+initWlBtn('wkWlBtn',  function(){ return wkKeepOn;  }, function(v){ wkKeepOn=v;  });
 
-/* ══════════════════════════════════════════════
-   FULLSCREEN — Android only
-══════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════
+   FULLSCREEN (unverändert)
+   ══════════════════════════════════════════════════ */
 (function(){
-  var btn=$('fsBtn');
-  var canFS=!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
-  if(canFS&&btn){
-    btn.style.display='-webkit-flex'; btn.style.display='flex';
-    var inFS=false;
-    btn.addEventListener('click',function(){
+  var btn = $('fsBtn');
+  var canFS = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+  if(canFS && btn){
+    btn.style.display = '-webkit-flex'; btn.style.display = 'flex';
+    var inFS = false;
+    btn.addEventListener('click', function(){
       try{
-        var el=document.documentElement;
-        if(!inFS){ var req=el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen; if(req){req.call(el);} }
-        else{ var ex=document.exitFullscreen||document.webkitExitFullscreen; if(ex){ex.call(document);} }
-      }catch(e){} showUI();
-    },false);
+        var el = document.documentElement;
+        if(!inFS){
+          var req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
+          if(req) req.call(el);
+        } else {
+          var ex = document.exitFullscreen || document.webkitExitFullscreen;
+          if(ex) ex.call(document);
+        }
+      }catch(e){}
+      showUI();
+    }, false);
     function onFSChange(){
-      inFS=!!(document.fullscreenElement||document.webkitFullscreenElement);
-      if(inFS){ btn.style.display='none'; }
-      else{ btn.style.display='-webkit-flex'; btn.style.display='flex'; btn.textContent='⛶'; }
+      inFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if(inFS){ btn.style.display = 'none'; }
+      else { btn.style.display = '-webkit-flex'; btn.style.display = 'flex'; btn.textContent = '⛶'; }
     }
-    document.addEventListener('fullscreenchange',onFSChange,false);
-    document.addEventListener('webkitfullscreenchange',onFSChange,false);
+    document.addEventListener('fullscreenchange', onFSChange, false);
+    document.addEventListener('webkitfullscreenchange', onFSChange, false);
   }
 })();
 
-/* ══════════════════════════════════════════════
-   INIT
-══════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════
+   MAIN LOOP — 60fps
+   ══════════════════════════════════════════════════ */
 updateDrums();
-function loop(){ tickClock(); requestAnimationFrame(loop); }
+
+function loop(){
+  tickClock();
+
+  if(cdState==='running' && cdTotal>0 && cdEndTime>0){
+    var cdFrac = Math.max(0, Math.min(1, (cdEndTime - Date.now()) / (cdTotal*1000)));
+    $('cdBarFill').style.width = (cdFrac*100).toFixed(3) + '%';
+  }
+
+  if(wkActive && !wkRinging && wkTotalSec>0){
+    var wkNow = new Date(), wkAlarm = new Date(wkNow);
+    wkAlarm.setHours(wkHval, wkMval, 0, 0);
+    if(wkAlarm <= wkNow) wkAlarm.setDate(wkAlarm.getDate()+1);
+    var wkFrac = Math.max(0, Math.min(1, (wkAlarm-wkNow) / (wkTotalSec*1000)));
+    $('wkBarFill').style.width = (wkFrac*100).toFixed(3) + '%';
+  }
+
+  requestAnimationFrame(loop);
+}
 loop();
 
 })();
