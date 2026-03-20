@@ -22,12 +22,8 @@
       width:100%; height:100%; overflow:hidden; background:#000;
       -webkit-user-select:none; user-select:none;
       -webkit-touch-callout:none;
-      resize:none;
       overscroll-behavior:none;
-      -webkit-overflow-scrolling:auto;
-      scrollbar-width:none;
     }
-    html::-webkit-scrollbar, body::-webkit-scrollbar { display:none; }
 
 ```
 /* ══════════════════════════════════════════════════
@@ -38,11 +34,7 @@
   overflow:hidden; background:#000; color:#fff;
   font-family:'Share Tech Mono', monospace;
   -webkit-transform:translateZ(0); transform:translateZ(0);
-  overscroll-behavior:none;
-  -webkit-overflow-scrolling:auto;
-  scrollbar-width:none;
 }
-#app::-webkit-scrollbar { display:none; }
 
 /* ══════════════════════════════════════════════════
    SCREEN — zentriert content-core
@@ -51,7 +43,6 @@
   position:absolute; top:0; left:0; right:0; bottom:0;
   display:none; background:#000;
   overflow:hidden;
-  overscroll-behavior:none;
 }
 .screen.active {
   display:-webkit-flex; display:flex;
@@ -682,13 +673,6 @@ body.ui-hidden .btn-ui {
 <script>
 (function(){
 'use strict';
-
-/* Prevent Safari scroll-bounce and overflow indicators */
-document.addEventListener('touchmove', function(e){
-  if(!e.target.closest('.drum-scroller')) e.preventDefault();
-}, {passive:false});
-document.body.style.overflow = 'hidden';
-document.documentElement.style.overflow = 'hidden';
 
 var $ = function(id){ return document.getElementById(id); };
 var pad = function(n){ return String(n).padStart(2,'0'); };
