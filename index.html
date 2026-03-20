@@ -176,8 +176,8 @@ body.ui-hidden .btn-ui {
     -webkit-align-items:flex-end; align-items:flex-end;
     position:absolute;
     right: calc(clamp(16px, 3vmin, 36px) + env(safe-area-inset-right, 0px));
-    top:50%;
-    -webkit-transform:translateY(-50%); transform:translateY(-50%);
+    top: calc(clamp(18px, 5vmin, 52px) + env(safe-area-inset-top, 0px));
+    -webkit-transform:none; transform:none;
     text-align:right;
     z-index:5;
     gap: clamp(2px, 0.5vh, 12px);
