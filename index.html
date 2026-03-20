@@ -119,12 +119,13 @@ body.ui-hidden .btn-ui {
   text-transform:uppercase;
   font-size: clamp(22px, 11vw, 200px);
   line-height: 1.0;
-  padding-bottom: clamp(30px, 9vmin, 180px);
-  min-height: clamp(30px, 13vw, 200px);
+  height: clamp(40px, calc(11vw + 9vmin), 220px);
+  overflow: hidden;
   text-align: justify;
   -moz-text-align-last: justify;
   -webkit-text-align-last: justify;
   text-align-last: justify;
+  -webkit-align-items: flex-end; align-items: flex-end;
 }
 .info-text.accent {
   font-family:'DIN Condensed','Barlow Condensed','Roboto Condensed',sans-serif; font-weight:700;
@@ -237,6 +238,8 @@ body.ui-hidden .btn-ui {
   line-height:0.92; white-space:nowrap;
   font-size: clamp(18px, min(20vw, 17vh), 1000px);
   padding-left: clamp(2px, min(1.5vw, 2vh), 40px);
+  min-width: 2.2ch;
+  text-align: center;
 }
 @media (orientation:landscape) {
   .time-main {
