@@ -58,6 +58,10 @@
              env(safe-area-inset-bottom, 0px)
              calc(clamp(28px,6vmin,48px) + env(safe-area-inset-left, 0px));
   }
+  /* Uhr-Screen: mehr Platz rechts für den Datumsblock */
+  #uhr-screen.screen.active {
+    padding-right: calc(26vw + env(safe-area-inset-right, 0px));
+  }
 }
 
 /* ══════════════════════════════════════════════════
