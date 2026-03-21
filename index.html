@@ -837,9 +837,8 @@ document.addEventListener('keydown', function(e){
 /* ══════════════════════════════════════════════════
    CLOCK
    ══════════════════════════════════════════════════ */
-function tickClock(){
-  var now = new Date();
-  var p = ((now.getSeconds()*1000 + now.getMilliseconds()) / 60000) * 100;
+var lastSec = -1;
+function tickClockText(now){
   $('timeMain').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes());
   $('timeSec').textContent = pad(now.getSeconds());
   /* Portrait-Datum (einzeilig) */
@@ -849,6 +848,9 @@ function tickClock(){
   $('dlDate').textContent = now.getDate();
   $('dlMonth').textContent = MONS_FULL[now.getMonth()];
   $('dlYear').textContent = now.getFullYear();
+}
+function tickClockBar(now){
+  var p = ((now.getSeconds()*1000 + now.getMilliseconds()) / 60000) * 100;
   $('barFill').style.width = p + '%';
 }
 
@@ -1114,12 +1116,22 @@ initWlBtn('wkWlBtn',  function(){ return wkKeepOn;  }, function(v){ wkKeepOn=v; 
 })();
 
 /* ══════════════════════════════════════════════════
-   MAIN LOOP — 60fps
+   MAIN LOOP — Balken 60fps, Text 1×/Sekunde
    ══════════════════════════════════════════════════ */
 updateDrums();
 
 function loop(){
-  tickClock();
+  var now = new Date();
+  var sec = now.getSeconds();
+
+  /* Text-Updates nur bei Sekundenwechsel */
+  if(sec !== lastSec){
+    lastSec = sec;
+    tickClockText(now);
+  }
+
+  /* Balken immer smooth (60fps) */
+  tickClockBar(now);
 
   if(cdState==='running' && cdTotal>0 && cdEndTime>0){
     var cdFrac = Math.max(0, Math.min(1, (cdEndTime - Date.now()) / (cdTotal*1000)));
