@@ -117,6 +117,7 @@ body.ui-hidden .btn-ui {
    ══════════════════════════════════════════════════ */
 .info-text {
   display:block;
+  font-family:'DIN Condensed','Barlow Condensed','Roboto Condensed',sans-serif; font-weight:700;
   color:rgba(255,255,255,.40);
   text-transform:uppercase;
   font-size: clamp(22px, 11vw, 200px);
@@ -127,12 +128,9 @@ body.ui-hidden .btn-ui {
   -moz-text-align-last: justify;
   -webkit-text-align-last: justify;
   text-align-last: justify;
-  -webkit-align-items: flex-end; align-items: flex-end;
 }
 .info-text.accent {
-  font-family:'DIN Condensed','Barlow Condensed','Roboto Condensed',sans-serif; font-weight:700;
   color:rgba(255,128,0,.85);
-  cursor:pointer;
   text-align:right;
   -moz-text-align-last:right;
   -webkit-text-align-last:right;
@@ -252,6 +250,9 @@ body.ui-hidden .btn-ui {
 
 /* Idle-State (Wecker) — nur Farbe ändern, Layout bleibt identisch */
 .time-main.idle {
+  color:rgba(255,255,255,.28);
+}
+.time-sec.idle {
   color:rgba(255,255,255,.28);
 }
 
@@ -593,7 +594,7 @@ body.ui-hidden .btn-ui {
       <span class="info-text accent" id="wkInfo"></span>
       <div class="time-row">
         <div class="time-main idle" id="wkDigits">00:00</div>
-        <div class="time-sec" id="wkSec">00</div>
+        <div class="time-sec idle" id="wkSec">00</div>
       </div>
       <div class="bar-row">
         <div class="bar-marker"></div>
@@ -915,8 +916,6 @@ $('cdResetBtn').addEventListener('click', function(){
   showUI();
 }, false);
 
-$('cdInfo').addEventListener('click', openCdModal, false);
-
 $('cdOk').addEventListener('click', function(){
   setTimeout(function(){
     var h = cdH.getVal(), m = cdM.getVal();
@@ -957,10 +956,12 @@ function wkDisplay(){
     $('wkDigits').textContent = '00:00';
     $('wkDigits').classList.add('idle');
     $('wkSec').textContent = '00';
+    $('wkSec').classList.add('idle');
     $('wkBarFill').style.width = '0%';
     return;
   }
   $('wkDigits').classList.remove('idle');
+  $('wkSec').classList.remove('idle');
   var rem = secUntilAlarm(wkHval, wkMval);
   $('wkDigits').textContent = pad(Math.floor(rem/3600)) + ':' + pad(Math.floor((rem%3600)/60));
   $('wkSec').textContent = pad(rem%60);
@@ -999,7 +1000,7 @@ function stopAlarm(){
   $('wkSetBtn').textContent = 'Stellen'; $('wkSetBtn').classList.remove('armed');
   setWkInfoText('');
   $('wkDigits').textContent = '00:00'; $('wkDigits').classList.add('idle');
-  $('wkSec').textContent = '00'; $('wkBarFill').style.width = '0%';
+  $('wkSec').textContent = '00'; $('wkSec').classList.add('idle'); $('wkBarFill').style.width = '0%';
   wlUpdate(); showUI();
 }
 function wkTick(){
@@ -1016,8 +1017,6 @@ function openWkModal(){
     wkM.setVal(wkM.getVal(), false);
   });
 }
-
-$('wkInfo').addEventListener('click', openWkModal, false);
 
 $('wkSetBtn').addEventListener('click', function(){
   showUI();
