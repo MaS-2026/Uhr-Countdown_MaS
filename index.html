@@ -56,7 +56,7 @@
 }
 @media (orientation:landscape) {
   .screen.active {
-    padding: env(safe-area-inset-top, 0px)
+    padding: clamp(20px, 8vh, 60px)
              calc(clamp(16px,4vmin,40px) + env(safe-area-inset-right, 0px))
              env(safe-area-inset-bottom, 0px)
              calc(clamp(16px,4vmin,40px) + env(safe-area-inset-left, 0px));
@@ -242,10 +242,10 @@ body.ui-hidden .btn-ui {
 }
 @media (orientation:landscape) {
   .time-main {
-    font-size: clamp(44px, min(36vw, 56vh), 2000px);
+    font-size: clamp(44px, min(36vw, 64vh), 2000px);
   }
   .time-sec {
-    font-size: clamp(18px, min(18vw, 28vh), 1000px);
+    font-size: clamp(18px, min(18vw, 32vh), 1000px);
     padding-left: clamp(4px, min(1.5vw, 3vh), 60px);
   }
 }
