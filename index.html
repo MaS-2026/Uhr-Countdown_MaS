@@ -33,6 +33,8 @@
   overflow:hidden; background:#000; color:#fff;
   font-family:'Share Tech Mono', monospace;
   -webkit-transform:translateZ(0); transform:translateZ(0);
+  -webkit-transition:-webkit-transform 8s ease-in-out;
+  transition:transform 8s ease-in-out;
 }
 
 /* ══════════════════════════════════════════════════
@@ -226,14 +228,14 @@ body.ui-hidden .btn-ui {
   font-family:'DIN Condensed','Barlow Condensed','Roboto Condensed','Arial Narrow',sans-serif;
   font-weight:700; letter-spacing:-0.02em;
   line-height:0.92; color:#fff; white-space:nowrap;
-  font-size: clamp(44px, min(40vw, 34vh), 2000px);
+  font-size: clamp(44px, min(37vw, 34vh), 2000px);
   font-variant-numeric: tabular-nums;
 }
 .time-sec {
   font-family:'DIN Condensed','Barlow Condensed','Roboto Condensed','Arial Narrow',sans-serif;
   font-weight:700; color:rgba(255,255,255,.52);
   line-height:0.92; white-space:nowrap;
-  font-size: clamp(18px, min(20vw, 17vh), 1000px);
+  font-size: clamp(18px, min(18vw, 17vh), 1000px);
   padding-left: clamp(2px, min(1.5vw, 2vh), 40px);
   width: 2.2ch;
   text-align: center;
@@ -1147,6 +1149,28 @@ function loop(){
   requestAnimationFrame(loop);
 }
 loop();
+
+/* ══════════════════════════════════════════════════
+   PIXEL-SHIFT — OLED Einbrennschutz
+   ══════════════════════════════════════════════════ */
+(function(){
+  var app = document.getElementById('app');
+  var steps = [-2,-1,0,1,2];
+  var lastIdx = -1;
+  function pickPos(){
+    var idx;
+    do { idx = Math.floor(Math.random()*25); } while(idx===lastIdx);
+    lastIdx = idx;
+    return { x: steps[idx%5], y: steps[Math.floor(idx/5)] };
+  }
+  function shift(){
+    var p = pickPos();
+    var v = 'translateZ(0) translate('+p.x+'px,'+p.y+'px)';
+    app.style.webkitTransform = v;
+    app.style.transform = v;
+  }
+  setInterval(shift, 73000);
+})();
 
 })();
 </script>
