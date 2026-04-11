@@ -326,6 +326,20 @@ body.ui-hidden .btn-ui {
   background:rgba(255,128,0,.88); border-color:#ff8000; color:#000;
 }
 
+.act-notify {
+  background:rgba(255,128,0,.14); border:1px solid rgba(255,128,0,.5);
+  color:#ff8000;
+  transition:background .3s, color .3s, border-color .3s;
+}
+.act-notify.vib {
+  background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.28);
+  color:rgba(255,255,255,.6);
+}
+.act-notify.sil {
+  background:transparent; border:1px solid rgba(255,255,255,.12);
+  color:rgba(255,255,255,.25);
+}
+
 .info-msg {
   color:#ff8000; letter-spacing:.15em; text-transform:uppercase;
   text-align:center; font-size:clamp(7px, 1.8vmin, 13px);
@@ -569,6 +583,7 @@ body.ui-hidden .btn-ui {
     <div class="screen-btns btn-ui">
       <button class="act-btn act-go" id="cdGoBtn">Stellen</button>
       <button class="act-btn act-reset" id="cdResetBtn">Reset</button>
+      <button class="act-btn act-notify" id="cdNotifyBtn">♪ Sound</button>
       <div class="info-msg hidden" id="cdDone">Zeit abgelaufen!</div>
     </div>
   </div>
@@ -593,6 +608,7 @@ body.ui-hidden .btn-ui {
       <button class="act-btn act-set" id="wkSetBtn">Stellen</button>
       <button class="act-btn act-reset" id="wkResetBtn">Reset</button>
       <button class="act-btn wl-toggle" id="wkWlBtn">Anbleiben</button>
+      <button class="act-btn act-notify" id="wkNotifyBtn">♪ Sound</button>
       <div class="info-msg hidden" id="wkMsg"></div>
     </div>
   </div>
@@ -850,6 +866,24 @@ function tickClockBar(now){
 }
 
 /* ══════════════════════════════════════════════════
+   NOTIFY MODE — Lautlos / Vibration / Sound
+   ══════════════════════════════════════════════════ */
+var notifyMode = 'sound';
+try{ var _nm = localStorage.getItem('notifyMode'); if(_nm==='vibration'||_nm==='silent') notifyMode=_nm; }catch(e){}
+
+function applyNotifyMode(){
+  var label = notifyMode==='sound' ? '♪ Sound' : notifyMode==='vibration' ? '≋ Vibration' : '– Lautlos';
+  ['cdNotifyBtn','wkNotifyBtn'].forEach(function(id){
+    var btn = $(id); if(!btn) return;
+    btn.textContent = label;
+    btn.classList.remove('vib','sil');
+    if(notifyMode==='vibration') btn.classList.add('vib');
+    if(notifyMode==='silent')    btn.classList.add('sil');
+  });
+  try{ localStorage.setItem('notifyMode', notifyMode); }catch(e){}
+}
+
+/* ══════════════════════════════════════════════════
    LOCAL STORAGE — Zustand persistieren
    ══════════════════════════════════════════════════ */
 function saveCdState(){
@@ -905,7 +939,6 @@ function cdTick(){
     cdWlOffT = setTimeout(function(){ cdWakeLock=false; wlUpdate(); }, 5*60*1000);
     clearCdState();
     wkBeep();
-    try{ if(navigator.vibrate) navigator.vibrate([200,100,200]); }catch(e){}
     return;
   }
   cdDisplay();
@@ -1002,20 +1035,23 @@ function wkDisplay(){
   $('wkSec').textContent = pad(rem%60);
 }
 function wkBeep(){
-  try{
-    if(!wkACtx) wkACtx = new (window.AudioContext || window.webkitAudioContext)();
-    if(wkACtx.state==='suspended') wkACtx.resume();
-    [{f:1047,d:0.00,l:0.11},{f:1047,d:0.16,l:0.11},{f:1047,d:0.32,l:0.11},{f:784,d:0.50,l:0.40}].forEach(function(p){
-      var o = wkACtx.createOscillator(), g = wkACtx.createGain();
-      o.connect(g); g.connect(wkACtx.destination);
-      o.frequency.value = p.f; o.type = 'square';
-      var t = wkACtx.currentTime + p.d;
-      g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(0.7, t+0.02);
-      g.gain.exponentialRampToValueAtTime(0.001, t+p.l);
-      o.start(t); o.stop(t+p.l+0.02);
-    });
-  } catch(e){}
+  if(notifyMode === 'silent') return;
+  if(notifyMode !== 'vibration'){
+    try{
+      if(!wkACtx) wkACtx = new (window.AudioContext || window.webkitAudioContext)();
+      if(wkACtx.state==='suspended') wkACtx.resume();
+      [{f:1047,d:0.00,l:0.11},{f:1047,d:0.16,l:0.11},{f:1047,d:0.32,l:0.11},{f:784,d:0.50,l:0.40}].forEach(function(p){
+        var o = wkACtx.createOscillator(), g = wkACtx.createGain();
+        o.connect(g); g.connect(wkACtx.destination);
+        o.frequency.value = p.f; o.type = 'square';
+        var t = wkACtx.currentTime + p.d;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.7, t+0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t+p.l);
+        o.start(t); o.stop(t+p.l+0.02);
+      });
+    } catch(e){}
+  }
   try{ if(navigator.vibrate) navigator.vibrate(300); }catch(e){}
 }
 function triggerAlarm(){
@@ -1024,7 +1060,9 @@ function triggerAlarm(){
   $('alarmTime').textContent = pad(wkHval) + ':' + pad(wkMval);
   $('alarmOverlay').classList.remove('hidden');
   wkBeep(); wkSndIv = setInterval(wkBeep, 1200);
-  try{ if(navigator.vibrate) navigator.vibrate([500,200,500,200,500]); }catch(e){}
+  if(notifyMode !== 'silent'){
+    try{ if(navigator.vibrate) navigator.vibrate([500,200,500,200,500]); }catch(e){}
+  }
 }
 function stopAlarm(){
   clearInterval(wkSndIv); wkSndIv = null;
@@ -1123,6 +1161,16 @@ function initWlBtn(btnId, getState, setState){
 try{ uhrKeepOn = localStorage.getItem('uhr_keepOn')==='1'; wkKeepOn = localStorage.getItem('wk_keepOn')==='1'; }catch(e){}
 initWlBtn('uhrWlBtn', function(){ return uhrKeepOn; }, function(v){ uhrKeepOn=v; });
 initWlBtn('wkWlBtn',  function(){ return wkKeepOn;  }, function(v){ wkKeepOn=v;  });
+
+['cdNotifyBtn','wkNotifyBtn'].forEach(function(id){
+  var btn = $(id); if(!btn) return;
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    notifyMode = notifyMode==='sound' ? 'vibration' : notifyMode==='vibration' ? 'silent' : 'sound';
+    applyNotifyMode(); showUI();
+  }, false);
+});
+applyNotifyMode();
 
 /* ══════════════════════════════════════════════════
    FULLSCREEN
