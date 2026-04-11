@@ -899,6 +899,8 @@ function cdTick(){
     clearTimeout(cdWlOffT);
     cdWlOffT = setTimeout(function(){ cdWakeLock=false; wlUpdate(); }, 5*60*1000);
     clearCdState();
+    wkBeep();
+    try{ if(navigator.vibrate) navigator.vibrate([200,100,200]); }catch(e){}
     return;
   }
   cdDisplay();
@@ -1009,6 +1011,7 @@ function wkBeep(){
       o.start(t); o.stop(t+p.l+0.02);
     });
   } catch(e){}
+  try{ if(navigator.vibrate) navigator.vibrate(300); }catch(e){}
 }
 function triggerAlarm(){
   if(wkRinging) return;
