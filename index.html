@@ -845,6 +845,36 @@ function tickClockBar(now){
 }
 
 /* ══════════════════════════════════════════════════
+   LOCAL STORAGE — Zustand persistieren
+   ══════════════════════════════════════════════════ */
+function saveCdState(){
+  try{
+    localStorage.setItem('cd_state',   cdState);
+    localStorage.setItem('cd_endTime', cdEndTime);
+    localStorage.setItem('cd_total',   cdTotal);
+    localStorage.setItem('cd_remain',  cdRemain);
+  }catch(e){}
+}
+function clearCdState(){
+  try{
+    ['cd_state','cd_endTime','cd_total','cd_remain'].forEach(function(k){ localStorage.removeItem(k); });
+  }catch(e){}
+}
+function saveWkState(){
+  try{
+    localStorage.setItem('wk_active',   '1');
+    localStorage.setItem('wk_h',        wkHval);
+    localStorage.setItem('wk_m',        wkMval);
+    localStorage.setItem('wk_totalSec', wkTotalSec);
+  }catch(e){}
+}
+function clearWkState(){
+  try{
+    ['wk_active','wk_h','wk_m','wk_totalSec'].forEach(function(k){ localStorage.removeItem(k); });
+  }catch(e){}
+}
+
+/* ══════════════════════════════════════════════════
    COUNTDOWN
    ══════════════════════════════════════════════════ */
 var cdTotal=0, cdRemain=0, cdIv=null, cdState='idle', cdEndTime=0;
@@ -868,6 +898,7 @@ function cdTick(){
     $('cdGoBtn').textContent = 'Stellen';
     clearTimeout(cdWlOffT);
     cdWlOffT = setTimeout(function(){ cdWakeLock=false; wlUpdate(); }, 5*60*1000);
+    clearCdState();
     return;
   }
   cdDisplay();
@@ -886,11 +917,13 @@ $('cdGoBtn').addEventListener('click', function(){
   if(cdState === 'running'){
     clearInterval(cdIv); cdIv = null; cdState = 'paused';
     $('cdGoBtn').textContent = 'Weiter';
+    saveCdState();
   } else if(cdState === 'paused'){
     cdState = 'running';
     $('cdGoBtn').textContent = 'Pause';
     cdEndTime = Date.now() + cdRemain*1000;
     cdIv = setInterval(cdTick, 1000);
+    saveCdState();
   } else {
     openCdModal();
   }
@@ -906,6 +939,7 @@ $('cdResetBtn').addEventListener('click', function(){
   $('cdDone').classList.add('hidden');
   setCdInfoText('');
   $('cdBarFill').style.width = '0%';
+  clearCdState();
   showUI();
 }, false);
 
@@ -922,6 +956,7 @@ $('cdOk').addEventListener('click', function(){
     clearTimeout(cdWlOffT); cdWakeLock = true; wlUpdate();
     $('cdBarFill').style.width = '100%';
     cdIv = setInterval(cdTick, 1000);
+    saveCdState();
     showUI();
   }, 150);
 }, false);
@@ -994,6 +1029,7 @@ function stopAlarm(){
   setWkInfoText('');
   $('wkDigits').textContent = '00:00'; $('wkDigits').classList.add('idle');
   $('wkSec').textContent = '00'; $('wkSec').classList.add('idle'); $('wkBarFill').style.width = '0%';
+  clearWkState();
   wlUpdate(); showUI();
 }
 function wkTick(){
@@ -1043,6 +1079,7 @@ $('wkOk').addEventListener('click', function(){
     $('wkBarFill').style.width = '100%';
     requestAnimationFrame(function(){ wkDisplay(); });
     clearInterval(wkIv); wkIv = setInterval(wkTick, 1000);
+    saveWkState();
     showUI();
   }, 150);
 }, false);
@@ -1106,6 +1143,69 @@ initWlBtn('wkWlBtn',  function(){ return wkKeepOn;  }, function(v){ wkKeepOn=v; 
     }
     document.addEventListener('fullscreenchange', onFSChange, false);
     document.addEventListener('webkitfullscreenchange', onFSChange, false);
+  }
+})();
+
+/* ══════════════════════════════════════════════════
+   RESTORE STATE — beim App-Start wiederherstellen
+   ══════════════════════════════════════════════════ */
+(function(){
+  /* Countdown */
+  var cs = localStorage.getItem('cd_state');
+  var ce = parseInt(localStorage.getItem('cd_endTime'), 10);
+  var ct = parseInt(localStorage.getItem('cd_total'),   10);
+  var cr = parseInt(localStorage.getItem('cd_remain'),  10);
+  if(cs && cs !== 'idle' && ct > 0){
+    cdTotal = ct;
+    if(cs === 'running' && ce > 0){
+      var rem = Math.max(0, Math.round((ce - Date.now()) / 1000));
+      if(rem > 0){
+        cdRemain = rem; cdState = 'running'; cdEndTime = ce;
+        $('cdGoBtn').textContent = 'Pause';
+        $('cdDone').classList.add('hidden');
+        cdDisplay();
+        cdWakeLock = true; wlUpdate();
+        cdIv = setInterval(cdTick, 1000);
+      } else {
+        $('cdBarFill').style.width = '0%';
+        setCdInfoText('');
+        $('cdDone').classList.remove('hidden');
+        $('cdGoBtn').textContent = 'Stellen';
+        clearCdState();
+      }
+    } else if(cs === 'paused' && cr > 0){
+      cdRemain = cr; cdState = 'paused'; cdEndTime = Date.now() + cr*1000;
+      $('cdGoBtn').textContent = 'Weiter';
+      cdDisplay();
+      $('cdBarFill').style.width = (Math.min(1, cr/ct)*100).toFixed(3)+'%';
+    }
+  }
+
+  /* Wecker */
+  if(localStorage.getItem('wk_active') === '1'){
+    var wh = parseInt(localStorage.getItem('wk_h'),        10);
+    var wm = parseInt(localStorage.getItem('wk_m'),        10);
+    var wt = parseInt(localStorage.getItem('wk_totalSec'), 10);
+    if(!isNaN(wh) && !isNaN(wm)){
+      wkHval = wh; wkMval = wm;
+      wkTotalSec = wt || secUntilAlarm(wh, wm);
+      var now2 = new Date(), alarmTs = new Date(now2);
+      alarmTs.setHours(wh, wm, 0, 0);
+      var diff = now2 - alarmTs;
+      wkActive = true;
+      if(diff >= 0 && diff < 2*60*1000){
+        /* Alarm hat während Abwesenheit ausgelöst */
+        wkIv = setInterval(wkTick, 1000);
+        triggerAlarm();
+      } else {
+        $('wkSetBtn').textContent = 'Aktiv ✓'; $('wkSetBtn').classList.add('armed');
+        setWkInfoHtml('→&thinsp;' + pad(wh) + ':' + pad(wm));
+        wlUpdate();
+        $('wkBarFill').style.width = '100%';
+        requestAnimationFrame(function(){ wkDisplay(); });
+        wkIv = setInterval(wkTick, 1000);
+      }
+    }
   }
 })();
 
