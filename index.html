@@ -772,9 +772,38 @@ document.addEventListener('visibilitychange', function(){
   if(document.visibilityState==='visible'){
     wlUpdate();
     if(cdState==='running') cdTick();
-    if(wkActive && !wkRinging) wkTick();
+    if(wkActive && !wkRinging){
+      /* Breites 30-Minuten-Fenster beim Aufwachen aus Hintergrund */
+      var _n = new Date(), _a = new Date(_n);
+      _a.setHours(wkHval, wkMval, 0, 0);
+      if(_a > _n) _a.setDate(_a.getDate()-1);
+      var _d = _n - _a;
+      if(_d >= 0 && _d < 30*60*1000) triggerAlarm();
+      else wkTick();
+    }
   }
 }, false);
+
+/* pagehide — letzter Speicherpunkt bevor iOS die App killt */
+window.addEventListener('pagehide', function(){
+  if(cdState==='running' && cdEndTime>0){
+    try{
+      localStorage.setItem('cd_state',   'running');
+      localStorage.setItem('cd_endTime', String(cdEndTime));
+      localStorage.setItem('cd_total',   String(cdTotal));
+      localStorage.setItem('cd_remain',  String(Math.max(0, Math.round((cdEndTime - Date.now()) / 1000))));
+    }catch(e){}
+  }
+  if(wkActive){
+    try{
+      localStorage.setItem('wk_active',   '1');
+      localStorage.setItem('wk_h',        String(wkHval));
+      localStorage.setItem('wk_m',        String(wkMval));
+      localStorage.setItem('wk_totalSec', String(wkTotalSec));
+    }catch(e){}
+  }
+}, false);
+
 function wlUpdate(){
   var need = uhrKeepOn || cdWakeLock || (wkKeepOn && wkActive);
   if(need) wlAcquire(); else wlRelease();
@@ -1255,8 +1284,8 @@ applyNotifyMode();
       if(alarmTs > now) alarmTs.setDate(alarmTs.getDate() - 1);
       var diff = now - alarmTs;
       wkActive = true;
-      if(diff >= 0 && diff < 2*60*1000){
-        /* Alarm hat während Abwesenheit ausgelöst */
+      if(diff >= 0 && diff < 30*60*1000){
+        /* Alarm hat während Abwesenheit ausgelöst (bis 30 Min. Toleranz) */
         wkIv = setInterval(wkTick, 1000);
         triggerAlarm();
       } else {
