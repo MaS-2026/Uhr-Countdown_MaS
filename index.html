@@ -87,7 +87,7 @@
   align-items:center;
   justify-content:center;
   gap: 2.5vmin;
-  z-index:10;
+  z-index:100; /* über bar-row::after (z-index 50) */
 }
 @media (orientation:landscape) {
   .screen-btns {
@@ -248,6 +248,43 @@ body.ui-hidden .btn-ui {
 /* Idle-State (Wecker) — Farbe identisch mit normaler Anzeige */
 .time-main.idle { color:#fff; }
 .time-sec.idle  { color:rgba(255,255,255,.52); }
+
+/* ══════════════════════════════════════════════════
+   COUNTDOWN & WECKER — größere Ziffern
+   Portrait: so groß wie ohne Überlauf möglich
+   Landscape: kleiner, damit Buttons nicht überlappt werden
+   ══════════════════════════════════════════════════ */
+#countdown-screen .time-main,
+#wecker-screen    .time-main {
+  font-size: clamp(44px, min(41vw, 58vh), 2000px);
+}
+#countdown-screen .time-sec,
+#wecker-screen    .time-sec {
+  font-size: clamp(18px, min(20vw, 29vh), 1000px);
+}
+@media (orientation:landscape) {
+  #countdown-screen .time-main,
+  #wecker-screen    .time-main {
+    font-size: clamp(44px, min(36vw, 40vh), 2000px);
+  }
+  #countdown-screen .time-sec,
+  #wecker-screen    .time-sec {
+    font-size: clamp(18px, min(18vw, 20vh), 1000px);
+    padding-left: clamp(4px, min(1.5vw, 3vh), 60px);
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   ZEN-MODUS — alles außer Ziffern ausblenden wenn Timer läuft
+   ══════════════════════════════════════════════════ */
+.zen-ui {
+  transition: opacity .8s;
+}
+body.ui-hidden #countdown-screen.screen-running .zen-ui,
+body.ui-hidden #wecker-screen.screen-running    .zen-ui {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
 
 /* ══════════════════════════════════════════════════
    SCREEN LABEL — "COUNTDOWN" / "WECKER"
@@ -596,21 +633,21 @@ body.ui-hidden .btn-ui {
   <!-- ══════════ COUNTDOWN ══════════ -->
 
   <div class="screen" id="countdown-screen">
-    <div class="screen-label">Countdown</div>
+    <div class="screen-label zen-ui">Countdown</div>
     <div class="content-core">
-      <span class="info-text accent" id="cdInfo"></span>
+      <span class="info-text accent zen-ui" id="cdInfo"></span>
       <div class="time-row">
         <div class="time-main" id="cdDigits">00:00</div>
         <div class="time-sec" id="cdSec">00</div>
       </div>
-      <div class="bar-row">
+      <div class="bar-row zen-ui">
         <div class="bar-marker"></div>
         <div class="sc-bar-track"><div class="bar-fill-reverse" id="cdBarFill"></div></div>
         <div class="bar-marker"></div>
       </div>
     </div>
-    <span class="landscape-info" id="cdInfoLand"></span>
-    <div class="screen-btns btn-ui">
+    <span class="landscape-info zen-ui" id="cdInfoLand"></span>
+    <div class="screen-btns btn-ui zen-ui">
       <button class="act-btn act-go" id="cdGoBtn">Stellen</button>
       <button class="act-btn act-reset" id="cdResetBtn">Reset</button>
       <button class="act-btn act-notify" id="cdNotifyBtn">♪ Sound</button>
@@ -621,21 +658,21 @@ body.ui-hidden .btn-ui {
   <!-- ══════════ WECKER ══════════ -->
 
   <div class="screen" id="wecker-screen">
-    <div class="screen-label">Wecker</div>
+    <div class="screen-label zen-ui">Wecker</div>
     <div class="content-core">
-      <span class="info-text accent" id="wkInfo"></span>
+      <span class="info-text accent zen-ui" id="wkInfo"></span>
       <div class="time-row">
         <div class="time-main" id="wkDigits">00:00</div>
         <div class="time-sec" id="wkSec">00</div>
       </div>
-      <div class="bar-row">
+      <div class="bar-row zen-ui">
         <div class="bar-marker"></div>
         <div class="sc-bar-track"><div class="bar-fill-reverse" id="wkBarFill"></div></div>
         <div class="bar-marker"></div>
       </div>
     </div>
-    <span class="landscape-info" id="wkInfoLand"></span>
-    <div class="screen-btns btn-ui">
+    <span class="landscape-info zen-ui" id="wkInfoLand"></span>
+    <div class="screen-btns btn-ui zen-ui">
       <button class="act-btn act-set" id="wkSetBtn">Stellen</button>
       <button class="act-btn act-reset" id="wkResetBtn">Reset</button>
       <button class="act-btn wl-toggle" id="wkWlBtn">Anbleiben</button>
@@ -994,6 +1031,7 @@ function cdTick(){
   cdRemain = Math.max(0, Math.round((cdEndTime - Date.now()) / 1000));
   if(cdRemain <= 0){
     clearInterval(cdIv); cdIv = null; cdState = 'idle'; cdRemain = 0;
+    $('countdown-screen').classList.remove('screen-running');
     $('cdDigits').textContent = '00:00';
     $('cdSec').textContent = '00';
     $('cdBarFill').style.width = '0%';
@@ -1023,12 +1061,14 @@ $('cdGoBtn').addEventListener('click', function(){
   if(cdState === 'running'){
     clearInterval(cdIv); cdIv = null; cdState = 'paused';
     $('cdGoBtn').textContent = 'Weiter';
+    $('countdown-screen').classList.remove('screen-running');
     saveCdState();
   } else if(cdState === 'paused'){
     cdState = 'running';
     $('cdGoBtn').textContent = 'Pause';
     cdEndTime = Date.now() + cdRemain*1000;
     cdIv = setInterval(cdTick, 1000);
+    $('countdown-screen').classList.add('screen-running');
     saveCdState();
   } else {
     openCdModal();
@@ -1039,6 +1079,7 @@ $('cdResetBtn').addEventListener('click', function(){
   clearInterval(cdIv); cdIv = null;
   cdState = 'idle'; cdTotal = 0; cdRemain = 0; cdEndTime = 0;
   clearTimeout(cdWlOffT); cdWakeLock = false; wlUpdate();
+  $('countdown-screen').classList.remove('screen-running');
   $('cdGoBtn').textContent = 'Stellen';
   $('cdDigits').textContent = '00:00';
   $('cdSec').textContent = '00';
@@ -1062,6 +1103,7 @@ $('cdOk').addEventListener('click', function(){
     clearTimeout(cdWlOffT); cdWakeLock = true; wlUpdate();
     $('cdBarFill').style.width = '100%';
     cdIv = setInterval(cdTick, 1000);
+    $('countdown-screen').classList.add('screen-running');
     saveCdState();
     showUI();
   }, 150);
@@ -1150,6 +1192,7 @@ function stopAlarm(){
   try{ if(navigator.vibrate) navigator.vibrate(0); }catch(e){}
   $('alarmOverlay').classList.add('hidden');
   wkRinging = false; wkActive = false;
+  $('wecker-screen').classList.remove('screen-running');
   clearInterval(wkIv); wkIv = null;
   $('wkSetBtn').textContent = 'Stellen'; $('wkSetBtn').classList.remove('armed');
   setWkInfoText('');
@@ -1198,6 +1241,7 @@ $('wkOk').addEventListener('click', function(){
     }
     if(wkActive){ clearInterval(wkIv); wkIv=null; wkActive=false; }
     wkHval = h; wkMval = m; wkTotalSec = rem; wkActive = true;
+    $('wecker-screen').classList.add('screen-running');
     $('wkSetBtn').textContent = 'Aktiv ✓'; $('wkSetBtn').classList.add('armed');
     setWkInfoHtml('→&thinsp;' + pad(h) + ':' + pad(m));
     $('wkMsg').classList.add('hidden');
@@ -1304,6 +1348,7 @@ applyNotifyMode();
         cdDisplay();
         cdWakeLock = true; wlUpdate();
         cdIv = setInterval(cdTick, 1000);
+        $('countdown-screen').classList.add('screen-running');
       } else {
         $('cdBarFill').style.width = '0%';
         setCdInfoText('');
@@ -1337,6 +1382,7 @@ applyNotifyMode();
         wkIv = setInterval(wkTick, 1000);
         triggerAlarm();
       } else {
+        $('wecker-screen').classList.add('screen-running');
         $('wkSetBtn').textContent = 'Aktiv ✓'; $('wkSetBtn').classList.add('armed');
         setWkInfoHtml('→&thinsp;' + pad(wh) + ':' + pad(wm));
         wlUpdate();
