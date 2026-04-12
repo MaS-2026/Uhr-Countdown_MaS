@@ -245,12 +245,41 @@ body.ui-hidden .btn-ui {
   }
 }
 
-/* Idle-State (Wecker) — nur Farbe ändern, Layout bleibt identisch */
-.time-main.idle {
-  color:rgba(255,255,255,.28);
+/* Idle-State (Wecker) — Farbe identisch mit normaler Anzeige */
+.time-main.idle { color:#fff; }
+.time-sec.idle  { color:rgba(255,255,255,.52); }
+
+/* ══════════════════════════════════════════════════
+   SCREEN LABEL — "COUNTDOWN" / "WECKER"
+   ══════════════════════════════════════════════════ */
+.screen-label {
+  position:absolute;
+  top: calc(clamp(8px, 2vmin, 16px) + env(safe-area-inset-top, 0px));
+  left:50%; transform:translateX(-50%);
+  font-family:'DIN Condensed','Barlow Condensed','Roboto Condensed',sans-serif;
+  font-weight:700;
+  color:rgba(255,128,0,.28);
+  letter-spacing:.45em;
+  text-transform:uppercase;
+  font-size:clamp(10px, 2.2vmin, 15px);
+  padding-right:.45em; /* Ausgleich letter-spacing */
+  pointer-events:none;
+  z-index:5;
+  white-space:nowrap;
 }
-.time-sec.idle {
-  color:rgba(255,255,255,.28);
+
+/* ══════════════════════════════════════════════════
+   FLASH OVERLAY — Bildschirmblinken bei Alarm
+   ══════════════════════════════════════════════════ */
+#flashOverlay {
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  z-index:290; pointer-events:none;
+  background:transparent;
+}
+@keyframes screenflash {
+  0%  { background:transparent; }
+  15% { background:rgba(210,45,0,.65); }
+  100%{ background:transparent; }
 }
 
 /* ══════════════════════════════════════════════════
@@ -567,6 +596,7 @@ body.ui-hidden .btn-ui {
   <!-- ══════════ COUNTDOWN ══════════ -->
 
   <div class="screen" id="countdown-screen">
+    <div class="screen-label">Countdown</div>
     <div class="content-core">
       <span class="info-text accent" id="cdInfo"></span>
       <div class="time-row">
@@ -591,11 +621,12 @@ body.ui-hidden .btn-ui {
   <!-- ══════════ WECKER ══════════ -->
 
   <div class="screen" id="wecker-screen">
+    <div class="screen-label">Wecker</div>
     <div class="content-core">
       <span class="info-text accent" id="wkInfo"></span>
       <div class="time-row">
-        <div class="time-main idle" id="wkDigits">00:00</div>
-        <div class="time-sec idle" id="wkSec">00</div>
+        <div class="time-main" id="wkDigits">00:00</div>
+        <div class="time-sec" id="wkSec">00</div>
       </div>
       <div class="bar-row">
         <div class="bar-marker"></div>
@@ -647,6 +678,9 @@ body.ui-hidden .btn-ui {
       </div>
     </div>
   </div>
+
+  <!-- ══════════ FLASH OVERLAY ══════════ -->
+  <div id="flashOverlay"></div>
 
   <!-- ══════════ ALARM OVERLAY ══════════ -->
 
@@ -969,7 +1003,7 @@ function cdTick(){
     clearTimeout(cdWlOffT);
     cdWlOffT = setTimeout(function(){ cdWakeLock=false; wlUpdate(); }, 5*60*1000);
     clearCdState();
-    wkBeep();
+    playAlarmSequence();
     showUI();
     return;
   }
@@ -1054,19 +1088,16 @@ function secUntilAlarm(h, m){
 function wkDisplay(){
   if(!wkActive){
     $('wkDigits').textContent = '00:00';
-    $('wkDigits').classList.add('idle');
     $('wkSec').textContent = '00';
-    $('wkSec').classList.add('idle');
     $('wkBarFill').style.width = '0%';
     return;
   }
-  $('wkDigits').classList.remove('idle');
-  $('wkSec').classList.remove('idle');
   var rem = secUntilAlarm(wkHval, wkMval);
   $('wkDigits').textContent = pad(Math.floor(rem/3600)) + ':' + pad(Math.floor((rem%3600)/60));
   $('wkSec').textContent = pad(rem%60);
 }
-function wkBeep(){
+function wkBeep(vol){
+  vol = (vol !== undefined) ? vol : 0.7;
   if(notifyMode === 'silent') return;
   if(notifyMode !== 'vibration'){
     try{
@@ -1078,13 +1109,30 @@ function wkBeep(){
         o.frequency.value = p.f; o.type = 'square';
         var t = wkACtx.currentTime + p.d;
         g.gain.setValueAtTime(0, t);
-        g.gain.linearRampToValueAtTime(0.7, t+0.02);
+        g.gain.linearRampToValueAtTime(vol, t+0.02);
         g.gain.exponentialRampToValueAtTime(0.001, t+p.l);
         o.start(t); o.stop(t+p.l+0.02);
       });
     } catch(e){}
   }
   try{ if(navigator.vibrate) navigator.vibrate(300); }catch(e){}
+}
+function flashScreen(){
+  var el = $('flashOverlay');
+  el.style.animation = 'none';
+  void el.offsetWidth; /* reflow erzwingen */
+  el.style.animation = 'screenflash .5s ease-out forwards';
+}
+function playAlarmSequence(){
+  /* 3× Beep in 3-Sekunden-Abständen, crescendo: leise → mittel → laut */
+  var vols = [0.22, 0.50, 1.0];
+  var i = 0;
+  function step(){
+    wkBeep(vols[i]); flashScreen();
+    i++;
+    if(i < vols.length) setTimeout(step, 3000);
+  }
+  step();
 }
 function triggerAlarm(){
   if(wkRinging) return;
@@ -1105,8 +1153,8 @@ function stopAlarm(){
   clearInterval(wkIv); wkIv = null;
   $('wkSetBtn').textContent = 'Stellen'; $('wkSetBtn').classList.remove('armed');
   setWkInfoText('');
-  $('wkDigits').textContent = '00:00'; $('wkDigits').classList.add('idle');
-  $('wkSec').textContent = '00'; $('wkSec').classList.add('idle'); $('wkBarFill').style.width = '0%';
+  $('wkDigits').textContent = '00:00';
+  $('wkSec').textContent = '00'; $('wkBarFill').style.width = '0%';
   clearWkState();
   wlUpdate(); showUI();
 }
