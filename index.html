@@ -931,6 +931,8 @@ function cdTick(){
   cdRemain = Math.max(0, Math.round((cdEndTime - Date.now()) / 1000));
   if(cdRemain <= 0){
     clearInterval(cdIv); cdIv = null; cdState = 'idle'; cdRemain = 0;
+    $('cdDigits').textContent = '00:00';
+    $('cdSec').textContent = '00';
     $('cdBarFill').style.width = '0%';
     setCdInfoText('');
     $('cdDone').classList.remove('hidden');
@@ -939,6 +941,7 @@ function cdTick(){
     cdWlOffT = setTimeout(function(){ cdWakeLock=false; wlUpdate(); }, 5*60*1000);
     clearCdState();
     wkBeep();
+    showUI();
     return;
   }
   cdDisplay();
